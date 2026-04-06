@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/screens/edit_profile_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/leaderboard_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/test_results_screen.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
@@ -24,7 +25,11 @@ class ProfileScreen extends StatelessWidget {
                 children: const [
                   Icon(Icons.bloodtype, color: AppColors.primary, size: 32),
                   SizedBox(width: 10),
-                  Text('BloodLink', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                  Text('BloodLink',
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -36,11 +41,13 @@ class ProfileScreen extends StatelessWidget {
                     backgroundColor: AppColors.white,
                     child: CircleAvatar(
                       radius: 62,
-                      backgroundImage: NetworkImage('https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80'),
+                      backgroundImage: NetworkImage(
+                          'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80'),
                     ),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditProfileScreen())),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const EditProfileScreen())),
                     child: Container(
                       width: 42,
                       height: 42,
@@ -48,7 +55,8 @@ class ProfileScreen extends StatelessWidget {
                         color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.edit, color: AppColors.white, size: 20),
+                      child: const Icon(Icons.edit,
+                          color: AppColors.white, size: 20),
                     ),
                   ),
                 ],
@@ -57,12 +65,16 @@ class ProfileScreen extends StatelessWidget {
               const Text('Elena Rodriguez', style: AppTextStyles.heading),
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
                 decoration: BoxDecoration(
                   color: AppColors.white,
                   borderRadius: BorderRadius.circular(32),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withOpacity(0.12), blurRadius: 18, offset: const Offset(0, 8)),
+                    BoxShadow(
+                        color: AppColors.primary.withOpacity(0.12),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8)),
                   ],
                 ),
                 child: Row(
@@ -70,7 +82,10 @@ class ProfileScreen extends StatelessWidget {
                   children: const [
                     Icon(Icons.favorite, color: AppColors.primary, size: 20),
                     SizedBox(width: 8),
-                    Text('O+ Blood Type', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
+                    Text('O+ Blood Type',
+                        style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
@@ -80,10 +95,15 @@ class ProfileScreen extends StatelessWidget {
                   Expanded(
                     child: CustomCard(
                       borderRadius: 24,
-                      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 22, horizontal: 16),
                       child: Column(
                         children: const [
-                          Text('14', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                          Text('14',
+                              style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary)),
                           SizedBox(height: 6),
                           Text('Donations', style: AppTextStyles.body),
                         ],
@@ -94,10 +114,15 @@ class ProfileScreen extends StatelessWidget {
                   Expanded(
                     child: CustomCard(
                       borderRadius: 24,
-                      padding: const EdgeInsets.symmetric(vertical: 22, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 22, horizontal: 16),
                       child: Column(
                         children: const [
-                          Text('Oct 12', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                          Text('Oct 12',
+                              style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary)),
                           SizedBox(height: 6),
                           Text('Last Donation', style: AppTextStyles.body),
                         ],
@@ -126,9 +151,13 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          Text('Eligibility Status', style: AppTextStyles.title),
+                          Text('Eligibility Status',
+                              style: AppTextStyles.title),
                           SizedBox(height: 4),
-                          Text('You are eligible to donate today!', style: TextStyle(color: Color(0xFF1BC47D), fontWeight: FontWeight.w600)),
+                          Text('You are eligible to donate today!',
+                              style: TextStyle(
+                                  color: Color(0xFF1BC47D),
+                                  fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -144,13 +173,15 @@ class ProfileScreen extends StatelessWidget {
                     _ProfileMenuItem(
                       icon: Icons.person_outline,
                       title: 'Personal Information',
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EditProfileScreen())),
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const EditProfileScreen())),
                     ),
                     _separator(),
                     _ProfileMenuItem(
                       icon: Icons.medical_services_outlined,
                       title: 'Medical Information',
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TestResultsScreen())),
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const TestResultsScreen())),
                     ),
                     _separator(),
                     _ProfileMenuItem(
@@ -162,7 +193,8 @@ class ProfileScreen extends StatelessWidget {
                     _ProfileMenuItem(
                       icon: Icons.emoji_events_outlined,
                       title: 'Leaderboard Status',
-                      onTap: () {},
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const LeaderboardScreen())),
                     ),
                   ],
                 ),
@@ -196,7 +228,8 @@ class _ProfileMenuItem extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  const _ProfileMenuItem({required this.icon, required this.title, required this.onTap});
+  const _ProfileMenuItem(
+      {required this.icon, required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +251,8 @@ class _ProfileMenuItem extends StatelessWidget {
             ),
             const SizedBox(width: 14),
             Expanded(child: Text(title, style: AppTextStyles.title)),
-            const Icon(Icons.keyboard_arrow_right, color: AppColors.textSecondary),
+            const Icon(Icons.keyboard_arrow_right,
+                color: AppColors.textSecondary),
           ],
         ),
       ),

@@ -4,6 +4,7 @@ import 'package:bloodlink_donor_mobile_app/screens/campaigns_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/urgent_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/history_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/profile_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/leaderboard_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/edit_profile_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/login_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/sign_up_screen.dart';
@@ -55,6 +56,7 @@ class BloodLinkApp extends StatelessWidget {
         '/history': (_) => const HistoryScreen(),
         '/profile': (_) => const MainNavigationScreen(),
         '/profile/edit': (_) => const EditProfileScreen(),
+        '/leaderboard': (_) => const LeaderboardScreen(),
         '/login': (_) => const LoginScreen(),
         '/signup': (_) => const SignUpScreen(),
         '/test-results': (_) => const TestResultsScreen(),
@@ -79,14 +81,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     UrgentScreen(),
     HistoryScreen(),
     ProfileScreen(),
-  ];
-
-  final List<String> _labels = [
-    'Home',
-    'Campaigns',
-    'Urgent',
-    'History',
-    'Profile',
   ];
 
   void _onItemTapped(int index) {

@@ -43,60 +43,133 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               CustomCard(
-                backgroundColor: AppColors.secondary.withOpacity(0.16),
-                borderRadius: 28,
-                padding: const EdgeInsets.all(22),
-                elevation: 0,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Next eligible donation', style: AppTextStyles.subtitle),
-                    const SizedBox(height: 12),
-                    Text('12 days', style: AppTextStyles.heading.copyWith(color: AppColors.primary, fontSize: 38)),
-                    const SizedBox(height: 10),
-                    const Text('You can donate again on Nov 14, 2023.', style: AppTextStyles.body),
-                    const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.22),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.calendar_month, color: AppColors.primary),
-                      ),
-                    ),
-                  ],
-                ),
+  backgroundColor: AppColors.secondary.withOpacity(0.16),
+  borderRadius: 28,
+  padding: const EdgeInsets.all(22),
+  elevation: 0,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text('Next eligible donation', style: AppTextStyles.subtitle),
+      const SizedBox(height: 12),
+
+      // 👇 THIS ROW FIXES YOUR PROBLEM
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Text(
+              '12 days',
+              style: AppTextStyles.heading.copyWith(
+                color: AppColors.primary,
+                fontSize: 38,
               ),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 14,
-                runSpacing: 14,
-                children: [
-                  _InfoTile(title: 'Blood Group', value: 'A+', status: 'Verified'),
-                  _InfoTile(title: 'Donations', value: '8', status: 'Since 2019'),
-                  _InfoTile(title: 'Last Donation', value: 'Aug 14', status: 'City Hospital'),
-                ],
-              ),
-              const SizedBox(height: 22),
+            ),
+          ),
+
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.22),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.calendar_month,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
+      ),
+
+      const SizedBox(height: 10),
+      const Text(
+        'You can donate again on Nov 14, 2023.',
+        style: AppTextStyles.body,
+      ),
+    ],
+  ),
+),
+ const SizedBox(height: 20),
+
+Row(
+  children: [
+    Expanded(
+      child: _InfoTile(
+        title: 'Blood Group',
+        value: 'A+',
+        status: 'Verified',
+      ),
+    ),
+    const SizedBox(width: 8), // 👈 reduced from 14
+
+    Expanded(
+      child: _InfoTile(
+        title: 'Donations',
+        value: '8',
+        status: 'Since 2019',
+      ),
+    ),
+    const SizedBox(width: 8), // 👈 reduced
+
+    Expanded(
+      child: _InfoTile(
+        title: 'Last Donation',
+        value: 'Aug 14',
+        status: 'City Hospital',
+      ),
+    ),
+  ],
+),
+
+const SizedBox(height: 22),
               const Text('Shortcuts', style: AppTextStyles.subheading),
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                child: Wrap(
-                  spacing: 14,
-                  runSpacing: 14,
-                  children: const [
-                    _ShortcutCard(label: 'Emergency requests', icon: Icons.notifications_active),
-                    _ShortcutCard(label: 'Campaigns', icon: Icons.campaign),
-                    _ShortcutCard(label: 'Test results', icon: Icons.science),
-                    _ShortcutCard(label: 'History', icon: Icons.history),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+            const SizedBox(height: 14),
+
+SizedBox(
+  width: double.infinity,
+  child: LayoutBuilder(
+    builder: (context, constraints) {
+      final itemWidth = (constraints.maxWidth - 14) / 2; // 2 per row
+
+      return Wrap(
+        spacing: 14,
+        runSpacing: 14,
+        children: [
+          SizedBox(
+            width: itemWidth,
+            child: const _ShortcutCard(
+              label: 'Emergency requests',
+              icon: Icons.notifications_active,
+            ),
+          ),
+          SizedBox(
+            width: itemWidth,
+            child: const _ShortcutCard(
+              label: 'Campaigns',
+              icon: Icons.campaign,
+            ),
+          ),
+          SizedBox(
+            width: itemWidth,
+            child: const _ShortcutCard(
+              label: 'Test results',
+              icon: Icons.science,
+            ),
+          ),
+          SizedBox(
+            width: itemWidth,
+            child: const _ShortcutCard(
+              label: 'History',
+              icon: Icons.history,
+            ),
+          ),
+        ],
+      );
+    },
+  ),
+),
+
+const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
@@ -181,25 +254,48 @@ class _InfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.42,
-      child: CustomCard(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: AppTextStyles.subtitle.copyWith(color: AppColors.textSecondary)),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(value, style: AppTextStyles.heading.copyWith(fontSize: 24)),
-                Text(status, style: AppTextStyles.label.copyWith(color: AppColors.primary)),
-              ],
+    return CustomCard(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // TITLE
+          Text(
+            title,
+            style: AppTextStyles.subtitle.copyWith(
+              color: AppColors.textSecondary,
+              fontSize: 12, // 👈 smaller
             ),
-          ],
-        ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          const SizedBox(height: 8),
+
+          // VALUE
+          Text(
+            value,
+            style: AppTextStyles.heading.copyWith(
+              fontSize: 18, // 👈 reduced from 24
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          const SizedBox(height: 4),
+
+          // STATUS
+          Text(
+            status,
+            style: AppTextStyles.label.copyWith(
+              color: AppColors.primary,
+              fontSize: 11, // 👈 smaller
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
