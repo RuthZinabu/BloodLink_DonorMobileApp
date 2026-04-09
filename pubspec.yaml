@@ -19,20 +19,21 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/image/app_logo.jpg
+    - assets/image/app_logo.png
     - assets/image/children_image.jpg
+    - assets/image/profile.jpg
+    - assets/image/image.png
 
 flutter_native_splash:
   color: "#F6F7FB"
-  image: assets/image/app_logo.jpg
+  image: assets/image/app_logo.png
   android_12:
-    image: assets/image/app_logo.jpg
+    image: assets/image/app_logo.png
     icon_background_color: "#F6F7FB"
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/image/app_logo.jpg"
-  adaptive_icon_background: "#F6F7FB"
+  image_path: "assets/image/app_logo.png"
   remove_alpha_ios: true
   min_sdk_android: 21

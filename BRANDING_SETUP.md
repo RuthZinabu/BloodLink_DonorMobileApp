@@ -64,7 +64,7 @@ flutter run
 **File:** `pubspec.yaml` - `flutter_native_splash` section
 
 - **Color:** `#F6F7FB` (light app background matching theme)
-- **Image:** `assets/image/app_logo.jpg`
+- **Image:** `assets/image/app_logo.png`
 - **Android 12+:** Adaptive splash with icon background
 
 **Splash Screen Widget:** `lib/screens/splash_screen.dart`
@@ -78,7 +78,7 @@ flutter run
 
 **File:** `pubspec.yaml` - `flutter_launcher_icons` section
 
-- **Source Icon:** `assets/image/app_logo.jpg`
+- **Source Icon:** `assets/image/app_logo.png`
 - **Adaptive Icon Background:** `#F6F7FB`
 - **Android:** Generates all required densities (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi)
 - **iOS:** Generates app icon set
@@ -115,7 +115,7 @@ MainNavigationScreen (if authenticated)
 
 ## Assets Used
 
-- `assets/image/app_logo.jpg` - Main logo for splash screen and app icon
+- `assets/image/app_logo.png` - Main logo for splash screen and app icon
 - `assets/image/children_image.jpg` - Welcome screen hero image
 
 ## Building APK (Android)

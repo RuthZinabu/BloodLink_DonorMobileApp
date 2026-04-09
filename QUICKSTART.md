@@ -118,7 +118,7 @@ These packages handled:
 
 ## 🖼️ Assets Used
 
-- `assets/image/app_logo.jpg` - Used for splash screen and app icon
+- `assets/image/app_logo.png` - Used for splash screen and app icon
 - `assets/image/children_image.jpg` - Welcome screen hero image
 
 ## ⚙️ Configuration Summary
@@ -127,9 +127,9 @@ These packages handled:
 |----------|-------|----------|
 | App Name | BloodLink Donor | Android, iOS, Flutter |
 | Splash Color | #F6F7FB | Android, iOS |
-| Splash Image | app_logo.jpg | Android, iOS |
+| Splash Image | app_logo.png | Android, iOS |
 | Splash Duration | 3 seconds | Flutter |
-| App Icon | app_logo.jpg (adaptive) | Android, iOS |
+| App Icon | app_logo.png (adaptive) | Android, iOS |
 | Min SDK | 21 | Android |
 
 ## 🔍 Verification Checklist
@@ -143,10 +143,10 @@ Before running on device:
 
 ## 🆘 Troubleshooting
 
-### "file_not_found" for app_logo.jpg
+### "file_not_found" for app_logo.png
 ```bash
 # Verify asset exists
-ls -l assets/image/app_logo.jpg
+ls -l assets/image/app_logo.png
 ```
 
 ### Splash not showing on Android
@@ -200,7 +200,7 @@ BloodLink_DonorMobileApp/
 │       ├── Info.plist (updated)
 │       └── Assets.xcassets/AppIcon.appiconset/ (generated)
 ├── assets/image/
-│   ├── app_logo.jpg (used ✨)
+│   ├── app_logo.png (used ✨)
 │   ├── children_image.jpg
 │   └── image.png
 ├── pubspec.yaml (updated)

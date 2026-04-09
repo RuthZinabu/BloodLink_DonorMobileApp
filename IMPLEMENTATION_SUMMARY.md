@@ -18,7 +18,7 @@ Features:
 - Custom Flutter widget with smooth animations
 - Fade and scale animations for logo entrance
 - Displays:
-  - BloodLink Donor logo (from `assets/image/app_logo.jpg`)
+  - BloodLink Donor logo (from `assets/image/app_logo.png`)
   - App name "BloodLink Donor"
   - Tagline "Save Lives Today"
   - Loading indicator
@@ -125,15 +125,15 @@ title: 'BloodLink Donor'
 ```yaml
 flutter_native_splash:
   color: "#F6F7FB"
-  image: assets/image/app_logo.jpg
+  image: assets/image/app_logo.png
   android_12:
-    image: assets/image/app_logo.jpg
+    image: assets/image/app_logo.png
     icon_background_color: "#F6F7FB"
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/image/app_logo.jpg"
+  image_path: "assets/image/app_logo.png"
   adaptive_icon_background: "#F6F7FB"
   remove_alpha_ios: true
   min_sdk_android: 21
@@ -250,7 +250,7 @@ dev_dependencies:
 - **Navigation Delay:** 3 seconds
 
 ### Icon Configuration
-- **Source:** `assets/image/app_logo.jpg`
+- **Source:** `assets/image/app_logo.png`
 - **Preserve Alpha:** False (iOS)
 - **Adaptive Background:** `#F6F7FB`
 - **Android Min SDK:** 21
@@ -315,7 +315,7 @@ Potential improvements you can make:
 
 If you encounter issues:
 1. Check `BRANDING_SETUP.md` for detailed troubleshooting
-2. Ensure `assets/image/app_logo.jpg` exists and is valid
+2. Ensure `assets/image/app_logo.png` exists and is valid
 3. Run `flutter clean` if icons don't update
 4. Check Android/iOS build logs for specific errors
 5. Verify all file permissions are correct

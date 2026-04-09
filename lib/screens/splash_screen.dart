@@ -99,8 +99,10 @@ class _SplashScreenState extends State<SplashScreen>
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(logoSize / 2),
                           child: Image.asset(
-                            'assets/image/app_logo.jpg',
-                            fit: BoxFit.cover,
+                            'assets/image/app_logo.png',
+                            fit: BoxFit.contain,
+                            cacheWidth: logoSize.toInt() * 2, // Higher resolution for crisp display
+                            cacheHeight: logoSize.toInt() * 2,
                           ),
                         ),
                       ),
@@ -133,19 +135,19 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   SizedBox(height: spacing3),
                   // Loading indicator
-                  FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: SizedBox(
-                      width: responsive.getFont(12),
-                      height: responsive.getFont(12),
-                      child: CircularProgressIndicator(
-                        strokeWidth: responsive.getFont(2),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primary.withAlpha(153),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // FadeTransition(
+                  //   opacity: _fadeAnimation,
+                  //   child: SizedBox(
+                  //     width: responsive.getFont(12),
+                  //     height: responsive.getFont(12),
+                  //     child: CircularProgressIndicator(
+                  //       strokeWidth: responsive.getFont(2),
+                  //       valueColor: AlwaysStoppedAnimation<Color>(
+                  //         AppColors.primary.withAlpha(153),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

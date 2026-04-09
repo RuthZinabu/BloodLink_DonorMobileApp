@@ -3,9 +3,42 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
+import 'dart:async';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  final List<String> _images = [
+    'assets/image/children_image.jpg',
+    'assets/image/image.png',
+  ];
+  int _currentImageIndex = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startImageTimer();
+  }
+
+  void _startImageTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      setState(() {
+        _currentImageIndex = (_currentImageIndex + 1) % _images.length;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   void _goToLogin(BuildContext context) {
     Navigator.of(context).pushReplacementNamed('/login');
@@ -202,11 +235,22 @@ class WelcomeScreen extends StatelessWidget {
               SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
               ClipRRect(
                 borderRadius: BorderRadius.circular(responsive.getBorderRadius(28)),
-                child: Image.asset(
-                  'assets/image/children_image.jpg',
-                  fit: BoxFit.cover,
+                child: Container(
                   width: double.infinity,
                   height: responsive.getHeight(32.5), // 260 on large screens
+                  color: AppColors.background,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(seconds: 1),
+                    child: Image.asset(
+                      _images[_currentImageIndex],
+                      key: ValueKey<String>(_images[_currentImageIndex]),
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                      filterQuality: FilterQuality.high,
+                      alignment: Alignment.center,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),

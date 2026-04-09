@@ -51,7 +51,7 @@ class HomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
                     ),
                     child: Icon(
-                      Icons.person,
+                      Icons.notifications_active,
                       color: AppColors.primary,
                       size: responsive.getIconSize(24),
                     ),

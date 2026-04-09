@@ -27,11 +27,6 @@ class ProfileScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.bloodtype,
-                    color: AppColors.primary,
-                    size: responsive.getIconSize(32),
-                  ),
                   SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                   Text(
                     'BloodLink',
