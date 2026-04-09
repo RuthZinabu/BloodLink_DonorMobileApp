@@ -316,6 +316,7 @@ class _RankingTile extends StatelessWidget {
       ),
       child: Card(
         elevation: 4,
+        color: AppColors.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
         ),

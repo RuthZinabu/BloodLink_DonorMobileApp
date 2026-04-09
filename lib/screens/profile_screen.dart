@@ -130,6 +130,7 @@ class ProfileScreen extends StatelessWidget {
                   Expanded(
                     child: Card(
                       elevation: 4,
+                      color: AppColors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
                       ),
@@ -164,6 +165,7 @@ class ProfileScreen extends StatelessWidget {
                   Expanded(
                     child: Card(
                       elevation: 4,
+                      color: AppColors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
                       ),
@@ -199,6 +201,7 @@ class ProfileScreen extends StatelessWidget {
               SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
               Card(
                 elevation: 4,
+                color: AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
                 ),
@@ -249,6 +252,7 @@ class ProfileScreen extends StatelessWidget {
               SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
               Card(
                 elevation: 4,
+                color: AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
                 ),

@@ -33,8 +33,8 @@ class CustomButton extends StatelessWidget {
     final responsiveBorderRadius = responsive.getBorderRadius(borderRadius);
     final responsivePadding = padding ??
         EdgeInsets.symmetric(
-          horizontal: responsive.getPadding(18),
-          vertical: responsive.getPadding(14),
+          horizontal: responsive.getPadding(12),
+          vertical: responsive.getPadding(8),
         );
     final buttonHeight = height ?? responsive.getButtonHeight();
 
@@ -59,7 +59,7 @@ class CustomButton extends StatelessWidget {
           label,
           style: AppTextStyles.title.copyWith(
             color: isOutlined ? AppColors.primary : textColor,
-            fontSize: responsive.getFont(AppTextStyles.title.fontSize ?? 16),
+            fontSize: responsive.getFont(AppTextStyles.title.fontSize ?? 14),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,

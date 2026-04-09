@@ -72,7 +72,7 @@ class UrgentScreen extends StatelessWidget {
                 distance: '5.1 km away',
                 bloodType: 'A+',
                 status: 'HIGH',
-                statusColor: AppColors.primary,
+                statusColor: const Color.fromARGB(255, 250, 159, 74),
                 details: 'Needed within: 6 hours',
                 actionButton: 'I\'m Coming',
                 responsive: responsive,
@@ -126,6 +126,8 @@ class _Pill extends StatelessWidget {
   }
 }
 
+
+
 class _EmergencyCard extends StatelessWidget {
   final String title;
   final String distance;
@@ -149,80 +151,146 @@ class _EmergencyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = MediaQuery.of(context).size.width < 360;
+
     return Card(
-      elevation: 4,
+      elevation: 3,
       color: AppColors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
+        borderRadius: BorderRadius.circular(
+          responsive.getBorderRadius(20),
+        ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(responsive.getPadding(16)),
+        padding: EdgeInsets.all(
+          responsive.getPadding(isSmall ? 10 : 14),
+        ),
         child: Column(
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Left status bar
                 Container(
-                  width: responsive.getWidth(1.5),
-                  height: responsive.getHeight(18),
+                  width: responsive.getWidth(1.2),
+                  height: responsive.getHeight(isSmall ? 12 : 14),
                   decoration: BoxDecoration(
                     color: statusColor,
-                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+                    borderRadius: BorderRadius.circular(
+                      responsive.getBorderRadius(10),
+                    ),
                   ),
                 ),
-                SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+                SizedBox(
+                  width: responsive.getSpacing(
+                    small: 6,
+                    medium: 8,
+                    large: 10,
+                  ),
+                ),
+
+                // Main content
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Title
                       Text(
                         title,
                         style: AppTextStyles.title.copyWith(
-                          fontSize: responsive.getFont(16),
+                          fontSize: responsive.getFont(
+                            isSmall ? 13 : 14,
+                          ),
                         ),
                       ),
-                      SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
+
+                      SizedBox(
+                        height: responsive.getSpacing(
+                          small: 2,
+                          medium: 3,
+                          large: 4,
+                        ),
+                      ),
+
+                      // Distance
                       Text(
                         distance,
                         style: AppTextStyles.body.copyWith(
-                          fontSize: responsive.getFont(14),
+                          fontSize: responsive.getFont(
+                            isSmall ? 11 : 12,
+                          ),
                         ),
                       ),
-                      SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+
+                      SizedBox(
+                        height: responsive.getSpacing(
+                          small: 6,
+                          medium: 8,
+                          large: 10,
+                        ),
+                      ),
+
+                      // Blood + details row
                       Row(
                         children: [
+                          // Blood type box
                           Container(
-                            width: responsive.getWidth(13),
-                            height: responsive.getWidth(13),
+                            width: responsive.getWidth(
+                              isSmall ? 9 : 10,
+                            ),
+                            height: responsive.getWidth(
+                              isSmall ? 9 : 10,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.primary.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+                              borderRadius: BorderRadius.circular(
+                                responsive.getBorderRadius(14),
+                              ),
                             ),
                             child: Center(
                               child: Text(
                                 bloodType,
                                 style: AppTextStyles.heading.copyWith(
                                   color: AppColors.primary,
-                                  fontSize: responsive.getFont(18),
+                                  fontSize: responsive.getFont(
+                                    isSmall ? 14 : 16,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+
+                          SizedBox(
+                            width: responsive.getSpacing(
+                              small: 6,
+                              medium: 8,
+                              large: 10,
+                            ),
+                          ),
+
+                          // Time / details
                           Expanded(
                             child: Row(
                               children: [
                                 Icon(
                                   Icons.access_time,
-                                  size: responsive.getIconSize(18),
+                                  size: responsive.getIconSize(16),
                                   color: AppColors.primary,
                                 ),
-                                SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+                                SizedBox(
+                                  width: responsive.getSpacing(
+                                    small: 4,
+                                    medium: 6,
+                                    large: 8,
+                                  ),
+                                ),
                                 Expanded(
                                   child: Text(
                                     details,
                                     style: AppTextStyles.body.copyWith(
-                                      fontSize: responsive.getFont(14),
+                                      fontSize: responsive.getFont(
+                                        isSmall ? 11 : 12,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -234,26 +302,39 @@ class _EmergencyCard extends StatelessWidget {
                     ],
                   ),
                 ),
+
+                // Status badge
                 Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: responsive.getPadding(12),
-                    vertical: responsive.getPadding(6),
+                    horizontal: responsive.getPadding(10),
+                    vertical: responsive.getPadding(4),
                   ),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
+                    borderRadius: BorderRadius.circular(
+                      responsive.getBorderRadius(14),
+                    ),
                   ),
                   child: Text(
                     status,
                     style: AppTextStyles.subtitle.copyWith(
                       color: statusColor,
-                      fontSize: responsive.getFont(12),
+                      fontSize: responsive.getFont(11),
                     ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+
+            SizedBox(
+              height: responsive.getSpacing(
+                small: 8,
+                medium: 10,
+                large: 12,
+              ),
+            ),
+
+            // Buttons
             Row(
               children: [
                 Expanded(
@@ -261,15 +342,21 @@ class _EmergencyCard extends StatelessWidget {
                     label: "Can't Donate",
                     onPressed: () {},
                     isOutlined: true,
-                    backgroundColor: AppColors.white,
-                    textColor: AppColors.textSecondary,
+                    height: responsive.getButtonHeight() * 0.75,
                   ),
                 ),
-                SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                SizedBox(
+                  width: responsive.getSpacing(
+                    small: 6,
+                    medium: 8,
+                    large: 10,
+                  ),
+                ),
                 Expanded(
                   child: CustomButton(
                     label: actionButton,
                     onPressed: () {},
+                    height: responsive.getButtonHeight() * 0.75,
                   ),
                 ),
               ],
@@ -280,3 +367,159 @@ class _EmergencyCard extends StatelessWidget {
     );
   }
 }
+
+
+// class _EmergencyCard extends StatelessWidget {
+//   final String title;
+//   final String distance;
+//   final String bloodType;
+//   final String status;
+//   final Color statusColor;
+//   final String details;
+//   final String actionButton;
+//   final ResponsiveUtils responsive;
+
+//   const _EmergencyCard({
+//     required this.title,
+//     required this.distance,
+//     required this.bloodType,
+//     required this.status,
+//     required this.statusColor,
+//     required this.details,
+//     required this.actionButton,
+//     required this.responsive,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Card(
+//       elevation: 4,
+//       color: AppColors.white,
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
+//       ),
+//       child: Padding(
+//         padding: EdgeInsets.all(responsive.getPadding(16)),
+//         child: Column(
+//           children: [
+//             Row(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Container(
+//                   width: responsive.getWidth(1.5),
+//                   height: responsive.getHeight(18),
+//                   decoration: BoxDecoration(
+//                     color: statusColor,
+//                     borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+//                   ),
+//                 ),
+//                 SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         title,
+//                         style: AppTextStyles.title.copyWith(
+//                           fontSize: responsive.getFont(16),
+//                         ),
+//                       ),
+//                       SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
+//                       Text(
+//                         distance,
+//                         style: AppTextStyles.body.copyWith(
+//                           fontSize: responsive.getFont(14),
+//                         ),
+//                       ),
+//                       SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+//                       Row(
+//                         children: [
+//                           Container(
+//                             width: responsive.getWidth(13),
+//                             height: responsive.getWidth(13),
+//                             decoration: BoxDecoration(
+//                               color: AppColors.primary.withOpacity(0.12),
+//                               borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+//                             ),
+//                             child: Center(
+//                               child: Text(
+//                                 bloodType,
+//                                 style: AppTextStyles.heading.copyWith(
+//                                   color: AppColors.primary,
+//                                   fontSize: responsive.getFont(18),
+//                                 ),
+//                               ),
+//                             ),
+//                           ),
+//                           SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+//                           Expanded(
+//                             child: Row(
+//                               children: [
+//                                 Icon(
+//                                   Icons.access_time,
+//                                   size: responsive.getIconSize(18),
+//                                   color: AppColors.primary,
+//                                 ),
+//                                 SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+//                                 Expanded(
+//                                   child: Text(
+//                                     details,
+//                                     style: AppTextStyles.body.copyWith(
+//                                       fontSize: responsive.getFont(14),
+//                                     ),
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 Container(
+//                   padding: EdgeInsets.symmetric(
+//                     horizontal: responsive.getPadding(12),
+//                     vertical: responsive.getPadding(6),
+//                   ),
+//                   decoration: BoxDecoration(
+//                     color: statusColor.withOpacity(0.18),
+//                     borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
+//                   ),
+//                   child: Text(
+//                     status,
+//                     style: AppTextStyles.subtitle.copyWith(
+//                       color: statusColor,
+//                       fontSize: responsive.getFont(12),
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+//             Row(
+//               children: [
+//                 Expanded(
+//                   child: CustomButton(
+//                     label: "Can't Donate",
+//                     onPressed: () {},
+//                     isOutlined: true,
+//                     backgroundColor: AppColors.white,
+//                     textColor: AppColors.textSecondary,
+//                   ),
+//                 ),
+//                 SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+//                 Expanded(
+//                   child: CustomButton(
+//                     label: actionButton,
+//                     onPressed: () {},
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

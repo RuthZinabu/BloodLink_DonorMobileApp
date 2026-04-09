@@ -188,9 +188,8 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+               Center(
+               child: 
                   Text(
                     'BloodLink',
                     style: TextStyle(
@@ -199,13 +198,7 @@ class WelcomeScreen extends StatelessWidget {
                       color: AppColors.primary,
                     ),
                   ),
-                  Icon(
-                    Icons.menu,
-                    color: AppColors.textPrimary,
-                    size: responsive.getIconSize(28),
-                  ),
-                ],
-              ),
+          ),
               SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
               ClipRRect(
                 borderRadius: BorderRadius.circular(responsive.getBorderRadius(28)),

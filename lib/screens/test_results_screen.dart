@@ -26,49 +26,71 @@ class TestResultsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Card(
-              color: const Color(0xFFD4F3E9),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(28)),
+           Center(
+  child: SizedBox(
+    width: double.infinity, // keeps it responsive full width
+    child: Card(
+      color: const Color(0xFFD4F3E9),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(
+          responsive.getBorderRadius(28),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(responsive.getPadding(28)),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: responsive.getWidth(22.5),
+              height: responsive.getWidth(22.5),
+              decoration: const BoxDecoration(
+                color: Color(0xFF1BC47D),
+                shape: BoxShape.circle,
               ),
-              child: Padding(
-                padding: EdgeInsets.all(responsive.getPadding(28)),
-                child: Column(
-                  children: [
-                    Container(
-                      width: responsive.getWidth(22.5),
-                      height: responsive.getWidth(22.5),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF1BC47D),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check,
-                        color: AppColors.white,
-                        size: responsive.getIconSize(50),
-                      ),
-                    ),
-                    SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
-                    Text(
-                      'All Clear',
-                      style: TextStyle(
-                        fontSize: responsive.getFont(32),
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
-                    Text(
-                      'Donation Date: Oct 24, 2023',
-                      style: TextStyle(
-                        color: const Color(0xFF9B9B9B),
-                        fontSize: responsive.getFont(14),
-                      ),
-                    ),
-                  ],
-                ),
+              child: Icon(
+                Icons.check,
+                color: AppColors.white,
+                size: responsive.getIconSize(50),
               ),
             ),
+            SizedBox(
+              height: responsive.getSpacing(
+                small: 12,
+                medium: 14,
+                large: 16,
+              ),
+            ),
+            Text(
+              'All Clear',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: responsive.getFont(32),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(
+              height: responsive.getSpacing(
+                small: 4,
+                medium: 6,
+                large: 8,
+              ),
+            ),
+            Text(
+              'Donation Date: Oct 24, 2023',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: const Color(0xFF9B9B9B),
+                fontSize: responsive.getFont(14),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
+),
             SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
             Text(
               'Infectious Disease Screening',
@@ -171,6 +193,7 @@ class _TestResultItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
+      color: AppColors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
       ),
