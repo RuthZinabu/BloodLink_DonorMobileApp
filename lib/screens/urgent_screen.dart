@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
+import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_card.dart';
 
@@ -9,38 +10,53 @@ class UrgentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveUtils.of(context);
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          padding: EdgeInsets.symmetric(
+            horizontal: responsive.getPadding(20),
+            vertical: responsive.getPadding(20),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Expanded(child: Text('Emergency Blood Requests', style: AppTextStyles.heading)),
+                  Expanded(
+                    child: Text(
+                      'Emergency Blood Requests',
+                      style: AppTextStyles.heading.copyWith(
+                        fontSize: responsive.getFont(24),
+                      ),
+                    ),
+                  ),
                   Container(
-                    width: 52,
-                    height: 52,
+                    width: responsive.getWidth(13),
+                    height: responsive.getWidth(13),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
                     ),
-                    child: const Icon(Icons.filter_list, color: AppColors.primary),
+                    child: Icon(
+                      Icons.filter_list,
+                      color: AppColors.primary,
+                      size: responsive.getIconSize(24),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
               Row(
-                children: const [
-                  _Pill(text: 'ALL', isActive: true),
-                  SizedBox(width: 12),
-                  _Pill(text: 'Critical'),
+                children: [
+                  _Pill(text: 'ALL', isActive: true, responsive: responsive),
+                  SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                  _Pill(text: 'Critical', responsive: responsive),
                 ],
               ),
-              const SizedBox(height: 24),
-              const _EmergencyCard(
+              SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
+              _EmergencyCard(
                 title: 'St. Mary\'s Trauma Center',
                 distance: '2.4 km away',
                 bloodType: 'O-',
@@ -48,9 +64,10 @@ class UrgentScreen extends StatelessWidget {
                 statusColor: AppColors.warning,
                 details: 'Oct 24, 2023 · 9:00 AM – 5:00 PM',
                 actionButton: 'I\'m Coming',
+                responsive: responsive,
               ),
-              const SizedBox(height: 16),
-              const _EmergencyCard(
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+              _EmergencyCard(
                 title: 'City General Hospital',
                 distance: '5.1 km away',
                 bloodType: 'A+',
@@ -58,9 +75,10 @@ class UrgentScreen extends StatelessWidget {
                 statusColor: AppColors.primary,
                 details: 'Needed within: 6 hours',
                 actionButton: 'I\'m Coming',
+                responsive: responsive,
               ),
-              const SizedBox(height: 16),
-              const _EmergencyCard(
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+              _EmergencyCard(
                 title: 'Children\'s Med Center',
                 distance: '8.3 km away',
                 bloodType: 'AB+',
@@ -68,8 +86,9 @@ class UrgentScreen extends StatelessWidget {
                 statusColor: AppColors.warning,
                 details: 'Needed within: 45 mins',
                 actionButton: 'I\'m Coming',
+                responsive: responsive,
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.04),
+              SizedBox(height: responsive.getHeight(4)),
             ],
           ),
         ),
@@ -81,21 +100,26 @@ class UrgentScreen extends StatelessWidget {
 class _Pill extends StatelessWidget {
   final String text;
   final bool isActive;
+  final ResponsiveUtils responsive;
 
-  const _Pill({required this.text, this.isActive = false});
+  const _Pill({required this.text, this.isActive = false, required this.responsive});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: responsive.getPadding(18),
+        vertical: responsive.getPadding(12),
+      ),
       decoration: BoxDecoration(
         color: isActive ? AppColors.primary : AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
       ),
       child: Text(
         text,
         style: AppTextStyles.subtitle.copyWith(
           color: isActive ? AppColors.white : AppColors.textSecondary,
+          fontSize: responsive.getFont(14),
         ),
       ),
     );
@@ -110,6 +134,7 @@ class _EmergencyCard extends StatelessWidget {
   final Color statusColor;
   final String details;
   final String actionButton;
+  final ResponsiveUtils responsive;
 
   const _EmergencyCard({
     required this.title,
@@ -119,97 +144,138 @@ class _EmergencyCard extends StatelessWidget {
     required this.statusColor,
     required this.details,
     required this.actionButton,
+    required this.responsive,
   });
 
   @override
   Widget build(BuildContext context) {
-    return CustomCard(
-      borderRadius: 24,
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 6,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: statusColor,
-                  borderRadius: BorderRadius.circular(12),
+    return Card(
+      elevation: 4,
+      color: AppColors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(responsive.getPadding(16)),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: responsive.getWidth(1.5),
+                  height: responsive.getHeight(18),
+                  decoration: BoxDecoration(
+                    color: statusColor,
+                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: AppTextStyles.title),
-                    const SizedBox(height: 4),
-                    Text(distance, style: AppTextStyles.body),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          child: Center(
-                            child: Text(
-                              bloodType,
-                              style: AppTextStyles.heading.copyWith(color: AppColors.primary, fontSize: 20),
+                SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: AppTextStyles.title.copyWith(
+                          fontSize: responsive.getFont(16),
+                        ),
+                      ),
+                      SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
+                      Text(
+                        distance,
+                        style: AppTextStyles.body.copyWith(
+                          fontSize: responsive.getFont(14),
+                        ),
+                      ),
+                      SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                      Row(
+                        children: [
+                          Container(
+                            width: responsive.getWidth(13),
+                            height: responsive.getWidth(13),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+                            ),
+                            child: Center(
+                              child: Text(
+                                bloodType,
+                                style: AppTextStyles.heading.copyWith(
+                                  color: AppColors.primary,
+                                  fontSize: responsive.getFont(18),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Row(
-                            children: [
-                              const Icon(Icons.access_time, size: 18, color: AppColors.primary),
-                              const SizedBox(width: 8),
-                              Expanded(child: Text(details, style: AppTextStyles.body)),
-                            ],
+                          SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  size: responsive.getIconSize(18),
+                                  color: AppColors.primary,
+                                ),
+                                SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+                                Expanded(
+                                  child: Text(
+                                    details,
+                                    style: AppTextStyles.body.copyWith(
+                                      fontSize: responsive.getFont(14),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: responsive.getPadding(12),
+                    vertical: responsive.getPadding(6),
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
+                  ),
+                  child: Text(
+                    status,
+                    style: AppTextStyles.subtitle.copyWith(
+                      color: statusColor,
+                      fontSize: responsive.getFont(12),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(16),
+              ],
+            ),
+            SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+            Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    label: "Can't Donate",
+                    onPressed: () {},
+                    isOutlined: true,
+                    backgroundColor: AppColors.white,
+                    textColor: AppColors.textSecondary,
+                  ),
                 ),
-                child: Text(status, style: AppTextStyles.subtitle.copyWith(color: statusColor)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: CustomButton(
-                  label: "Can't Donate",
-                  onPressed: () {},
-                  isOutlined: true,
-                  backgroundColor: AppColors.white,
-                  textColor: AppColors.textSecondary,
+                SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                Expanded(
+                  child: CustomButton(
+                    label: actionButton,
+                    onPressed: () {},
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: CustomButton(
-                  label: actionButton,
-                  onPressed: () {},
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

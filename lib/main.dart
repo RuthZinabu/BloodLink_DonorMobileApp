@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:bloodlink_donor_mobile_app/screens/splash_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/welcome_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/home_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/campaigns_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/urgent_screen.dart';
@@ -23,7 +25,7 @@ class BloodLinkApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'BloodLink',
+      title: 'BloodLink Donor',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,
@@ -48,8 +50,10 @@ class BloodLinkApp extends StatelessWidget {
           iconTheme: IconThemeData(color: AppColors.textPrimary),
         ),
       ),
-      home: const LoginScreen(),
+      home: const SplashScreen(),
       routes: {
+        '/splash': (_) => const SplashScreen(),
+        '/welcome': (_) => const WelcomeScreen(),
         '/home': (_) => const MainNavigationScreen(),
         '/campaigns': (_) => const CampaignsScreen(),
         '/urgent': (_) => const UrgentScreen(),

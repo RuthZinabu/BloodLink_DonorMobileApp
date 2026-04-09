@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/screens/login_screen.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
+import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
-import 'package:bloodlink_donor_mobile_app/widgets/custom_text_field.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -66,6 +66,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
     Navigator.of(context).pushReplacementNamed('/profile');
   }
 
+  Widget _buildTextField({
+    required String label,
+    required String hintText,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+    bool obscureText = false,
+    required ResponsiveUtils responsive,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.subtitle
+              .copyWith(fontSize: responsive.getFont(14)),
+        ),
+        SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+        TextField(
+          controller: controller,
+          style: AppTextStyles.body
+              .copyWith(fontSize: responsive.getFont(14)),
+          keyboardType: keyboardType,
+          obscureText: obscureText,
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: AppTextStyles.body.copyWith(
+              color: AppColors.border,
+              fontSize: responsive.getFont(14),
+            ),
+            filled: true,
+            fillColor: AppColors.white,
+            contentPadding: EdgeInsets.symmetric(
+              vertical: responsive.getPadding(18),
+              horizontal: responsive.getPadding(16),
+            ),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+            ),
+            isDense: true,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -78,148 +124,164 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+    final iconBoxSize = responsive.isSmallScreen
+        ? 60.0
+        : responsive.isMediumScreen
+            ? 80.0
+            : 100.0;
+    final iconSize = responsive.getFont(44);
+    final headingFontSize = responsive.getFont(26);
+    final bodyFontSize = responsive.getFont(14);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+          padding: EdgeInsets.symmetric(
+            horizontal: responsive.getPadding(20),
+            vertical: responsive.getPadding(32),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 80,
-                height: 80,
+                width: iconBoxSize,
+                height: iconBoxSize,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
                 ),
-                child: const Icon(Icons.favorite, color: AppColors.white, size: 44),
+                child: Icon(
+                  Icons.favorite,
+                  color: AppColors.white,
+                  size: iconSize,
+                ),
               ),
-              const SizedBox(height: 24),
-              const Text('Donor Registration', style: AppTextStyles.heading),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(
+                height: responsive.getSpacing(small: 16, medium: 24, large: 32),
+              ),
+              Text(
+                'Donor Registration',
+                style: AppTextStyles.heading
+                    .copyWith(fontSize: headingFontSize),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(
+                height: responsive.getSpacing(small: 6, medium: 8, large: 10),
+              ),
+              Text(
                 'Join us and help save lives',
-                style: AppTextStyles.body,
+                style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 28),
-              if (_errorMessage != null) ...[
+              SizedBox(
+                height: responsive.getSpacing(small: 16, medium: 20, large: 28),
+              ),
+              if (_errorMessage != null)
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: EdgeInsets.all(responsive.getFont(14)),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.warning.withAlpha((0.12 * 255).toInt()),
+                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: AppColors.warning, size: 20),
-                      const SizedBox(width: 12),
+                      Icon(
+                        Icons.error_outline,
+                        color: AppColors.warning,
+                        size: responsive.getFont(20),
+                      ),
+                      SizedBox(width: responsive.getSpacing(small: 8, medium: 12)),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: const TextStyle(color: AppColors.warning, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppColors.warning,
+                            fontWeight: FontWeight.w600,
+                            fontSize: bodyFontSize,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-              ],
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Full Name', style: AppTextStyles.subtitle),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _nameController,
-                    style: AppTextStyles.body,
-                    decoration: InputDecoration(
-                      hintText: 'Example User',
-                      hintStyle: AppTextStyles.body.copyWith(color: AppColors.border),
-                      filled: true,
-                      fillColor: AppColors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                  ),
-                ],
+              if (_errorMessage != null)
+                SizedBox(
+                  height: responsive.getSpacing(small: 12, medium: 16, large: 20),
+                ),
+              _buildTextField(
+                label: 'Full Name',
+                hintText: 'Example User',
+                controller: _nameController,
+                responsive: responsive,
               ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Email Address', style: AppTextStyles.subtitle),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _emailController,
-                    style: AppTextStyles.body,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'user@example.com',
-                      hintStyle: AppTextStyles.body.copyWith(color: AppColors.border),
-                      filled: true,
-                      fillColor: AppColors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                  ),
-                ],
+              SizedBox(
+                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
               ),
-              const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Phone Number', style: AppTextStyles.subtitle),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _phoneController,
-                    style: AppTextStyles.body,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      hintText: '+1 (555) 000-0000',
-                      hintStyle: AppTextStyles.body.copyWith(color: AppColors.border),
-                      filled: true,
-                      fillColor: AppColors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                  ),
-                ],
+              _buildTextField(
+                label: 'Email Address',
+                hintText: 'user@example.com',
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                responsive: responsive,
               ),
-              const SizedBox(height: 16),
+              SizedBox(
+                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
+              ),
+              _buildTextField(
+                label: 'Phone Number',
+                hintText: '+1 (555) 000-0000',
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                responsive: responsive,
+              ),
+              SizedBox(
+                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Blood Type', style: AppTextStyles.subtitle),
-                  const SizedBox(height: 8),
+                  Text(
+                    'Blood Type',
+                    style: AppTextStyles.subtitle
+                        .copyWith(fontSize: responsive.getFont(14)),
+                  ),
+                  SizedBox(
+                    height: responsive.getSpacing(small: 6, medium: 8, large: 10),
+                  ),
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.white,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius:
+                          BorderRadius.circular(responsive.getBorderRadius(18)),
                     ),
                     child: DropdownButton<String>(
                       value: _selectedBloodType,
                       isExpanded: true,
                       underline: Container(),
-                      icon: const Padding(
-                        padding: EdgeInsets.only(right: 16),
-                        child: Icon(Icons.expand_more, color: AppColors.textSecondary),
+                      icon: Padding(
+                        padding: EdgeInsets.only(
+                          right: responsive.getPadding(16),
+                        ),
+                        child: Icon(
+                          Icons.expand_more,
+                          color: AppColors.textSecondary,
+                          size: responsive.getIconSize(24),
+                        ),
                       ),
                       items: _bloodTypes.map((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 16),
-                            child: Text(value, style: AppTextStyles.body),
+                            padding: EdgeInsets.only(
+                              left: responsive.getPadding(16),
+                            ),
+                            child: Text(
+                              value,
+                              style: AppTextStyles.body
+                                  .copyWith(fontSize: responsive.getFont(14)),
+                            ),
                           ),
                         );
                       }).toList(),
@@ -234,81 +296,88 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Password', style: AppTextStyles.subtitle),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _passwordController,
-                          style: AppTextStyles.body,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            hintStyle: AppTextStyles.body.copyWith(color: AppColors.border),
-                            filled: true,
-                            fillColor: AppColors.white,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Confirm', style: AppTextStyles.subtitle),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _confirmPasswordController,
-                          style: AppTextStyles.body,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            hintText: '••••••••',
-                            hintStyle: AppTextStyles.body.copyWith(color: AppColors.border),
-                            filled: true,
-                            fillColor: AppColors.white,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              SizedBox(
+                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
               ),
-              const SizedBox(height: 24),
+              responsive.isSmallScreen
+                  ? Column(
+                      children: [
+                        _buildTextField(
+                          label: 'Password',
+                          hintText: '••••••••',
+                          controller: _passwordController,
+                          obscureText: true,
+                          responsive: responsive,
+                        ),
+                        SizedBox(
+                          height: responsive.getSpacing(
+                              small: 12, medium: 16, large: 20),
+                        ),
+                        _buildTextField(
+                          label: 'Confirm Password',
+                          hintText: '••••••••',
+                          controller: _confirmPasswordController,
+                          obscureText: true,
+                          responsive: responsive,
+                        ),
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: _buildTextField(
+                            label: 'Password',
+                            hintText: '••••••••',
+                            controller: _passwordController,
+                            obscureText: true,
+                            responsive: responsive,
+                          ),
+                        ),
+                        SizedBox(
+                          width: responsive.getSpacing(small: 12, medium: 16),
+                        ),
+                        Expanded(
+                          child: _buildTextField(
+                            label: 'Confirm',
+                            hintText: '••••••••',
+                            controller: _confirmPasswordController,
+                            obscureText: true,
+                            responsive: responsive,
+                          ),
+                        ),
+                      ],
+                    ),
+              SizedBox(
+                height: responsive.getSpacing(small: 16, medium: 24, large: 32),
+              ),
               CustomButton(
                 label: 'Create Account',
                 onPressed: _signUp,
+                width: double.infinity,
               ),
-              const SizedBox(height: 18),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              SizedBox(
+                height: responsive.getSpacing(small: 12, medium: 18, large: 24),
+              ),
+              Wrap(
+                alignment: WrapAlignment.center,
                 children: [
-                  const Text('Already have an account? ', style: AppTextStyles.body),
+                  Text(
+                    'Already have an account? ',
+                    style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (_) => const LoginScreen()),
                       );
                     },
-                    child: const Text(
+                    child: Text(
                       'Sign in',
-                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: bodyFontSize,
+                      ),
                     ),
                   ),
                 ],

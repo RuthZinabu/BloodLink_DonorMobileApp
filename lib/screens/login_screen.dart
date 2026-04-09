@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/screens/sign_up_screen.dart';
-import 'package:bloodlink_donor_mobile_app/screens/home_screen.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
+import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
-import 'package:bloodlink_donor_mobile_app/widgets/custom_card.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,7 +27,8 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
-    if (_emailController.text == _hardcodedEmail && _passwordController.text == _hardcodedPassword) {
+    if (_emailController.text == _hardcodedEmail &&
+        _passwordController.text == _hardcodedPassword) {
       Navigator.of(context).pushReplacementNamed('/profile');
     } else {
       setState(() {
@@ -46,92 +46,159 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = context.responsive;
+
+    final iconBoxSize = responsive.isSmallScreen
+        ? 60.0
+        : responsive.isMediumScreen
+            ? 80.0
+            : 100.0;
+    final iconSize = responsive.getFont(44);
+    final h20 = responsive.getSpacing(small: 12, medium: 20, large: 28);
+    final h28 = responsive.getSpacing(small: 20, medium: 28, large: 36);
+    final h32 = responsive.getSpacing(small: 24, medium: 32, large: 40);
+    const h8 = 8;
+    final h18 = responsive.getSpacing(small: 12, medium: 18, large: 24);
+    final h24 = responsive.getSpacing(small: 16, medium: 24, large: 32);
+    final headingFontSize = responsive.getFont(26);
+    final bodyFontSize = responsive.getFont(14);
+    final textFieldBorderRadius = responsive.getBorderRadius(18);
+    final errorBorderRadius = responsive.getBorderRadius(12);
+    final errorIconSize = responsive.getFont(20);
+    final errorPadding = responsive.getFont(14);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+          padding: EdgeInsets.symmetric(
+            horizontal: responsive.getPadding(20),
+            vertical: responsive.getPadding(40),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: h20),
+              // Logo
               Container(
-                width: 80,
-                height: 80,
+                width: iconBoxSize,
+                height: iconBoxSize,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
                 ),
-                child: const Icon(Icons.favorite, color: AppColors.white, size: 44),
+                child: Icon(
+                  Icons.favorite,
+                  color: AppColors.white,
+                  size: iconSize,
+                ),
               ),
-              const SizedBox(height: 28),
-              const Text('Welcome Back', style: AppTextStyles.heading),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: h28),
+              // Heading
+              Text(
+                'Welcome Back',
+                style: AppTextStyles.heading.copyWith(fontSize: headingFontSize),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+              Text(
                 'Sign in to continue saving lives',
-                style: AppTextStyles.body,
+                style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: h32),
+              // Error message
               if (_errorMessage != null) ...[
                 Container(
-                  padding: const EdgeInsets.all(14),
+                  padding: EdgeInsets.all(errorPadding),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.warning.withAlpha((0.12 * 255).toInt()),
+                    borderRadius: BorderRadius.circular(errorBorderRadius),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: AppColors.warning, size: 20),
-                      const SizedBox(width: 12),
+                      Icon(
+                        Icons.error_outline,
+                        color: AppColors.warning,
+                        size: errorIconSize,
+                      ),
+                      SizedBox(width: responsive.getSpacing(small: 8, medium: 12, large: 16)),
                       Expanded(
                         child: Text(
                           _errorMessage!,
-                          style: const TextStyle(color: AppColors.warning, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            color: AppColors.warning,
+                            fontWeight: FontWeight.w600,
+                            fontSize: bodyFontSize,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: h20),
               ],
+              // Email field
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Username', style: AppTextStyles.subtitle),
-                  const SizedBox(height: 8),
+                  Text(
+                    'Username',
+                    style: AppTextStyles.subtitle
+                        .copyWith(fontSize: responsive.getFont(14)),
+                  ),
+                  SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                   TextField(
                     controller: _emailController,
-                    style: AppTextStyles.body,
+                    style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                     decoration: InputDecoration(
                       hintText: 'name@email.com',
-                      hintStyle: AppTextStyles.body.copyWith(color: AppColors.border),
+                      hintStyle: AppTextStyles.body.copyWith(
+                        color: AppColors.border,
+                        fontSize: bodyFontSize,
+                      ),
                       filled: true,
                       fillColor: AppColors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: responsive.getPadding(18),
+                        horizontal: responsive.getPadding(16),
+                      ),
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(textFieldBorderRadius),
                       ),
+                      isDense: true,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: h18),
+              // Password field
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Password', style: AppTextStyles.subtitle),
-                  const SizedBox(height: 8),
+                  Text(
+                    'Password',
+                    style: AppTextStyles.subtitle
+                        .copyWith(fontSize: responsive.getFont(14)),
+                  ),
+                  SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                   TextField(
                     controller: _passwordController,
-                    style: AppTextStyles.body,
+                    style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       hintText: '••••••••',
-                      hintStyle: AppTextStyles.body.copyWith(color: AppColors.border),
+                      hintStyle: AppTextStyles.body.copyWith(
+                        color: AppColors.border,
+                        fontSize: bodyFontSize,
+                      ),
                       filled: true,
                       fillColor: AppColors.white,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: responsive.getPadding(18),
+                        horizontal: responsive.getPadding(16),
+                      ),
                       suffixIcon: GestureDetector(
                         onTap: () {
                           setState(() {
@@ -141,57 +208,80 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Icon(
                           _obscurePassword ? Icons.visibility_off : Icons.visibility,
                           color: AppColors.textSecondary,
+                          size: responsive.getIconSize(20),
                         ),
                       ),
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(textFieldBorderRadius),
                       ),
+                      isDense: true,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: h18),
+              // Forgot password
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
                   onTap: () {},
-                  child: const Text(
+                  child: Text(
                     'Forgot Password?',
-                    style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: bodyFontSize,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 28),
+              SizedBox(height: h28),
+              // Login button
               CustomButton(
                 label: 'Login',
                 onPressed: _login,
+                width: double.infinity,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: h24),
+              // Divider with OR text
               Row(
-                children: const [
-                  Expanded(child: Divider(color: AppColors.border)),
+                children: [
+                  const Expanded(child: Divider(color: AppColors.border)),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('OR', style: AppTextStyles.body),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: responsive.getPadding(12),
+                    ),
+                    child: Text(
+                      'OR',
+                      style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
+                    ),
                   ),
-                  Expanded(child: Divider(color: AppColors.border)),
+                  const Expanded(child: Divider(color: AppColors.border)),
                 ],
               ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              SizedBox(height: h24),
+              // Sign up link
+              Wrap(
+                alignment: WrapAlignment.center,
                 children: [
-                  const Text("Don't have an account? ", style: AppTextStyles.body),
+                  Text(
+                    "Don't have an account? ",
+                    style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (_) => const SignUpScreen()),
                       );
                     },
-                    child: const Text(
+                    child: Text(
                       'Register',
-                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: bodyFontSize,
+                      ),
                     ),
                   ),
                 ],
