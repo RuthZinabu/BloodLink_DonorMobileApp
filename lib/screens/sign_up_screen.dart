@@ -4,6 +4,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
+import 'package:bloodlink_donor_mobile_app/services/auth_manager.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -18,21 +19,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  String _selectedBloodType = 'O Positive (O+)';
+  final _addressController = TextEditingController();
+  DateTime? _selectedBirthDate;
   String? _errorMessage;
+  bool _isLoading = false;
+  late AuthManager _authManager;
 
-  final List<String> _bloodTypes = [
-    'A Positive (A+)',
-    'A Negative (A-)',
-    'B Positive (B+)',
-    'B Negative (B-)',
-    'AB Positive (AB+)',
-    'AB Negative (AB-)',
-    'O Positive (O+)',
-    'O Negative (O-)',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _authManager = AuthManager();
+    _selectedBirthDate = DateTime.now().subtract(const Duration(days: 365 * 18));
+  }
 
-  void _signUp() {
+  Future<void> _selectBirthDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedBirthDate ?? DateTime.now().subtract(const Duration(days: 365 * 18)),
+      firstDate: DateTime(1950),
+      lastDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+    );
+
+    if (picked != null && picked != _selectedBirthDate) {
+      setState(() {
+        _selectedBirthDate = picked;
+      });
+    }
+  }
+
+  Future<void> _signUp() async {
     setState(() {
       _errorMessage = null;
     });
@@ -48,6 +63,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
+    if (_selectedBirthDate == null) {
+      setState(() {
+        _errorMessage = 'Please select your birth date';
+      });
+      return;
+    }
+
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
         _errorMessage = 'Passwords do not match';
@@ -55,15 +77,55 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    if (_passwordController.text.length < 6) {
+    if (_passwordController.text.length < 8) {
       setState(() {
-        _errorMessage = 'Password must be at least 6 characters';
+        _errorMessage = 'Password must be at least 8 characters';
       });
       return;
     }
 
-    // If validation passes, navigate to home
-    Navigator.of(context).pushReplacementNamed('/profile');
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await _authManager.registerDonor(
+        fullName: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        password: _passwordController.text,
+        address: _addressController.text.trim(),
+        birthDate: _selectedBirthDate!,
+      );
+
+      if (!mounted) return;
+
+      if (result['success']) {
+        // Show success message and navigate to login
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful! Please log in.')),
+        );
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      } else {
+        setState(() {
+          _errorMessage = result['message'] ?? 'Registration failed';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'An error occurred: ${e.toString()}';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Widget _buildTextField({
@@ -239,59 +301,56 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SizedBox(
                 height: responsive.getSpacing(small: 12, medium: 16, large: 20),
               ),
+              _buildTextField(
+                label: 'Address (Optional)',
+                hintText: 'Your residential address',
+                controller: _addressController,
+                responsive: responsive,
+              ),
+              SizedBox(
+                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Blood Type',
+                    'Birth Date',
                     style: AppTextStyles.subtitle
                         .copyWith(fontSize: responsive.getFont(14)),
                   ),
-                  SizedBox(
-                    height: responsive.getSpacing(small: 6, medium: 8, large: 10),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius:
-                          BorderRadius.circular(responsive.getBorderRadius(18)),
-                    ),
-                    child: DropdownButton<String>(
-                      value: _selectedBloodType,
-                      isExpanded: true,
-                      underline: Container(),
-                      icon: Padding(
-                        padding: EdgeInsets.only(
-                          right: responsive.getPadding(16),
-                        ),
-                        child: Icon(
-                          Icons.expand_more,
-                          color: AppColors.textSecondary,
-                          size: responsive.getIconSize(24),
-                        ),
+                  SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+                  GestureDetector(
+                    onTap: _selectBirthDate,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: responsive.getPadding(18),
+                        horizontal: responsive.getPadding(16),
                       ),
-                      items: _bloodTypes.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Padding(
-                            padding: EdgeInsets.only(
-                              left: responsive.getPadding(16),
-                            ),
-                            child: Text(
-                              value,
-                              style: AppTextStyles.body
-                                  .copyWith(fontSize: responsive.getFont(14)),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _selectedBirthDate == null
+                                ? 'Select date'
+                                : '${_selectedBirthDate!.year}-${_selectedBirthDate!.month.toString().padLeft(2, '0')}-${_selectedBirthDate!.day.toString().padLeft(2, '0')}',
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: responsive.getFont(14),
+                              color: _selectedBirthDate == null
+                                  ? AppColors.border
+                                  : AppColors.textPrimary,
                             ),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _selectedBloodType = newValue;
-                          });
-                        }
-                      },
+                          Icon(
+                            Icons.calendar_today,
+                            color: AppColors.primary,
+                            size: responsive.getIconSize(20),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -351,8 +410,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 height: responsive.getSpacing(small: 16, medium: 24, large: 32),
               ),
               CustomButton(
-                label: 'Create Account',
-                onPressed: _signUp,
+                label: _isLoading ? 'Creating Account...' : 'Create Account',
+                onPressed: _isLoading ? () {} : _signUp,
                 width: double.infinity,
               ),
               SizedBox(

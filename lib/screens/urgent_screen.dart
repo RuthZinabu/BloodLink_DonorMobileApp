@@ -3,7 +3,6 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
-import 'package:bloodlink_donor_mobile_app/widgets/custom_card.dart';
 
 class UrgentScreen extends StatelessWidget {
   const UrgentScreen({super.key});

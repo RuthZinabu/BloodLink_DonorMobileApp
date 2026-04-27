@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
+import 'package:bloodlink_donor_mobile_app/services/auth_manager.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,10 +16,12 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  late AuthManager _authManager;
 
   @override
   void initState() {
     super.initState();
+    _authManager = AuthManager();
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -35,10 +38,12 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController.forward();
 
-    // Navigate to welcome screen after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
+    // Check auth status and navigate after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () async {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/welcome');
+        final isLoggedIn = await _authManager.isLoggedIn();
+        final nextRoute = isLoggedIn ? '/home' : '/welcome';
+        Navigator.of(context).pushReplacementNamed(nextRoute);
       }
     });
   }

@@ -6,13 +6,66 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
+import 'package:bloodlink_donor_mobile_app/services/auth_manager.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late AuthManager _authManager;
+  bool _isLoggingOut = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _authManager = AuthManager();
+  }
+
+  Future<void> _logout() async {
+    setState(() {
+      _isLoggingOut = true;
+    });
+
+    try {
+      final result = await _authManager.logout();
+
+      if (!mounted) return;
+
+      if (result['success']) {
+        // Navigate to login screen
+        Navigator.of(context).pushReplacementNamed('/login');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Logout failed')),
+        );
+        setState(() {
+          _isLoggingOut = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error during logout: ${e.toString()}')),
+        );
+        setState(() {
+          _isLoggingOut = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final responsive = ResponsiveUtils.of(context);
+    final responsive = context.responsive;
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -300,8 +353,8 @@ class ProfileScreen extends StatelessWidget {
               ),
               SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
               CustomButton(
-                label: 'Logout',
-                onPressed: () {},
+                label: _isLoggingOut ? 'Logging out...' : 'Logout',
+                onPressed: _isLoggingOut ? () {} : _logout,
                 backgroundColor: AppColors.white,
                 textColor: AppColors.primary,
                 borderRadius: responsive.getBorderRadius(24),

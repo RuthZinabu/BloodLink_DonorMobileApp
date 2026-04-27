@@ -4,6 +4,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
+import 'package:bloodlink_donor_mobile_app/services/auth_manager.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,23 +18,68 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   String? _errorMessage;
+  bool _isLoading = false;
+  late AuthManager _authManager;
 
-  // Hardcoded credentials for testing
-  static const String _hardcodedEmail = 'user@example.com';
-  static const String _hardcodedPassword = 'password123';
+  @override
+  void initState() {
+    super.initState();
+    _authManager = AuthManager();
+  }
 
-  void _login() {
+  Future<void> _login() async {
     setState(() {
       _errorMessage = null;
+      _isLoading = true;
     });
 
-    if (_emailController.text == _hardcodedEmail &&
-        _passwordController.text == _hardcodedPassword) {
-      Navigator.of(context).pushReplacementNamed('/profile');
-    } else {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty) {
       setState(() {
-        _errorMessage = 'Invalid email or password';
+        _errorMessage = 'Please enter your email';
+        _isLoading = false;
       });
+      return;
+    }
+
+    if (password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your password';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final result = await _authManager.login(
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      if (result['success']) {
+        // Navigate to home screen on successful login
+        Navigator.of(context).pushReplacementNamed('/profile');
+      } else {
+        setState(() {
+          _errorMessage = result['message'] ?? 'Login failed';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'An error occurred: ${e.toString()}';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -57,7 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final h20 = responsive.getSpacing(small: 12, medium: 20, large: 28);
     final h28 = responsive.getSpacing(small: 20, medium: 28, large: 36);
     final h32 = responsive.getSpacing(small: 24, medium: 32, large: 40);
-    const h8 = 8;
     final h18 = responsive.getSpacing(small: 12, medium: 18, large: 24);
     final h24 = responsive.getSpacing(small: 16, medium: 24, large: 32);
     final headingFontSize = responsive.getFont(26);
@@ -239,8 +284,8 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: h28),
               // Login button
               CustomButton(
-                label: 'Login',
-                onPressed: _login,
+                label: _isLoading ? 'Logging in...' : 'Login',
+                onPressed: _isLoading ? () {} : _login,
                 width: double.infinity,
               ),
               SizedBox(height: h24),
