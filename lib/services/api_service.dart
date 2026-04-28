@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
 
 class ApiService {
   static const String baseUrL = 'https://bloodlink-backend-bpll.onrender.com';
@@ -31,7 +32,9 @@ class ApiService {
           'phone': phone,
           'password': password,
           'address': address,
-          'birth_date': birthDate.toIso8601String(),
+          'birth_date': "${birthDate.year.toString().padLeft(4, '0')}-"
+              "${birthDate.month.toString().padLeft(2, '0')}-"
+              "${birthDate.day.toString().padLeft(2, '0')}T00:00:00Z",
         }),
       ).timeout(const Duration(seconds: 30));
 
@@ -50,7 +53,7 @@ class ApiService {
       } else {
         return {
           'success': false,
-          'message': 'Registration failed: ${response.statusCode}',
+          'message': 'Registration failed: ${response.body}',
         };
       }
     } catch (e) {
@@ -102,6 +105,40 @@ class ApiService {
         return {
           'success': false,
           'message': 'Login failed: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Forgot password
+  Future<Map<String, dynamic>> forgotPassword({
+    required String email,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrL/api/auth/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+        }),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'success': true,
+          'message': responseBody['message'] ?? 'Password reset email sent',
+        };
+      } else {
+        final errorBody = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': errorBody['message'] ?? 'Failed to send reset email',
         };
       }
     } catch (e) {
@@ -183,5 +220,133 @@ class ApiService {
   Future<void> clearCredentials() async {
     await _secureStorage.delete(key: _tokenKey);
     await _secureStorage.delete(key: _refreshTokenKey);
+  }
+
+  Future<Map<String, String>> _getHeaders({bool authenticated = false}) async {
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    if (authenticated) {
+      final token = await getAccessToken();
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+    }
+    return headers;
+  }
+
+  /// Retrieve the current user's profile from the backend.
+  Future<Map<String, dynamic>> fetchUserProfile() async {
+    try {
+      final token = await getAccessToken();
+      if (token == null || token.isEmpty) {
+        return {
+          'success': false,
+          'message': 'User is not authenticated.',
+        };
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrL/api/protected/profile'),
+        headers: await _getHeaders(authenticated: true),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return {
+          'success': true,
+          'profile': decoded is Map<String, dynamic> && decoded.containsKey('data')
+              ? decoded['data']
+              : decoded,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to load profile: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Update the current user's profile.
+  Future<Map<String, dynamic>> updateUserProfile({
+    String? fullName,
+    String? email,
+    String? phone,
+    String? address,
+  }) async {
+    try {
+      final token = await getAccessToken();
+      if (token == null || token.isEmpty) {
+        return {
+          'success': false,
+          'message': 'User is not authenticated.',
+        };
+      }
+
+      final body = <String, dynamic>{};
+      if (fullName != null) body['full_name'] = fullName;
+      if (email != null) body['email'] = email;
+      if (phone != null) body['phone'] = phone;
+      if (address != null) body['address'] = address;
+
+      final response = await http.patch(
+        Uri.parse('$baseUrL/api/protected/profile'),
+        headers: await _getHeaders(authenticated: true),
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return {
+          'success': true,
+          'message': decoded['message'] ?? 'Profile updated successfully',
+          'profile': decoded is Map<String, dynamic> && decoded.containsKey('data')
+              ? decoded['data']
+              : decoded,
+        };
+      } else {
+        final decoded = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': decoded['message'] ?? 'Failed to update profile',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Fetch public campaigns from the backend.
+  Future<List<Campaign>> fetchCampaigns() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrL/api/campaigns/'),
+        headers: await _getHeaders(),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final campaignsData = decoded is Map<String, dynamic> && decoded.containsKey('data')
+            ? decoded['data']
+            : decoded;
+
+        if (campaignsData is List) {
+          return campaignsData.map((item) => Campaign.fromJson(item as Map<String, dynamic>)).toList();
+        } else {
+          return [];
+        }
+      } else {
+        throw Exception('Failed to load campaigns: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    }
   }
 }

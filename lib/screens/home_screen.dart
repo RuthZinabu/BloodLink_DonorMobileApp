@@ -3,9 +3,40 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_card.dart';
+import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final ApiService _apiService = ApiService();
+  String _userName = 'Alex'; // Default name
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    final result = await _apiService.fetchUserProfile();
+    if (result['success'] == true && result['profile'] != null) {
+      final profile = result['profile'] as Map<String, dynamic>;
+      setState(() {
+        _userName = profile['full_name'] ?? profile['name'] ?? 'User';
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +66,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                         SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
                         Text(
-                          'Hi Alex, ready to save a life?',
+                          _isLoading ? 'Loading...' : 'Hi $_userName, ready to save a life?',
                           style: AppTextStyles.subtitle.copyWith(
                             fontSize: responsive.getFont(16),
                           ),
@@ -131,7 +162,7 @@ class HomeScreen extends StatelessWidget {
                   Expanded(
                     child: _InfoTile(
                       title: 'Donations',
-                      value: '8',
+                      value: '8, Eight',
                       status: 'Since 2019',
                       responsive: responsive,
                     ),
@@ -141,7 +172,7 @@ class HomeScreen extends StatelessWidget {
                   Expanded(
                     child: _InfoTile(
                       title: 'Last Donation',
-                      value: 'Aug 14',
+                      value: 'Aug 14, 2026',
                       status: 'City Hospital',
                       responsive: responsive,
                     ),
@@ -174,6 +205,7 @@ class HomeScreen extends StatelessWidget {
                             label: 'Emergency requests',
                             icon: Icons.notifications_active,
                             responsive: responsive,
+                            onPressed: () => Navigator.of(context).pushNamed('/urgent'),
                           ),
                         ),
                         SizedBox(
@@ -182,6 +214,7 @@ class HomeScreen extends StatelessWidget {
                             label: 'Campaigns',
                             icon: Icons.campaign,
                             responsive: responsive,
+                            onPressed: () => Navigator.of(context).pushNamed('/campaigns'),
                           ),
                         ),
                         SizedBox(
@@ -190,6 +223,7 @@ class HomeScreen extends StatelessWidget {
                             label: 'Test results',
                             icon: Icons.science,
                             responsive: responsive,
+                            onPressed: () => Navigator.of(context).pushNamed('/test-results'),
                           ),
                         ),
                         SizedBox(
@@ -198,6 +232,7 @@ class HomeScreen extends StatelessWidget {
                             label: 'History',
                             icon: Icons.history,
                             responsive: responsive,
+                            onPressed: () => Navigator.of(context).pushNamed('/history'),
                           ),
                         ),
                       ],
@@ -356,7 +391,7 @@ class _InfoTile extends StatelessWidget {
           Text(
             value,
             style: AppTextStyles.heading.copyWith(
-              fontSize: responsive.getFont(18), // 👈 reduced from 24
+              fontSize: responsive.getFont(13), // 👈 reduced from 24
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -385,50 +420,56 @@ class _ShortcutCard extends StatelessWidget {
   final String label;
   final IconData icon;
   final ResponsiveUtils responsive;
+  final VoidCallback? onPressed;
 
   const _ShortcutCard({
     required this.label,
     required this.icon,
     required this.responsive,
+    this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      color: AppColors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: responsive.getPadding(18),
-          horizontal: responsive.getPadding(16),
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
+      child: Card(
+        elevation: 4,
+        color: AppColors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: responsive.getWidth(10),
-              height: responsive.getWidth(10),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: responsive.getPadding(18),
+            horizontal: responsive.getPadding(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: responsive.getWidth(10),
+                height: responsive.getWidth(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.primary,
+                  size: responsive.getIconSize(22),
+                ),
               ),
-              child: Icon(
-                icon,
-                color: AppColors.primary,
-                size: responsive.getIconSize(22),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 18, large: 20)),
+              Text(
+                label,
+                style: AppTextStyles.title.copyWith(
+                  fontSize: responsive.getFont(14),
+                ),
               ),
-            ),
-            SizedBox(height: responsive.getSpacing(small: 12, medium: 18, large: 20)),
-            Text(
-              label,
-              style: AppTextStyles.title.copyWith(
-                fontSize: responsive.getFont(14),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

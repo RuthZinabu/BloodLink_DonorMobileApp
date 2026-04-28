@@ -1,3 +1,4 @@
+import 'package:bloodlink_donor_mobile_app/screens/forgot_password_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/screens/sign_up_screen.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
@@ -270,7 +271,13 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ForgotPasswordScreen(),
+                      ),
+                    );
+                  },
                   child: Text(
                     'Forgot Password?',
                     style: TextStyle(
