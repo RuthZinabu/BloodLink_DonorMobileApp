@@ -180,11 +180,4 @@ cat << 'EOF'
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                         YOU'RE 35% DONE! 🚀                                  ║
-║  All infrastructure is in place. The hardest part is done. Just follow the   ║
-║  patterns and knock out the remaining 9 screens! Each one is similar.        ║
-║  Estimated 4-6 hours to 100% responsive coverage.                           ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
 EOF
