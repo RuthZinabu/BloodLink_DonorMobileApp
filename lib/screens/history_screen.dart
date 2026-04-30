@@ -2,33 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
+import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
+import 'package:bloodlink_donor_mobile_app/models/donation.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  final ApiService _apiService = ApiService();
+  final List<Donation> _donations = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDonations();
+  }
+
+  Future<void> _loadDonations() async {
+    final donations = await _apiService.fetchDonations();
+    if (mounted) {
+      setState(() {
+        _donations.addAll(donations);
+        _isLoading = false;
+        if (donations.isEmpty) {
+          _errorMessage = 'No donation history has been recorded yet.';
+        }
+      });
+    }
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Unknown date';
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
     final responsive = ResponsiveUtils.of(context);
-    final historyItems = [
-      _HistoryItem(
-        date: 'Aug 14, 2023',
-        location: 'City Hospital',
-        status: 'Completed',
-        responsive: responsive,
-      ),
-      _HistoryItem(
-        date: 'May 02, 2023',
-        location: 'St. Mary\'s Clinic',
-        status: 'Completed',
-        responsive: responsive,
-      ),
-      _HistoryItem(
-        date: 'Feb 11, 2023',
-        location: 'South Health Center',
-        status: 'Completed',
-        responsive: responsive,
-      ),
-    ];
 
     return SafeArea(
       child: Scaffold(
@@ -49,20 +69,48 @@ class HistoryScreen extends StatelessWidget {
               ),
               SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
               Text(
-                'Track all your past donations and test results in one place.',
+                'Track the donations recorded by your blood collector.',
                 style: AppTextStyles.body.copyWith(
                   fontSize: responsive.getFont(14),
                 ),
               ),
               SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
               Expanded(
-                child: ListView.separated(
-                  itemCount: historyItems.length,
-                  separatorBuilder: (_, __) => SizedBox(
-                    height: responsive.getSpacing(small: 10, medium: 12, large: 14),
-                  ),
-                  itemBuilder: (context, index) => historyItems[index],
-                ),
+                child: _isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : _donations.isEmpty
+                        ? Center(
+                            child: Text(
+                              _errorMessage ??
+                                  'No donation records are available yet.',
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.body.copyWith(
+                                fontSize: responsive.getFont(16),
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            itemCount: _donations.length,
+                            separatorBuilder: (_, __) => SizedBox(
+                              height: responsive.getSpacing(small: 10, medium: 12, large: 14),
+                            ),
+                            itemBuilder: (context, index) {
+                              final donation = _donations[index];
+                              return _HistoryItem(
+                                date: _formatDate(donation.donationDate),
+                                location: donation.location ?? 'Unknown location',
+                                status: donation.status?.replaceAll('_', ' ').toUpperCase() ?? 'Pending',
+                                bloodType: donation.bloodType,
+                                collectedBy: donation.collectedBy,
+                                responsive: responsive,
+                              );
+                            },
+                          ),
               ),
             ],
           ),
@@ -76,6 +124,8 @@ class _HistoryItem extends StatelessWidget {
   final String date;
   final String location;
   final String status;
+  final String? bloodType;
+  final String? collectedBy;
   final ResponsiveUtils responsive;
 
   const _HistoryItem({
@@ -83,6 +133,8 @@ class _HistoryItem extends StatelessWidget {
     required this.location,
     required this.status,
     required this.responsive,
+    this.bloodType,
+    this.collectedBy,
   });
 
   @override
@@ -98,49 +150,93 @@ class _HistoryItem extends StatelessWidget {
           horizontal: responsive.getPadding(16),
           vertical: responsive.getPadding(14),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: responsive.getWidth(13),
-              height: responsive.getWidth(13),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.16),
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
-              ),
-              child: Icon(
-                Icons.history,
-                color: AppColors.primary,
-                size: responsive.getIconSize(28),
-              ),
+            Row(
+              children: [
+                Container(
+                  width: responsive.getWidth(13),
+                  height: responsive.getWidth(13),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.16),
+                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
+                  ),
+                  child: Icon(
+                    Icons.history,
+                    color: AppColors.primary,
+                    size: responsive.getIconSize(28),
+                  ),
+                ),
+                SizedBox(width: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        date,
+                        style: AppTextStyles.title.copyWith(
+                          fontSize: responsive.getFont(16),
+                        ),
+                      ),
+                      SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
+                      Text(
+                        location,
+                        style: AppTextStyles.body.copyWith(
+                          fontSize: responsive.getFont(14),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: responsive.getPadding(10),
+                    vertical: responsive.getPadding(8),
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
+                  ),
+                  child: Text(
+                    status,
+                    style: AppTextStyles.subtitle.copyWith(
+                      color: AppColors.primary,
+                      fontSize: responsive.getFont(12),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: responsive.getSpacing(small: 12, medium: 14, large: 16)),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            if (bloodType != null || collectedBy != null) ...[
+              SizedBox(height: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+              Row(
                 children: [
-                  Text(
-                    date,
-                    style: AppTextStyles.title.copyWith(
-                      fontSize: responsive.getFont(16),
+                  if (bloodType != null) ...[
+                    Icon(Icons.bloodtype, color: AppColors.primary, size: responsive.getIconSize(18)),
+                    SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                    Expanded(
+                      child: Text(
+                        'Blood type: $bloodType',
+                        style: AppTextStyles.body.copyWith(
+                          fontSize: responsive.getFont(14),
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
-                  Text(
-                    location,
-                    style: AppTextStyles.body.copyWith(
-                      fontSize: responsive.getFont(14),
-                    ),
-                  ),
+                  ],
                 ],
               ),
-            ),
-            Text(
-              status,
-              style: AppTextStyles.subtitle.copyWith(
-                color: AppColors.primary,
-                fontSize: responsive.getFont(12),
-              ),
-            ),
+              if (collectedBy != null) ...[
+                SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                Text(
+                  'Recorded by: $collectedBy',
+                  style: AppTextStyles.body.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: responsive.getFont(12),
+                  ),
+                ),
+              ],
+            ],
           ],
         ),
       ),

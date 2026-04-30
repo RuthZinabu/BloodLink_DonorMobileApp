@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
+import 'package:bloodlink_donor_mobile_app/models/donation.dart';
+import 'package:bloodlink_donor_mobile_app/models/test_result.dart';
 
 class ApiService {
   static const String baseUrL = 'https://bloodlink-backend-bpll.onrender.com';
@@ -320,6 +322,48 @@ class ApiService {
         'success': false,
         'message': 'Network error: ${e.toString()}',
       };
+    }
+  }
+
+  /// Retrieve the current user's donations.
+  Future<List<Donation>> fetchDonations() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrL/api/donor/donations'),
+        headers: await _getHeaders(authenticated: true),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is List) {
+          return decoded
+              .map((item) => Donation.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// Retrieve the current user's latest test result.
+  Future<TestResult?> fetchLatestTestResult() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrL/api/donor/test-result/latest'),
+        headers: await _getHeaders(authenticated: true),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic>) {
+          return TestResult.fromJson(decoded);
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
   }
 

@@ -27,6 +27,7 @@ flutter:
     - assets/image/children_image.jpg
     - assets/image/profile.jpg
     - assets/image/image.png
+    - assets/image/default_profile.png
 
 flutter_native_splash:
   color: "#F6F7FB"

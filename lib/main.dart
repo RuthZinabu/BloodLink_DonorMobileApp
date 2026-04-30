@@ -8,6 +8,9 @@ import 'package:bloodlink_donor_mobile_app/screens/history_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/profile_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/leaderboard_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/edit_profile_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/about_us_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/privacy_policy_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/terms_of_service_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/login_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/sign_up_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/test_results_screen.dart';
@@ -64,6 +67,9 @@ class BloodLinkApp extends StatelessWidget {
         '/login': (_) => const LoginScreen(),
         '/signup': (_) => const SignUpScreen(),
         '/test-results': (_) => const TestResultsScreen(),
+        '/about': (_) => const AboutUsScreen(),
+        '/privacy': (_) => const PrivacyPolicyScreen(),
+        '/terms': (_) => const TermsOfServiceScreen(),
       },
     );
   }

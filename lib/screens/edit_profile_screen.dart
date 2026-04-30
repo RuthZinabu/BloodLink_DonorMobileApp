@@ -98,9 +98,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_selectedImage != null) {
       backgroundImage = FileImage(_selectedImage!);
     } else {
-      backgroundImage = NetworkImage(
+      backgroundImage = AssetImage(
         widget.initialProfile?['photo_url']?.toString() ??
-            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+            'assets/image/default_profile.png',
       );
     }
 

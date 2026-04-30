@@ -92,6 +92,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  String _formatBloodGroup(Map<String, dynamic>? profileData) {
+    final bloodType = profileData?['blood_type']?.toString().trim();
+    if (bloodType == null || bloodType.isEmpty) {
+      return 'Not recorded';
+    }
+    return bloodType;
+  }
+
+  String _formatDonationsCount(Map<String, dynamic>? profileData) {
+    final count = profileData?['donations_count'];
+    if (count == null) return '0';
+    return count.toString();
+  }
+
+  String _formatLastDonationDate(Map<String, dynamic>? profileData) {
+    final date = profileData?['last_donation_date']?.toString().trim();
+    if (date == null || date.isEmpty) {
+      return 'No donation';
+    }
+    // Try to parse and format the date
+    try {
+      final parsed = DateTime.tryParse(date);
+      if (parsed != null) {
+        const monthNames = [
+          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        ];
+        return '${monthNames[parsed.month - 1]} ${parsed.day}, ${parsed.year}';
+      }
+    } catch (_) {}
+    return date;
+  }
+
+  String _formatEligibilityStatus(Map<String, dynamic>? profileData) {
+    final status = profileData?['eligibility_status']?.toString().trim();
+    if (status == null || status.isEmpty) {
+      return 'Status not available';
+    }
+    return status;
+  }
+
   @override
   Widget build(BuildContext context) {
     final responsive = context.responsive;
@@ -145,9 +186,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               backgroundColor: AppColors.white,
                               child: CircleAvatar(
                                 radius: responsive.getWidth(15.5),
-                                backgroundImage: NetworkImage(
+                                backgroundImage: AssetImage(
                                   _profileData?['photo_url']?.toString() ??
-                                      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80',
+                                      'assets/image/default_profile.png',
                                 ),
                               ),
                             ),
@@ -217,7 +258,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                               Text(
-                                _profileData?['blood_type']?.toString() ?? 'O+ Blood Type',
+                                _formatBloodGroup(_profileData),
                                 style: TextStyle(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w700,
@@ -245,7 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        _profileData?['donations_count']?.toString() ?? '14',
+                                        _formatDonationsCount(_profileData),
                                         style: TextStyle(
                                           fontSize: responsive.getFont(28),
                                           fontWeight: FontWeight.w800,
@@ -280,7 +321,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   child: Column(
                                     children: [
                                       Text(
-                                        _profileData?['last_donation_date']?.toString() ?? 'Oct 12, 2026',
+                                        _formatLastDonationDate(_profileData),
                                         style: TextStyle(
                                           fontSize: responsive.getFont(22),
                                           fontWeight: FontWeight.w800,
@@ -338,7 +379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
                                       Text(
-                                        _profileData?['eligibility_status']?.toString() ?? 'You are eligible to donate today!',
+                                        _formatEligibilityStatus(_profileData),
                                         style: TextStyle(
                                           color: const Color(0xFF1BC47D),
                                           fontWeight: FontWeight.w600,

@@ -16,6 +16,13 @@ class _HomeScreenState extends State<HomeScreen> {
   final ApiService _apiService = ApiService();
   String _userName = 'Alex'; // Default name
   bool _isLoading = true;
+  String _bloodGroup = 'Unknown';
+  String _donationsCount = '0';
+  String _donationsStatus = 'No data';
+  String _lastDonationDate = 'No donation';
+  String _lastDonationLocation = 'Not recorded';
+  String _nextEligibleDays = 'Not available';
+  String _nextEligibleMessage = 'Next donation data is unavailable.';
 
   @override
   void initState() {
@@ -27,8 +34,38 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await _apiService.fetchUserProfile();
     if (result['success'] == true && result['profile'] != null) {
       final profile = result['profile'] as Map<String, dynamic>;
+      final lastDonationRaw = profile['last_donation_date'] ??
+          profile['last_donation'] ??
+          profile['lastDonationDate'];
+      final lastDonationDate = _parseDate(lastDonationRaw?.toString());
+      final nextEligibleRaw = profile['next_eligible_date'] ??
+          profile['next_donation_date'] ??
+          profile['next_eligible_donation'] ??
+          profile['nextEligibleDate'];
+      final nextEligibleDate = _parseDate(nextEligibleRaw?.toString());
+      final nextEligible = _buildNextEligibleText(
+        nextEligibleDate,
+        lastDonationDate,
+        profile,
+      );
+
       setState(() {
         _userName = profile['full_name'] ?? profile['name'] ?? 'User';
+        _bloodGroup = profile['blood_type']?.toString() ?? 'Unknown';
+        _donationsCount = profile['donations_count']?.toString() ??
+            profile['donation_count']?.toString() ??
+            '0';
+        _donationsStatus = profile['donation_since']?.toString() ??
+            profile['member_since']?.toString() ??
+            'No data';
+        _lastDonationDate = lastDonationDate != null
+            ? _formatDate(lastDonationDate)
+            : 'No donation';
+        _lastDonationLocation = profile['last_donation_center']?.toString() ??
+            profile['last_donation_location']?.toString() ??
+            'Not recorded';
+        _nextEligibleDays = nextEligible['days']!;
+        _nextEligibleMessage = nextEligible['message']!;
         _isLoading = false;
       });
     } else {
@@ -36,6 +73,78 @@ class _HomeScreenState extends State<HomeScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  DateTime? _parseDate(String? raw) {
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      return DateTime.tryParse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${monthNames[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  String _formatRelativeDays(DateTime date) {
+    final now = DateTime.now();
+    final diff = date.difference(now).inDays;
+    if (diff <= 0) return 'Today';
+    return '$diff days';
+  }
+
+  Map<String, String> _buildNextEligibleText(
+    DateTime? nextEligibleDate,
+    DateTime? lastDonationDate,
+    Map<String, dynamic> profile,
+  ) {
+    if (nextEligibleDate != null) {
+      return {
+        'days': _formatRelativeDays(nextEligibleDate),
+        'message': 'You can donate again on ${_formatDate(nextEligibleDate)}.',
+      };
+    }
+
+    final eligibility = profile['eligibility_status']?.toString();
+    if (eligibility != null && eligibility.isNotEmpty) {
+      final normalized = eligibility.replaceAll('_', ' ').toUpperCase();
+      if (normalized.toLowerCase().contains('eligible')) {
+        return {
+          'days': normalized,
+          'message': eligibility,
+        };
+      }
+      if (lastDonationDate != null) {
+        final nextDate = lastDonationDate.add(const Duration(days: 90));
+        return {
+          'days': _formatRelativeDays(nextDate),
+          'message': 'You can donate again on ${_formatDate(nextDate)}.',
+        };
+      }
+      return {
+        'days': normalized,
+        'message': eligibility,
+      };
+    }
+
+    if (lastDonationDate != null) {
+      final nextDate = lastDonationDate.add(const Duration(days: 90));
+      return {
+        'days': _formatRelativeDays(nextDate),
+        'message': 'You can donate again on ${_formatDate(nextDate)}.',
+      };
+    }
+
+    return {
+      'days': 'Not available',
+      'message': 'Next donation data is unavailable.',
+    };
   }
 
   @override
@@ -58,12 +167,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                      GestureDetector(
+                        onTap: () {
+                            Navigator.of(context).pushNamed('/welcome');
+                        },
+                        child: Text(
                           'Welcome',
                           style: AppTextStyles.heading.copyWith(
                             fontSize: responsive.getFont(26),
                           ),
                         ),
+                      ),
                         SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
                         Text(
                           _isLoading ? 'Loading...' : 'Hi $_userName, ready to save a life?',
@@ -112,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            '12 days',
+                            _nextEligibleDays,
                             style: AppTextStyles.heading.copyWith(
                               color: AppColors.primary,
                               fontSize: responsive.getFont(38),
@@ -137,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     SizedBox(height: responsive.getSpacing(small: 6, medium: 10, large: 12)),
                     Text(
-                      'You can donate again on Nov 14, 2023.',
+                      _nextEligibleMessage,
                       style: AppTextStyles.body.copyWith(
                         fontSize: responsive.getFont(14),
                       ),
@@ -152,8 +266,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: _InfoTile(
                       title: 'Blood Group',
-                      value: 'A+',
-                      status: 'Verified',
+                      value: _bloodGroup,
+                      status: _bloodGroup == 'Unknown' ? 'Not recorded' : 'Verified',
                       responsive: responsive,
                     ),
                   ),
@@ -162,8 +276,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: _InfoTile(
                       title: 'Donations',
-                      value: '8, Eight',
-                      status: 'Since 2019',
+                      value: _donationsCount,
+                      status: _donationsStatus,
                       responsive: responsive,
                     ),
                   ),
@@ -172,8 +286,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Expanded(
                     child: _InfoTile(
                       title: 'Last Donation',
-                      value: 'Aug 14, 2026',
-                      status: 'City Hospital',
+                      value: _lastDonationDate,
+                      status: _lastDonationLocation,
                       responsive: responsive,
                     ),
                   ),
