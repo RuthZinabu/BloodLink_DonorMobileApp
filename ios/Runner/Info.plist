@@ -67,4 +67,7 @@
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Allow BloodLink to access your location so nearby urgent requests can be shown.</string>
+	<string>Allow BloodLink to access your location so nearby urgent requests can be shown.</string>	<key>UIStatusBarHidden</key>
+	<false/>
+</dict>
+</plist>
