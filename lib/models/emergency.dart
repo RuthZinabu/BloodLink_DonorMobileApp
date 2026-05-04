@@ -12,6 +12,7 @@ class Emergency {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? publishedAt;
+  final double? distance; // Distance in km for nearby emergencies
 
   Emergency({
     required this.emergencyId,
@@ -27,6 +28,7 @@ class Emergency {
     required this.createdAt,
     required this.updatedAt,
     this.publishedAt,
+    this.distance,
   });
 
   factory Emergency.fromJson(Map<String, dynamic> json) {
@@ -46,6 +48,7 @@ class Emergency {
       publishedAt: json['published_at'] != null
           ? DateTime.parse(json['published_at'] as String)
           : null,
+      distance: json['distance'] != null ? (json['distance'] as num).toDouble() : null,
     );
   }
 

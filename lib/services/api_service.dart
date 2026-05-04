@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
 import 'package:bloodlink_donor_mobile_app/models/donation.dart';
 import 'package:bloodlink_donor_mobile_app/models/test_result.dart';
+import 'package:bloodlink_donor_mobile_app/models/badge.dart';
 import 'package:bloodlink_donor_mobile_app/models/leaderboard_entry.dart';
 import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
 
@@ -377,6 +378,32 @@ class ApiService {
     }
   }
 
+  /// Retrieve the current user's awarded badges.
+  Future<List<Badge>> fetchBadges() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrL/api/donor/badges'),
+        headers: await _getHeaders(authenticated: true),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final badgeData = decoded is Map<String, dynamic> && decoded.containsKey('badges')
+            ? decoded['badges']
+            : [];
+
+        if (badgeData is List) {
+          return badgeData
+              .map((item) => Badge.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   /// Retrieve the current user's latest test result.
   Future<TestResult?> fetchLatestTestResult() async {
     try {
@@ -414,6 +441,29 @@ class ApiService {
         }
       } else {
         throw Exception('Failed to load emergencies: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    }
+  }
+
+  /// Fetch nearby emergencies based on donor's location.
+  Future<List<Emergency>> fetchNearbyEmergencies(double latitude, double longitude) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrL/api/donor/emergencies/nearby?lat=$latitude&lng=$longitude'),
+        headers: await _getHeaders(authenticated: true),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is List) {
+          return decoded.map((item) => Emergency.fromJson(item as Map<String, dynamic>)).toList();
+        } else {
+          return [];
+        }
+      } else {
+        throw Exception('Failed to load nearby emergencies: ${response.body}');
       }
     } catch (e) {
       throw Exception('Network error: ${e.toString()}');

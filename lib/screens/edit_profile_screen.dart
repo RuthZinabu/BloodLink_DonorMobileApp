@@ -120,15 +120,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               CircleAvatar(
                 radius: responsive.getWidth(15.5),
                 backgroundColor: AppColors.surface,
-                child: resolvedPhotoUrl.isNotEmpty && Uri.tryParse(resolvedPhotoUrl)?.isAbsolute == true
+                child: resolvedPhotoUrl.isNotEmpty &&
+                        (resolvedPhotoUrl.startsWith('https://') || resolvedPhotoUrl.startsWith('http://'))
                     ? ClipOval(
-                        child: FadeInImage(
-                          placeholder: const AssetImage('assets/image/default_profile.png'),
-                          image: NetworkImage(resolvedPhotoUrl),
+                        child: Image.network(
+                          resolvedPhotoUrl,
                           fit: BoxFit.cover,
                           width: responsive.getWidth(31),
                           height: responsive.getWidth(31),
-                          imageErrorBuilder: (context, error, stackTrace) {
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(child: CircularProgressIndicator());
+                          },
+                          errorBuilder: (context, error, stackTrace) {
                             return Image.asset(
                               'assets/image/default_profile.png',
                               fit: BoxFit.cover,
@@ -160,6 +164,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 hintText: 'Enter a public image URL',
                 controller: _photoUrlController,
                 keyboardType: TextInputType.url,
+                onChanged: (_) => setState(() {}),
                 prefixIcon: Icon(
                   Icons.link,
                   color: AppColors.primary,

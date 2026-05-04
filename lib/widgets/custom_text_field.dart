@@ -9,6 +9,7 @@ class CustomTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final bool readOnly;
   final VoidCallback? onTap;
+  final ValueChanged<String>? onChanged;
   final TextEditingController? controller;
   final TextInputType keyboardType;
 
@@ -19,6 +20,7 @@ class CustomTextField extends StatelessWidget {
     this.prefixIcon,
     this.readOnly = false,
     this.onTap,
+    this.onChanged,
     this.controller,
     this.keyboardType = TextInputType.text,
   });
@@ -44,6 +46,7 @@ class CustomTextField extends StatelessWidget {
           controller: controller,
           readOnly: readOnly,
           onTap: onTap,
+          onChanged: onChanged,
           keyboardType: keyboardType,
           style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
           decoration: InputDecoration(

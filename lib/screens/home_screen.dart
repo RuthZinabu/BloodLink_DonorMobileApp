@@ -4,6 +4,8 @@ import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_card.dart';
 import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
+import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,7 +14,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final ApiService _apiService = ApiService();
   String _userName = 'Alex'; // Default name
   bool _isLoading = true;
@@ -24,10 +26,29 @@ class _HomeScreenState extends State<HomeScreen> {
   String _nextEligibleDays = 'Not available';
   String _nextEligibleMessage = 'Next donation data is unavailable.';
 
+  List<Emergency> _nearbyEmergencies = [];
+  bool _locationEnabled = false;
+  bool _loadingNearby = true;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadUserProfile();
+    _checkLocationAndFetchNearby();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkLocationAndFetchNearby();
+    }
   }
 
   Future<void> _loadUserProfile() async {
@@ -71,6 +92,63 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       setState(() {
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _checkLocationAndFetchNearby() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _locationEnabled = false;
+          _loadingNearby = false;
+        });
+        return;
+      }
+
+      // Check location permission
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _locationEnabled = false;
+            _loadingNearby = false;
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _locationEnabled = false;
+          _loadingNearby = false;
+        });
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Fetch nearby emergencies
+      final emergencies = await _apiService.fetchNearbyEmergencies(
+        position.latitude,
+        position.longitude,
+      );
+
+      setState(() {
+        _nearbyEmergencies = emergencies;
+        _locationEnabled = true;
+        _loadingNearby = false;
+      });
+    } catch (e) {
+      setState(() {
+        _locationEnabled = false;
+        _loadingNearby = false;
       });
     }
   }
@@ -147,6 +225,51 @@ class _HomeScreenState extends State<HomeScreen> {
     };
   }
 
+  String _getUrgencyLabel(String urgencyLevel) {
+    switch (urgencyLevel.toUpperCase()) {
+      case 'CRITICAL':
+        return 'Critical';
+      case 'URGENT':
+      case 'HIGH':
+        return 'High';
+      case 'MEDIUM':
+        return 'Medium';
+      case 'LOW':
+        return 'Low';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  Color _getUrgencyColor(String urgencyLevel) {
+    switch (urgencyLevel.toUpperCase()) {
+      case 'CRITICAL':
+        return AppColors.warning;
+      case 'URGENT':
+      case 'HIGH':
+        return AppColors.primary;
+      case 'MEDIUM':
+        return AppColors.secondary;
+      case 'LOW':
+        return AppColors.textSecondary;
+      default:
+        return AppColors.textSecondary;
+    }
+  }
+
+  String _formatTimeLeft(DateTime? publishedAt) {
+    if (publishedAt == null) return 'Unknown';
+    final now = DateTime.now();
+    final diff = now.difference(publishedAt);
+    if (diff.inDays > 0) {
+      return '${diff.inDays}d ago';
+    } else if (diff.inHours > 0) {
+      return '${diff.inHours}h ago';
+    } else {
+      return '${diff.inMinutes}m ago';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final responsive = ResponsiveUtils.of(context);
@@ -205,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
               CustomCard(
-                backgroundColor: AppColors.secondary.withOpacity(0.16),
+                backgroundColor: AppColors.secondary.withAlpha((0.16 * 255).round()),
                 borderRadius: responsive.getBorderRadius(28),
                 padding: EdgeInsets.all(responsive.getPadding(22)),
                 elevation: 0,
@@ -237,7 +360,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Container(
                           padding: EdgeInsets.all(responsive.getPadding(12)),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.22),
+                            color: AppColors.primary.withAlpha((0.22 * 255).round()),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -376,35 +499,75 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
-              _UrgentItem(
-                bloodType: 'A+',
-                title: 'St. Mary\'s Hospital',
-                distance: '2.5 km',
-                timeLeft: '2h left',
-                urgencyLabel: 'High',
-                labelColor: AppColors.warning,
-                responsive: responsive,
-              ),
-              SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 14)),
-              _UrgentItem(
-                bloodType: 'O-',
-                title: 'General Medical Center',
-                distance: '4.1 km',
-                timeLeft: '5h left',
-                urgencyLabel: 'Medium',
-                labelColor: AppColors.secondary,
-                responsive: responsive,
-              ),
-              SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 14)),
-              _UrgentItem(
-                bloodType: 'AB+',
-                title: 'City Children\'s Clinic',
-                distance: '8.0 km',
-                timeLeft: '1d left',
-                urgencyLabel: 'Low',
-                labelColor: AppColors.textSecondary,
-                responsive: responsive,
-              ),
+              if (_loadingNearby)
+                Center(child: CircularProgressIndicator())
+              else if (!_locationEnabled)
+                Card(
+                  elevation: 4,
+                  color: AppColors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(responsive.getPadding(18)),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.location_off,
+                          color: AppColors.textSecondary,
+                          size: responsive.getIconSize(24),
+                        ),
+                        SizedBox(width: responsive.getSpacing(small: 12, medium: 16, large: 18)),
+                        Expanded(
+                          child: Text(
+                            'Enable location in your phone to see nearby urgent requests',
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: responsive.getFont(14),
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else if (_nearbyEmergencies.isEmpty)
+                Card(
+                  elevation: 4,
+                  color: AppColors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(responsive.getPadding(18)),
+                    child: Center(
+                      child: Text(
+                        'No nearby urgent requests found',
+                        style: AppTextStyles.body.copyWith(
+                          fontSize: responsive.getFont(14),
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: _nearbyEmergencies.take(3).map((emergency) => Column(
+                    children: [
+                      _UrgentItem(
+                        bloodType: emergency.bloodType,
+                        title: emergency.hospitalName,
+                        distance: emergency.distance != null ? '${emergency.distance!.toStringAsFixed(1)} km' : 'Unknown',
+                        timeLeft: _formatTimeLeft(emergency.publishedAt ?? emergency.createdAt),
+                        urgencyLabel: _getUrgencyLabel(emergency.urgencyLevel),
+                        labelColor: _getUrgencyColor(emergency.urgencyLevel),
+                        responsive: responsive,
+                      ),
+                      SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 14)),
+                    ],
+                  )).toList(),
+                ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
               Card(
                 elevation: 4,
@@ -566,7 +729,7 @@ class _ShortcutCard extends StatelessWidget {
                 width: responsive.getWidth(10),
                 height: responsive.getWidth(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
+                    color: AppColors.primary.withAlpha((0.12 * 255).round()),
                   borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
                 ),
                 child: Icon(
@@ -628,7 +791,7 @@ class _UrgentItem extends StatelessWidget {
               width: responsive.getWidth(15),
               height: responsive.getWidth(15),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.12),
+                color: AppColors.primary.withAlpha((0.12 * 255).round()),
                 borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
               ),
               child: Center(
@@ -668,7 +831,7 @@ class _UrgentItem extends StatelessWidget {
               horizontal: responsive.getPadding(14),
             ),
             decoration: BoxDecoration(
-              color: labelColor.withOpacity(0.15),
+              color: labelColor.withAlpha((0.15 * 255).round()),
               borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
             ),
             child: Text(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/screens/edit_profile_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/badges_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/leaderboard_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/test_results_screen.dart';
 import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
@@ -133,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return status;
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     final responsive = context.responsive;
     final profilePhotoUrl = _profileData?['profile_picture_url']?.toString() ?? '';
@@ -184,21 +185,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           alignment: Alignment.bottomRight,
                           children: [
                             CircleAvatar(
-                              key: ValueKey(profilePhotoUrl), // Force rebuild when URL changes
+                              key: ValueKey(profilePhotoUrl),
                               radius: responsive.getWidth(16.5),
                               backgroundColor: AppColors.white,
                               child: CircleAvatar(
                                 radius: responsive.getWidth(15.5),
                                 backgroundColor: AppColors.surface,
-                                child: profilePhotoUrl.isNotEmpty && Uri.tryParse(profilePhotoUrl)?.isAbsolute == true
+                                child: profilePhotoUrl.isNotEmpty &&
+                                        (profilePhotoUrl.startsWith('https://') || profilePhotoUrl.startsWith('http://'))
                                     ? ClipOval(
-                                        child: FadeInImage(
-                                          placeholder: const AssetImage('assets/image/default_profile.png'),
-                                          image: NetworkImage(profilePhotoUrl),
+                                        child: Image.network(
+                                          profilePhotoUrl,
                                           fit: BoxFit.cover,
                                           width: responsive.getWidth(31),
                                           height: responsive.getWidth(31),
-                                          imageErrorBuilder: (context, error, stackTrace) {
+                                          loadingBuilder: (context, child, loadingProgress) {
+                                            if (loadingProgress == null) return child;
+                                            return const Center(child: CircularProgressIndicator());
+                                          },
+                                          errorBuilder: (context, error, stackTrace) {
                                             return Image.asset(
                                               'assets/image/default_profile.png',
                                               fit: BoxFit.cover,
@@ -339,51 +344,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         icon: Icons.person_outline,
                                         title: 'Personal Information',
                                         responsive: responsive,
-                                  onTap: () => Navigator.of(context)
-                                      .push<bool>(
-                                        MaterialPageRoute(
-                                          builder: (_) => EditProfileScreen(
-                                            initialProfile: _profileData,
+                                        onTap: () => Navigator.of(context)
+                                            .push<bool>(
+                                              MaterialPageRoute(
+                                                builder: (_) => EditProfileScreen(
+                                                  initialProfile: _profileData,
+                                                ),
+                                              ),
+                                            )
+                                            .then((updated) {
+                                          if (updated == true) {
+                                            _loadProfile();
+                                          }
+                                        }),
+                                      ),
+                                      _separator(responsive),
+                                      _ProfileMenuItem(
+                                        icon: Icons.medical_services_outlined,
+                                        title: 'Medical Information',
+                                        responsive: responsive,
+                                        onTap: () => Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => const TestResultsScreen(),
                                           ),
                                         ),
-                                      )
-                                      .then((updated) {
-                                    if (updated == true) {
-                                      _loadProfile();
-                                    }
-                                  }),
-                                ),
-                                _separator(responsive),
-                                _ProfileMenuItem(
-                                  icon: Icons.medical_services_outlined,
-                                  title: 'Medical Information',
-                                  responsive: responsive,
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const TestResultsScreen(),
-                                    ),
+                                      ),
+                                      _separator(responsive),
+                                      _ProfileMenuItem(
+                                        icon: Icons.emoji_events,
+                                        title: 'My Badges',
+                                        responsive: responsive,
+                                        onTap: () => Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => const BadgesScreen(),
+                                          ),
+                                        ),
+                                      ),
+                                      _separator(responsive),
+                                      _ProfileMenuItem(
+                                        icon: Icons.history_rounded,
+                                        title: 'Donation History',
+                                        responsive: responsive,
+                                        onTap: () => Navigator.of(context).pushNamed('/history'),
+                                      ),
+                                      _separator(responsive),
+                                      _ProfileMenuItem(
+                                        icon: Icons.emoji_events_outlined,
+                                        title: 'Leaderboard Status',
+                                        responsive: responsive,
+                                        onTap: () => Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => const LeaderboardScreen(),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                _separator(responsive),
-                                _ProfileMenuItem(
-                                  icon: Icons.history_rounded,
-                                  title: 'Donation History',
-                                  responsive: responsive,
-                                  onTap: () => Navigator.of(context).pushNamed('/history'),
-                                ),
-                                _separator(responsive),
-                                _ProfileMenuItem(
-                                  icon: Icons.emoji_events_outlined,
-                                  title: 'Leaderboard Status',
-                                  responsive: responsive,
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => const LeaderboardScreen(),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                         SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
@@ -398,13 +417,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ),
-                      ],
-      ),
-                ),
       ),
     );
   }
-
   Widget _separator(ResponsiveUtils responsive) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: responsive.getPadding(16)),

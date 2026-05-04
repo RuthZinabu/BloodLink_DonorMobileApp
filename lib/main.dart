@@ -6,6 +6,7 @@ import 'package:bloodlink_donor_mobile_app/screens/campaigns_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/urgent_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/history_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/profile_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/badges_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/leaderboard_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/edit_profile_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/about_us_screen.dart';
@@ -64,6 +65,7 @@ class BloodLinkApp extends StatelessWidget {
         '/profile': (_) => const MainNavigationScreen(),
         '/profile/edit': (_) => const EditProfileScreen(),
         '/leaderboard': (_) => const LeaderboardScreen(),
+        '/badges': (_) => const BadgesScreen(),
         '/login': (_) => const LoginScreen(),
         '/signup': (_) => const SignUpScreen(),
         '/test-results': (_) => const TestResultsScreen(),
