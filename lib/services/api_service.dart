@@ -4,6 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
 import 'package:bloodlink_donor_mobile_app/models/donation.dart';
 import 'package:bloodlink_donor_mobile_app/models/test_result.dart';
+import 'package:bloodlink_donor_mobile_app/models/leaderboard_entry.dart';
+import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
 
 class ApiService {
   static const String baseUrL = 'https://bloodlink-backend-bpll.onrender.com';
@@ -279,6 +281,7 @@ class ApiService {
     String? email,
     String? phone,
     String? address,
+    String? photoUrl,
   }) async {
     try {
       final token = await getAccessToken();
@@ -294,6 +297,7 @@ class ApiService {
       if (email != null) body['email'] = email;
       if (phone != null) body['phone'] = phone;
       if (address != null) body['address'] = address;
+      if (photoUrl != null) body['profile_picture_url'] = photoUrl;
 
       final response = await http.patch(
         Uri.parse('$baseUrL/api/protected/profile'),
@@ -347,6 +351,32 @@ class ApiService {
     }
   }
 
+  /// Retrieve the top donor leaderboard for the current donor role.
+  Future<List<LeaderboardEntry>> fetchLeaderboard({int limit = 10}) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrL/api/donor/leaderboard?limit=$limit'),
+        headers: await _getHeaders(authenticated: true),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final leaderboardData = decoded is Map<String, dynamic> && decoded.containsKey('leaderboard')
+            ? decoded['leaderboard']
+            : [];
+
+        if (leaderboardData is List) {
+          return leaderboardData
+              .map((item) => LeaderboardEntry.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   /// Retrieve the current user's latest test result.
   Future<TestResult?> fetchLatestTestResult() async {
     try {
@@ -364,6 +394,29 @@ class ApiService {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  /// Fetch emergencies for the logged-in donor from the backend.
+  Future<List<Emergency>> fetchEmergencies() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrL/api/donor/emergencies'),
+        headers: await _getHeaders(authenticated: true),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded is List) {
+          return decoded.map((item) => Emergency.fromJson(item as Map<String, dynamic>)).toList();
+        } else {
+          return [];
+        }
+      } else {
+        throw Exception('Failed to load emergencies: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
     }
   }
 

@@ -138,16 +138,16 @@ class _TestResultsScreenState extends State<TestResultsScreen> {
                                     ),
                                   ),
                                   SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
-                                  Text(
-                                    'Donor ID: ${_latestResult!.donorId ?? 'Unknown'}',
-                                    textAlign: TextAlign.center,
-                                    style: AppTextStyles.body.copyWith(
-                                      fontSize: responsive.getFont(14),
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
-                                  Text(
+                                  // Text(
+                                  //   'Donor ID: ${_latestResult!.donorId ?? 'Unknown'}',
+                                  //   textAlign: TextAlign.center,
+                                  //   style: AppTextStyles.body.copyWith(
+                                  //     fontSize: responsive.getFont(14),
+                                  //     color: AppColors.textSecondary,
+                                  //   ),
+                                  // ),
+                                  // SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+                                   Text(
                                     'Tested by: ${_latestResult!.testedBy ?? 'Unknown'}',
                                     textAlign: TextAlign.center,
                                     style: AppTextStyles.body.copyWith(

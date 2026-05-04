@@ -92,38 +92,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  String _formatBloodGroup(Map<String, dynamic>? profileData) {
-    final bloodType = profileData?['blood_type']?.toString().trim();
-    if (bloodType == null || bloodType.isEmpty) {
-      return 'Not recorded';
-    }
-    return bloodType;
-  }
+  // String _formatBloodGroup(Map<String, dynamic>? profileData) {
+  //   final bloodType = profileData?['blood_type']?.toString().trim();
+  //   if (bloodType == null || bloodType.isEmpty) {
+  //     return 'Not recorded';
+  //   }
+  //   return bloodType;
+  // }
 
-  String _formatDonationsCount(Map<String, dynamic>? profileData) {
-    final count = profileData?['donations_count'];
-    if (count == null) return '0';
-    return count.toString();
-  }
+  // String _formatDonationsCount(Map<String, dynamic>? profileData) {
+  //   final count = profileData?['donations_count'];
+  //   if (count == null) return '0';
+  //   return count.toString();
+  // }
 
-  String _formatLastDonationDate(Map<String, dynamic>? profileData) {
-    final date = profileData?['last_donation_date']?.toString().trim();
-    if (date == null || date.isEmpty) {
-      return 'No donation';
-    }
-    // Try to parse and format the date
-    try {
-      final parsed = DateTime.tryParse(date);
-      if (parsed != null) {
-        const monthNames = [
-          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-        ];
-        return '${monthNames[parsed.month - 1]} ${parsed.day}, ${parsed.year}';
-      }
-    } catch (_) {}
-    return date;
-  }
+  // String _formatLastDonationDate(Map<String, dynamic>? profileData) {
+  //   final date = profileData?['last_donation_date']?.toString().trim();
+  //   if (date == null || date.isEmpty) {
+  //     return 'No donation';
+  //   }
+  //   // Try to parse and format the date
+  //   try {
+  //     final parsed = DateTime.tryParse(date);
+  //     if (parsed != null) {
+  //       const monthNames = [
+  //         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  //         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  //       ];
+  //       return '${monthNames[parsed.month - 1]} ${parsed.day}, ${parsed.year}';
+  //     }
+  //   } catch (_) {}
+  //   return date;
+  // }
 
   String _formatEligibilityStatus(Map<String, dynamic>? profileData) {
     final status = profileData?['eligibility_status']?.toString().trim();
@@ -136,6 +136,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final responsive = context.responsive;
+    final profilePhotoUrl = _profileData?['profile_picture_url']?.toString() ?? '';
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -182,14 +184,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           alignment: Alignment.bottomRight,
                           children: [
                             CircleAvatar(
+                              key: ValueKey(profilePhotoUrl), // Force rebuild when URL changes
                               radius: responsive.getWidth(16.5),
                               backgroundColor: AppColors.white,
                               child: CircleAvatar(
                                 radius: responsive.getWidth(15.5),
-                                backgroundImage: AssetImage(
-                                  _profileData?['photo_url']?.toString() ??
-                                      'assets/image/default_profile.png',
-                                ),
+                                backgroundColor: AppColors.surface,
+                                child: profilePhotoUrl.isNotEmpty && Uri.tryParse(profilePhotoUrl)?.isAbsolute == true
+                                    ? ClipOval(
+                                        child: FadeInImage(
+                                          placeholder: const AssetImage('assets/image/default_profile.png'),
+                                          image: NetworkImage(profilePhotoUrl),
+                                          fit: BoxFit.cover,
+                                          width: responsive.getWidth(31),
+                                          height: responsive.getWidth(31),
+                                          imageErrorBuilder: (context, error, stackTrace) {
+                                            return Image.asset(
+                                              'assets/image/default_profile.png',
+                                              fit: BoxFit.cover,
+                                              width: responsive.getWidth(31),
+                                              height: responsive.getWidth(31),
+                                            );
+                                          },
+                                        ),
+                                      )
+                                    : Image.asset(
+                                        'assets/image/default_profile.png',
+                                        fit: BoxFit.cover,
+                                        width: responsive.getWidth(31),
+                                        height: responsive.getWidth(31),
+                                      ),
                               ),
                             ),
                             GestureDetector(
@@ -248,166 +272,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          child: Column(
                             children: [
-                              Icon(
-                                Icons.favorite,
-                                color: AppColors.primary,
-                                size: responsive.getIconSize(20),
-                              ),
-                              SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
-                              Text(
-                                _formatBloodGroup(_profileData),
-                                style: TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: responsive.getFont(14),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Card(
+                              Card(
                                 elevation: 4,
                                 color: AppColors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
                                 ),
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: responsive.getPadding(22),
-                                    horizontal: responsive.getPadding(16),
-                                  ),
-                                  child: Column(
+                                  padding: EdgeInsets.all(responsive.getPadding(18)),
+                                  child: Row(
                                     children: [
-                                      Text(
-                                        _formatDonationsCount(_profileData),
-                                        style: TextStyle(
-                                          fontSize: responsive.getFont(28),
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.primary,
+                                      Container(
+                                        width: responsive.getWidth(10.5),
+                                        height: responsive.getWidth(10.5),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFE8F7EE),
+                                          borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
                                         ),
-                                      ),
-                                      SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
-                                      Text(
-                                        'Donations',
-                                        style: AppTextStyles.body.copyWith(
-                                          fontSize: responsive.getFont(14),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: responsive.getSpacing(small: 12, medium: 16, large: 20)),
-                            Expanded(
-                              child: Card(
-                                elevation: 4,
-                                color: AppColors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: responsive.getPadding(22),
-                                    horizontal: responsive.getPadding(16),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        _formatLastDonationDate(_profileData),
-                                        style: TextStyle(
-                                          fontSize: responsive.getFont(22),
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.primary,
-                                        ),
-                                      ),
-                                      SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
-                                      Text(
-                                        'Last Donation',
-                                        style: AppTextStyles.body.copyWith(
-                                          fontSize: responsive.getFont(14),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
-                        Card(
-                          elevation: 4,
-                          color: AppColors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(responsive.getPadding(18)),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: responsive.getWidth(10.5),
-                                  height: responsive.getWidth(10.5),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE8F7EE),
-                                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
-                                  ),
-                                  child: Icon(
-                                    Icons.shield,
-                                    color: const Color(0xFF1BC47D),
-                                    size: responsive.getIconSize(20),
-                                  ),
-                                ),
-                                SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Eligibility Status',
-                                        style: AppTextStyles.title.copyWith(
-                                          fontSize: responsive.getFont(14),
-                                        ),
-                                      ),
-                                      SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
-                                      Text(
-                                        _formatEligibilityStatus(_profileData),
-                                        style: TextStyle(
+                                        child: Icon(
+                                          Icons.shield,
                                           color: const Color(0xFF1BC47D),
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: responsive.getFont(12),
+                                          size: responsive.getIconSize(20),
+                                        ),
+                                      ),
+                                      SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Eligibility Status',
+                                              style: AppTextStyles.title.copyWith(
+                                                fontSize: responsive.getFont(14),
+                                              ),
+                                            ),
+                                            SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
+                                            Text(
+                                              _formatEligibilityStatus(_profileData),
+                                              style: TextStyle(
+                                                color: const Color(0xFF1BC47D),
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: responsive.getFont(12),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
-                        Card(
-                          elevation: 4,
-                          color: AppColors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: responsive.getPadding(6)),
-                            child: Column(
-                              children: [
-                                _ProfileMenuItem(
-                                  icon: Icons.person_outline,
-                                  title: 'Personal Information',
-                                  responsive: responsive,
+                              ),
+                              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
+                              Card(
+                                elevation: 4,
+                                color: AppColors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: responsive.getPadding(6)),
+                                  child: Column(
+                                    children: [
+                                      _ProfileMenuItem(
+                                        icon: Icons.person_outline,
+                                        title: 'Personal Information',
+                                        responsive: responsive,
                                   onTap: () => Navigator.of(context)
                                       .push<bool>(
                                         MaterialPageRoute(
@@ -467,6 +398,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                   ),
+                      ],
+      ),
+                ),
       ),
     );
   }

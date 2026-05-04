@@ -16,7 +16,7 @@ class CampaignDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          campaign.title,
+        'Campaign',
           style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(18)),
         ),
         backgroundColor: AppColors.background,
@@ -49,6 +49,11 @@ class CampaignDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Text(
+          campaign.title,
+          style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(18)),
+        ),
+        SizedBox(height: responsive.getSpacing(small: 10, medium: 12, large: 14)),
                     Text(
                       campaign.displayStatus,
                       style: AppTextStyles.subtitle.copyWith(
@@ -111,12 +116,6 @@ class CampaignDetailScreen extends StatelessWidget {
                 label: 'Venue',
                 value: campaign.displayLocation,
                 responsive: responsive,
-              ),
-              SizedBox(height: responsive.getSpacing(small: 24, medium: 26, large: 28)),
-              CustomButton(
-                label: 'Register Interest',
-                onPressed: () => Navigator.of(context).pop(),
-                backgroundColor: AppColors.primary,
               ),
             ],
           ),
