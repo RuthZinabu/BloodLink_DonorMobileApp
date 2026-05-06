@@ -4,6 +4,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_card.dart';
 import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
+import 'package:bloodlink_donor_mobile_app/services/notification_service.dart';
 import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -16,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final ApiService _apiService = ApiService();
+  final NotificationService _notificationService = NotificationService();
   String _userName = 'Alex'; // Default name
   bool _isLoading = true;
   String _bloodGroup = 'Unknown';
@@ -29,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<Emergency> _nearbyEmergencies = [];
   bool _locationEnabled = false;
   bool _loadingNearby = true;
+  int _unreadNotifications = 0;
 
   @override
   void initState() {
@@ -36,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _loadUserProfile();
     _checkLocationAndFetchNearby();
+    _loadUnreadNotificationsCount();
   }
 
   @override
@@ -240,7 +244,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         return 'Unknown';
     }
   }
-
+  Future<void> _loadUnreadNotificationsCount() async {
+    try {
+      final count = await _notificationService.getUnreadNotificationCount();
+      if (mounted) {
+        setState(() {
+          _unreadNotifications = count;
+        });
+      }
+    } catch (e) {
+      // Silently fail, unread count is not critical
+    }
+  }
   Color _getUrgencyColor(String urgencyLevel) {
     switch (urgencyLevel.toUpperCase()) {
       case 'CRITICAL':
@@ -311,18 +326,55 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ],
                     ),
                   ),
-                  Container(
-                    width: responsive.getWidth(12),
-                    height: responsive.getWidth(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
-                    ),
-                    child: Icon(
-                      Icons.notifications_active,
-                      color: AppColors.primary,
-                      size: responsive.getIconSize(24),
-                    ),
+                  Stack(
+                    children: [
+                      Container(
+                        width: responsive.getWidth(12),
+                        height: responsive.getWidth(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.white,
+                          borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
+                        ),
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed('/notifications').then((_) {
+                              // Refresh unread count when returning from notifications screen
+                              _loadUnreadNotificationsCount();
+                            });
+                          },
+                          icon: Icon(
+                            Icons.notifications_active,
+                            color: AppColors.primary,
+                            size: responsive.getIconSize(24),
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                      if (_unreadNotifications > 0)
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Container(
+                            width: responsive.getWidth(3),
+                            height: responsive.getWidth(3),
+                            decoration: BoxDecoration(
+                              color: AppColors.warning,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColors.white, width: 1),
+                            ),
+                            child: Center(
+                              child: Text(
+                                _unreadNotifications > 99 ? '99+' : _unreadNotifications.toString(),
+                                style: AppTextStyles.subtitle.copyWith(
+                                  fontSize: responsive.getFont(8),
+                                  color: AppColors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),

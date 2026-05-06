@@ -112,6 +112,11 @@ class DonationDetailScreen extends StatelessWidget {
                   label: 'Status',
                   value: donation.status ?? 'Unknown',
                   responsive: responsive),
+              if (donation.overallStatus != null && donation.overallStatus!.isNotEmpty)
+                _DetailRow(
+                    label: 'Overall Status',
+                    value: donation.overallStatus!,
+                    responsive: responsive),
               _DetailRow(
                   label: 'Location',
                   value: donation.location ?? 'Unknown',
@@ -124,10 +129,65 @@ class DonationDetailScreen extends StatelessWidget {
                   label: 'Donation Date',
                   value: _formatDate(donation.donationDate),
                   responsive: responsive),
-              _DetailRow(
-                  label: 'Recorded By',
-                  value: donation.collectedBy ?? 'Unknown',
-                  responsive: responsive),
+              if (donation.createdAt != null)
+                _DetailRow(
+                    label: 'Created At',
+                    value: _formatDate(donation.createdAt),
+                    responsive: responsive),
+              // _DetailRow(
+              //     label: 'Recorded By',
+              //     value: donation.collectedBy ?? 'Unknown',
+              //     responsive: responsive),
+              if (donation.donorName != null)
+                _DetailRow(
+                    label: 'Donor Name',
+                    value: donation.donorName!,
+                    responsive: responsive),
+              if (donation.collectorName != null)
+                _DetailRow(
+                    label: 'Collector Name',
+                    value: donation.collectorName!,
+                    responsive: responsive),
+              if (donation.campaignTitle != null)
+                _DetailRow(
+                    label: 'Campaign Title',
+                    value: donation.campaignTitle!,
+                    responsive: responsive),
+              if (donation.campaignAddress != null)
+                _DetailRow(
+                    label: 'Campaign Address',
+                    value: donation.campaignAddress!,
+                    responsive: responsive),
+              if (donation.weight != null)
+                _DetailRow(
+                    label: 'Weight (kg)',
+                    value: donation.weight!.toStringAsFixed(1),
+                    responsive: responsive),
+              if (donation.bloodPressure != null)
+                _DetailRow(
+                    label: 'Blood Pressure',
+                    value: donation.bloodPressure!,
+                    responsive: responsive),
+              if (donation.hemoglobin != null)
+                _DetailRow(
+                    label: 'Hemoglobin (g/dL)',
+                    value: donation.hemoglobin!.toStringAsFixed(1),
+                    responsive: responsive),
+              if (donation.temperature != null)
+                _DetailRow(
+                    label: 'Temperature (°C)',
+                    value: donation.temperature!.toStringAsFixed(1),
+                    responsive: responsive),
+              if (donation.pulse != null)
+                _DetailRow(
+                    label: 'Pulse (bpm)',
+                    value: donation.pulse!.toString(),
+                    responsive: responsive),
+              if (donation.quantityMl != null)
+                _DetailRow(
+                    label: 'Quantity (ml)',
+                    value: donation.quantityMl!.toString(),
+                    responsive: responsive),
             ],
           ),
         ),

@@ -15,6 +15,7 @@ import 'package:bloodlink_donor_mobile_app/screens/terms_of_service_screen.dart'
 import 'package:bloodlink_donor_mobile_app/screens/login_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/sign_up_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/test_results_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/notifications_screen.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 
@@ -69,6 +70,7 @@ class BloodLinkApp extends StatelessWidget {
         '/login': (_) => const LoginScreen(),
         '/signup': (_) => const SignUpScreen(),
         '/test-results': (_) => const TestResultsScreen(),
+        '/notifications': (_) => const NotificationsScreen(),
         '/about': (_) => const AboutUsScreen(),
         '/privacy': (_) => const PrivacyPolicyScreen(),
         '/terms': (_) => const TermsOfServiceScreen(),

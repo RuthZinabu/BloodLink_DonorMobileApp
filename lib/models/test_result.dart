@@ -2,7 +2,7 @@ class TestResult {
   final String testId;
   final String donationId;
   final String? donorId;
-  final String? testedBy;
+  final String? testerName;
   final String? hivResult;
   final String? hepatitisResult;
   final String? syphilisResult;
@@ -15,7 +15,7 @@ class TestResult {
     required this.testId,
     required this.donationId,
     this.donorId,
-    this.testedBy,
+    this.testerName,
     this.hivResult,
     this.hepatitisResult,
     this.syphilisResult,
@@ -36,7 +36,7 @@ class TestResult {
       testId: json['test_id']?.toString() ?? json['id']?.toString() ?? '',
       donationId: json['donation_id']?.toString() ?? '',
       donorId: json['donor_id']?.toString(),
-      testedBy: json['tested_by']?.toString(),
+      testerName: json['tester_name']?.toString(),
       hivResult: json['hiv_result']?.toString(),
       hepatitisResult: json['hepatitis_result']?.toString(),
       syphilisResult: json['syphilis_result']?.toString(),

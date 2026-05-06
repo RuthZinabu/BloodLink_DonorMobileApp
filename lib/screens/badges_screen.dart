@@ -63,48 +63,50 @@ class _BadgesScreenState extends State<BadgesScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 56,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text('Badge Details', style: AppTextStyles.heading.copyWith(fontSize: 22)),
-              const SizedBox(height: 20),
-              _detailRow('Badge', badge.badgeName),
-              const SizedBox(height: 12),
-              _detailRow('Description', badge.description),
-              const SizedBox(height: 12),
-              _detailRow('Awarded', _formatDate(badge.awardedAt)),
-              const SizedBox(height: 12),
-              _detailRow('Donor ID', badge.donorId),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 56,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(3),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
                 ),
-              ),
-            ],
+                const SizedBox(height: 20),
+                Text('Badge Details', style: AppTextStyles.heading.copyWith(fontSize: 22)),
+                const SizedBox(height: 20),
+                _detailRow('Badge', badge.badgeName),
+                const SizedBox(height: 12),
+                _detailRow('Description', badge.description),
+                const SizedBox(height: 12),
+                _detailRow('Awarded', _formatDate(badge.awardedAt)),
+                const SizedBox(height: 12),
+                _detailRow('Donor ID', badge.donorId),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
