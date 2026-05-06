@@ -161,7 +161,7 @@ class _HistoryItem extends StatelessWidget {
     final status =
         donation.status?.replaceAll('_', ' ').toUpperCase() ?? 'Pending';
     final bloodType = donation.bloodType;
-    final collectedBy = donation.collectedBy;
+    final collectorName = donation.collectorName;
 
     return Card(
       elevation: 4,
@@ -241,7 +241,7 @@ class _HistoryItem extends StatelessWidget {
                   ),
                 ],
               ),
-              if (bloodType != null || collectedBy != null) ...[
+              if (bloodType != null || collectorName != null) ...[
                 SizedBox(
                     height: responsive.getSpacing(
                         small: 10, medium: 12, large: 14)),
@@ -265,12 +265,12 @@ class _HistoryItem extends StatelessWidget {
                     ],
                   ],
                 ),
-                if (collectedBy != null) ...[
+                if (collectorName != null) ...[
                   SizedBox(
                       height: responsive.getSpacing(
                           small: 8, medium: 10, large: 12)),
                   Text(
-                    'Recorded by: $collectedBy',
+                    'Recorder name: $collectorName',
                     style: AppTextStyles.body.copyWith(
                       color: AppColors.textSecondary,
                       fontSize: responsive.getFont(12),
