@@ -12,6 +12,8 @@ class Emergency {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? publishedAt;
+  final double? latitude;
+  final double? longitude;
   final double? distance; // Distance in km for nearby emergencies
 
   Emergency({
@@ -28,6 +30,8 @@ class Emergency {
     required this.createdAt,
     required this.updatedAt,
     this.publishedAt,
+    this.latitude,
+    this.longitude,
     this.distance,
   });
 
@@ -48,7 +52,34 @@ class Emergency {
       publishedAt: json['published_at'] != null
           ? DateTime.parse(json['published_at'] as String)
           : null,
+      latitude: json['latitude'] != null ? (json['latitude'] as num).toDouble() : null,
+      longitude: json['longitude'] != null ? (json['longitude'] as num).toDouble() : null,
       distance: json['distance'] != null ? (json['distance'] as num).toDouble() : null,
+    );
+  }
+
+  Emergency copyWith({
+    double? latitude,
+    double? longitude,
+    double? distance,
+  }) {
+    return Emergency(
+      emergencyId: emergencyId,
+      requestId: requestId,
+      bloodType: bloodType,
+      quantityRequired: quantityRequired,
+      quantityFulfilled: quantityFulfilled,
+      urgencyLevel: urgencyLevel,
+      hospitalName: hospitalName,
+      location: location,
+      status: status,
+      isManual: isManual,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      publishedAt: publishedAt,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      distance: distance ?? this.distance,
     );
   }
 
@@ -67,6 +98,9 @@ class Emergency {
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
       'published_at': publishedAt?.toIso8601String(),
+      'latitude': latitude,
+      'longitude': longitude,
+      'distance': distance,
     };
   }
 }

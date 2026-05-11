@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496928260558",
+    "project_id": "bloodlink-donor-80694",
+    "storage_bucket": "bloodlink-donor-80694.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496928260558:android:56d9f488eff2af379f6b9f",
+        "android_client_info": {
+          "package_name": "com.example.bloodlink_donor_mobile_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCj-63ml8vlUKP5csuv8vsdYIWbgWtrZ9w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

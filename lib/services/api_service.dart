@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
@@ -7,6 +9,7 @@ import 'package:bloodlink_donor_mobile_app/models/test_result.dart';
 import 'package:bloodlink_donor_mobile_app/models/badge.dart';
 import 'package:bloodlink_donor_mobile_app/models/leaderboard_entry.dart';
 import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
+import 'package:bloodlink_donor_mobile_app/models/blood_request.dart';
 
 class ApiService {
   static const String baseUrL = 'https://bloodlink-backend-bpll.onrender.com';
@@ -28,20 +31,22 @@ class ApiService {
     required DateTime birthDate,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrL/api/auth/register-donor'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'full_name': fullName,
-          'email': email,
-          'phone': phone,
-          'password': password,
-          'address': address,
-          'birth_date': "${birthDate.year.toString().padLeft(4, '0')}-"
-              "${birthDate.month.toString().padLeft(2, '0')}-"
-              "${birthDate.day.toString().padLeft(2, '0')}T00:00:00Z",
-        }),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            Uri.parse('$baseUrL/api/auth/register-donor'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'full_name': fullName,
+              'email': email,
+              'phone': phone,
+              'password': password,
+              'address': address,
+              'birth_date': "${birthDate.year.toString().padLeft(4, '0')}-"
+                  "${birthDate.month.toString().padLeft(2, '0')}-"
+                  "${birthDate.day.toString().padLeft(2, '0')}T00:00:00Z",
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 201) {
         return {
@@ -75,14 +80,16 @@ class ApiService {
     required String password,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrL/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            Uri.parse('$baseUrL/api/auth/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': email,
+              'password': password,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
@@ -91,8 +98,7 @@ class ApiService {
 
         // Store tokens securely
         await _secureStorage.write(key: _tokenKey, value: accessToken);
-        await _secureStorage.write(
-            key: _refreshTokenKey, value: refreshToken);
+        await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
 
         return {
           'success': true,
@@ -125,13 +131,15 @@ class ApiService {
     required String email,
   }) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrL/api/auth/forgot-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email,
-        }),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            Uri.parse('$baseUrL/api/auth/forgot-password'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': email,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
@@ -249,18 +257,21 @@ class ApiService {
         };
       }
 
-      final response = await http.get(
-        Uri.parse('$baseUrL/api/protected/profile'),
-        headers: await _getHeaders(authenticated: true),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .get(
+            Uri.parse('$baseUrL/api/protected/profile'),
+            headers: await _getHeaders(authenticated: true),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         return {
           'success': true,
-          'profile': decoded is Map<String, dynamic> && decoded.containsKey('data')
-              ? decoded['data']
-              : decoded,
+          'profile':
+              decoded is Map<String, dynamic> && decoded.containsKey('data')
+                  ? decoded['data']
+                  : decoded,
         };
       } else {
         return {
@@ -300,20 +311,23 @@ class ApiService {
       if (address != null) body['address'] = address;
       if (photoUrl != null) body['profile_picture_url'] = photoUrl;
 
-      final response = await http.patch(
-        Uri.parse('$baseUrL/api/protected/profile'),
-        headers: await _getHeaders(authenticated: true),
-        body: jsonEncode(body),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .patch(
+            Uri.parse('$baseUrL/api/protected/profile'),
+            headers: await _getHeaders(authenticated: true),
+            body: jsonEncode(body),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         return {
           'success': true,
           'message': decoded['message'] ?? 'Profile updated successfully',
-          'profile': decoded is Map<String, dynamic> && decoded.containsKey('data')
-              ? decoded['data']
-              : decoded,
+          'profile':
+              decoded is Map<String, dynamic> && decoded.containsKey('data')
+                  ? decoded['data']
+                  : decoded,
         };
       } else {
         final decoded = jsonDecode(response.body);
@@ -333,10 +347,12 @@ class ApiService {
   /// Retrieve the current user's donations.
   Future<List<Donation>> fetchDonations() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrL/api/donor/donations'),
-        headers: await _getHeaders(authenticated: true),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .get(
+            Uri.parse('$baseUrL/api/donor/donations'),
+            headers: await _getHeaders(authenticated: true),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -355,20 +371,24 @@ class ApiService {
   /// Retrieve the top donor leaderboard for the current donor role.
   Future<List<LeaderboardEntry>> fetchLeaderboard({int limit = 10}) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrL/api/donor/leaderboard?limit=$limit'),
-        headers: await _getHeaders(authenticated: true),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .get(
+            Uri.parse('$baseUrL/api/donor/leaderboard?limit=$limit'),
+            headers: await _getHeaders(authenticated: true),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        final leaderboardData = decoded is Map<String, dynamic> && decoded.containsKey('leaderboard')
+        final leaderboardData = decoded is Map<String, dynamic> &&
+                decoded.containsKey('leaderboard')
             ? decoded['leaderboard']
             : [];
 
         if (leaderboardData is List) {
           return leaderboardData
-              .map((item) => LeaderboardEntry.fromJson(item as Map<String, dynamic>))
+              .map((item) =>
+                  LeaderboardEntry.fromJson(item as Map<String, dynamic>))
               .toList();
         }
       }
@@ -381,16 +401,19 @@ class ApiService {
   /// Retrieve the current user's awarded badges.
   Future<List<Badge>> fetchBadges() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrL/api/donor/badges'),
-        headers: await _getHeaders(authenticated: true),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .get(
+            Uri.parse('$baseUrL/api/donor/badges'),
+            headers: await _getHeaders(authenticated: true),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        final badgeData = decoded is Map<String, dynamic> && decoded.containsKey('badges')
-            ? decoded['badges']
-            : [];
+        final badgeData =
+            decoded is Map<String, dynamic> && decoded.containsKey('badges')
+                ? decoded['badges']
+                : [];
 
         if (badgeData is List) {
           return badgeData
@@ -407,10 +430,12 @@ class ApiService {
   /// Retrieve the current user's latest test result.
   Future<TestResult?> fetchLatestTestResult() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrL/api/donor/test-result/latest'),
-        headers: await _getHeaders(authenticated: true),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .get(
+            Uri.parse('$baseUrL/api/donor/test-result/latest'),
+            headers: await _getHeaders(authenticated: true),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
@@ -424,18 +449,22 @@ class ApiService {
     }
   }
 
-  /// Fetch emergencies for the logged-in donor from the backend.
+  /// Fetch published emergency requests from the backend.
   Future<List<Emergency>> fetchEmergencies() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrL/api/donor/emergencies'),
-        headers: await _getHeaders(authenticated: true),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .get(
+            Uri.parse('$baseUrL/api/emergencies/published'),
+            headers: await _getHeaders(authenticated: false),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded is List) {
-          return decoded.map((item) => Emergency.fromJson(item as Map<String, dynamic>)).toList();
+          return decoded
+              .map((item) => Emergency.fromJson(item as Map<String, dynamic>))
+              .toList();
         } else {
           return [];
         }
@@ -447,45 +476,47 @@ class ApiService {
     }
   }
 
-  /// Fetch nearby emergencies based on donor's location.
-  Future<List<Emergency>> fetchNearbyEmergencies(double latitude, double longitude) async {
+  /// Update the donor's current location on the backend.
+  Future<bool> updateDonorLocation(double latitude, double longitude) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrL/api/donor/emergencies/nearby?lat=$latitude&lng=$longitude'),
-        headers: await _getHeaders(authenticated: true),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            Uri.parse('$baseUrL/api/donor/location'),
+            headers: await _getHeaders(authenticated: true),
+            body: jsonEncode({
+              'latitude': latitude,
+              'longitude': longitude,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
-      if (response.statusCode == 200) {
-        final decoded = jsonDecode(response.body);
-        if (decoded is List) {
-          return decoded.map((item) => Emergency.fromJson(item as Map<String, dynamic>)).toList();
-        } else {
-          return [];
-        }
-      } else {
-        throw Exception('Failed to load nearby emergencies: ${response.body}');
-      }
+      return response.statusCode == 200;
     } catch (e) {
-      throw Exception('Network error: ${e.toString()}');
+      return false;
     }
   }
 
   /// Fetch public campaigns from the backend.
   Future<List<Campaign>> fetchCampaigns() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrL/api/campaigns/'),
-        headers: await _getHeaders(),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .get(
+            Uri.parse('$baseUrL/api/campaigns/'),
+            headers: await _getHeaders(),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        final campaignsData = decoded is Map<String, dynamic> && decoded.containsKey('data')
-            ? decoded['data']
-            : decoded;
+        final campaignsData =
+            decoded is Map<String, dynamic> && decoded.containsKey('data')
+                ? decoded['data']
+                : decoded;
 
         if (campaignsData is List) {
-          return campaignsData.map((item) => Campaign.fromJson(item as Map<String, dynamic>)).toList();
+          return campaignsData
+              .map((item) => Campaign.fromJson(item as Map<String, dynamic>))
+              .toList();
         } else {
           return [];
         }
@@ -494,6 +525,107 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Network error: ${e.toString()}');
+    }
+  }
+
+  /// Create a blood request for the logged-in donor.
+  Future<Map<String, dynamic>> createBloodRequest({
+    required int quantityMl,
+    required String reason,
+    required String hospitalName,
+    required String hospitalAddress,
+    required String hospitalPhone,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrL/api/donor/blood-request'),
+            headers: await _getHeaders(authenticated: true),
+            body: jsonEncode({
+              'quantity_ml': quantityMl,
+              'reason': reason,
+              'hospital_name': hospitalName,
+              'hospital_address': hospitalAddress,
+              'hospital_phone': hospitalPhone,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 201) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'success': true,
+          'message':
+              responseBody['message'] ?? 'Blood request created successfully',
+        };
+      } else if (response.statusCode == 403) {
+        final errorBody = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': errorBody['error'] ??
+              'You must have at least one successful donation to request blood',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Failed to create blood request: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Fetch the logged-in donor's blood requests.
+  Future<List<BloodRequest>> fetchMyBloodRequests({
+    String? status,
+    String? startDate,
+    String? endDate,
+  }) async {
+    try {
+      final queryParams = <String, String>{};
+      if (status != null && status.isNotEmpty) {
+        queryParams['status'] = status;
+      }
+      if (startDate != null && startDate.isNotEmpty) {
+        queryParams['start_date'] = startDate;
+      }
+      if (endDate != null && endDate.isNotEmpty) {
+        queryParams['end_date'] = endDate;
+      }
+
+      final uri = Uri.parse('$baseUrL/api/donor/my-requests')
+          .replace(queryParameters: queryParams);
+
+      final response = await http
+          .get(
+            uri,
+            headers: await _getHeaders(authenticated: true),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        if (decoded['data'] is List) {
+          return (decoded['data'] as List)
+              .map(
+                  (item) => BloodRequest.fromJson(item as Map<String, dynamic>))
+              .toList();
+        } else {
+          return [];
+        }
+      } else {
+        throw Exception('Failed to load blood requests: ${response.body}');
+      }
+    } on TimeoutException catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    } on SocketException catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    } catch (e) {
+      rethrow;
     }
   }
 }

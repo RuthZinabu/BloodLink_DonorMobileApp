@@ -138,10 +138,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                 .sublist(3)
                                 .map((entry) => _RankingTile(
                                       rank: entry.rank,
-                                      name: _donorLabel(entry.donorId),
+                                      name: entry.fullName.isNotEmpty ? entry.fullName : _donorLabel(entry.donorId),
                                       subtitle: '${entry.donationCount} donations',
                                       score: entry.donationCount.toString(),
                                       responsive: responsive,
+                                      profilePictureUrl: entry.profilePictureUrl,
                                     ))
                                 .toList(),
                           )
@@ -166,7 +167,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   Widget _buildPodiumSpot(ResponsiveUtils responsive, int position) {
     final entry = _leaderboard.length >= position ? _leaderboard[position - 1] : null;
-    final displayName = entry != null ? _donorLabel(entry.donorId) : 'Awaiting donor';
+    final displayName = entry != null ? (entry.fullName.isNotEmpty ? entry.fullName : _donorLabel(entry.donorId)) : 'Awaiting donor';
     final displayScore = entry != null ? '${entry.donationCount}' : '0';
     final labelColor = position == 2
         ? Colors.blueGrey.shade200
@@ -182,12 +183,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       labelColor: labelColor,
       topPadding: topPadding,
       responsive: responsive,
+      profilePictureUrl: entry?.profilePictureUrl ?? '',
     );
   }
 
   Widget _buildFirstPlaceSpot(ResponsiveUtils responsive) {
     final entry = _leaderboard.isNotEmpty ? _leaderboard[0] : null;
-    final displayName = entry != null ? _donorLabel(entry.donorId) : 'No winner yet';
+    final displayName = entry != null ? (entry.fullName.isNotEmpty ? entry.fullName : _donorLabel(entry.donorId)) : 'No winner yet';
     final displayCount = entry != null ? entry.donationCount.toString() : '0';
 
     return Column(
@@ -291,6 +293,7 @@ class _PodiumSpot extends StatelessWidget {
   final Color labelColor;
   final double topPadding;
   final ResponsiveUtils responsive;
+  final String profilePictureUrl;
 
   const _PodiumSpot({
     required this.rank,
@@ -299,6 +302,7 @@ class _PodiumSpot extends StatelessWidget {
     required this.circleColor,
     required this.labelColor,
     required this.responsive,
+    required this.profilePictureUrl,
     this.topPadding = 24,
   });
 
@@ -309,20 +313,17 @@ class _PodiumSpot extends StatelessWidget {
         children: [
           Padding(
             padding: EdgeInsets.only(top: topPadding),
-            child: Container(
-              width: responsive.getWidth(22),
-              height: responsive.getWidth(22),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: circleColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color.fromRGBO(95, 109, 126, 0.08),
-                    blurRadius: responsive.getElevation(12),
-                    offset: Offset(0, responsive.getHeight(2)),
-                  ),
-                ],
-              ),
+            child: CircleAvatar(
+              radius: responsive.getWidth(11),
+              backgroundColor: circleColor,
+              backgroundImage: profilePictureUrl.isNotEmpty ? NetworkImage(profilePictureUrl) : null,
+              child: profilePictureUrl.isEmpty
+                  ? Icon(
+                      Icons.person,
+                      color: AppColors.textSecondary,
+                      size: responsive.getIconSize(16),
+                    )
+                  : null,
             ),
           ),
           SizedBox(height: responsive.getSpacing(small: 10, medium: 12, large: 14)),
@@ -377,6 +378,7 @@ class _RankingTile extends StatelessWidget {
   final String subtitle;
   final String score;
   final ResponsiveUtils responsive;
+  final String profilePictureUrl;
 
   const _RankingTile({
     required this.rank,
@@ -384,6 +386,7 @@ class _RankingTile extends StatelessWidget {
     required this.subtitle,
     required this.score,
     required this.responsive,
+    required this.profilePictureUrl,
   });
 
   @override
@@ -414,13 +417,17 @@ class _RankingTile extends StatelessWidget {
                 ),
               ),
               SizedBox(width: responsive.getSpacing(small: 12, medium: 14, large: 16)),
-              Container(
-                width: responsive.getWidth(11),
-                height: responsive.getWidth(11),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.gray,
-                ),
+              CircleAvatar(
+                radius: responsive.getWidth(5.5),
+                backgroundColor: AppColors.gray,
+                backgroundImage: profilePictureUrl.isNotEmpty ? NetworkImage(profilePictureUrl) : null,
+                child: profilePictureUrl.isEmpty
+                    ? Icon(
+                        Icons.person,
+                        color: AppColors.white,
+                        size: responsive.getIconSize(10),
+                      )
+                    : null,
               ),
               SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
               Expanded(

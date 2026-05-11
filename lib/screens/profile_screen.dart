@@ -389,6 +389,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       _separator(responsive),
                                       _ProfileMenuItem(
+                                        icon: Icons.bloodtype,
+                                        title: 'Blood Requests',
+                                        responsive: responsive,
+                                        onTap: () => Navigator.of(context).pushNamed('/my-requests'),
+                                      ),
+                                      _separator(responsive),
+                                      _ProfileMenuItem(
                                         icon: Icons.emoji_events_outlined,
                                         title: 'Leaderboard Status',
                                         responsive: responsive,

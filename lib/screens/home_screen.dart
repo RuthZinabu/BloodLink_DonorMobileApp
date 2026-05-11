@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
@@ -6,6 +8,7 @@ import 'package:bloodlink_donor_mobile_app/widgets/custom_card.dart';
 import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
 import 'package:bloodlink_donor_mobile_app/services/notification_service.dart';
 import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
+import 'package:bloodlink_donor_mobile_app/models/eligibility.dart';
 import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +30,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _lastDonationLocation = 'Not recorded';
   String _nextEligibleDays = 'Not available';
   String _nextEligibleMessage = 'Next donation data is unavailable.';
+
+  // Eligibility status from backend
+  DonorInfo _donorInfo = DonorInfo.empty();
 
   List<Emergency> _nearbyEmergencies = [];
   bool _locationEnabled = false;
@@ -74,23 +80,35 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         profile,
       );
 
+      // Extract eligibility data from profile
+      Eligibility eligibility = Eligibility.empty();
+      DonorInfo donorInfo = DonorInfo.empty();
+      
+      if (profile['eligibility'] is Map<String, dynamic>) {
+        eligibility = Eligibility.fromJson(profile['eligibility']);
+      }
+      
+      if (profile['donor_info'] is Map<String, dynamic>) {
+        donorInfo = DonorInfo.fromJson(profile['donor_info']);
+      }
+
       setState(() {
         _userName = profile['full_name'] ?? profile['name'] ?? 'User';
-        _bloodGroup = profile['blood_type']?.toString() ?? 'Unknown';
-        _donationsCount = profile['donations_count']?.toString() ??
-            profile['donation_count']?.toString() ??
-            '0';
-        _donationsStatus = profile['donation_since']?.toString() ??
-            profile['member_since']?.toString() ??
-            'No data';
-        _lastDonationDate = lastDonationDate != null
-            ? _formatDate(lastDonationDate)
+        _bloodGroup = _donorInfo?.bloodGroup ?? 'Unknown';
+        _donationsCount = _donorInfo?.totalDonations?.toString() ?? '0';
+        _donationsStatus = _donorInfo?.totalDonations != null && _donorInfo!.totalDonations > 0 
+            ? '${_donorInfo!.totalDonations} successful donations' 
+            : 'No donations yet';
+        _lastDonationDate = _donorInfo?.lastDonationDate != null
+            ? _formatDate(_donorInfo!.lastDonationDate!)
             : 'No donation';
-        _lastDonationLocation = profile['last_donation_center']?.toString() ??
-            profile['last_donation_location']?.toString() ??
-            'Not recorded';
+        _lastDonationLocation = _donorInfo?.isVerified == true ? 'Verified' : 'Not verified';
         _nextEligibleDays = nextEligible['days']!;
         _nextEligibleMessage = nextEligible['message']!;
+        
+        // Set donor info
+        _donorInfo = donorInfo;
+        
         _isLoading = false;
       });
     } else {
@@ -138,14 +156,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Fetch nearby emergencies
-      final emergencies = await _apiService.fetchNearbyEmergencies(
-        position.latitude,
-        position.longitude,
-      );
+      await _apiService.updateDonorLocation(position.latitude, position.longitude);
+
+      final emergencies = await _apiService.fetchEmergencies();
+
+      final nearbyEmergencies = emergencies
+          .map((emergency) {
+            final distance = (emergency.latitude != null && emergency.longitude != null)
+                ? _calculateDistanceKm(
+                    position.latitude,
+                    position.longitude,
+                    emergency.latitude!,
+                    emergency.longitude!,
+                  )
+                : emergency.distance;
+            return emergency.copyWith(distance: distance);
+          })
+          .where((emergency) => emergency.distance != null && emergency.distance! <= 20)
+          .toList();
 
       setState(() {
-        _nearbyEmergencies = emergencies;
+        _nearbyEmergencies = nearbyEmergencies;
         _locationEnabled = true;
         _loadingNearby = false;
       });
@@ -179,6 +210,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final diff = date.difference(now).inDays;
     if (diff <= 0) return 'Today';
     return '$diff days';
+  }
+
+  double _calculateDistanceKm(
+    double startLat,
+    double startLng,
+    double endLat,
+    double endLng,
+  ) {
+    const earthRadiusKm = 6371.0;
+    final lat1 = startLat * (3.141592653589793 / 180);
+    final lat2 = endLat * (3.141592653589793 / 180);
+    final deltaLat = (endLat - startLat) * (3.141592653589793 / 180);
+    final deltaLng = (endLng - startLng) * (3.141592653589793 / 180);
+
+    final a =
+        (sin(deltaLat / 2) * sin(deltaLat / 2)) +
+        cos(lat1) * cos(lat2) *
+            (sin(deltaLng / 2) * sin(deltaLng / 2));
+    final c = 2 * atan2(sqrt(a), sqrt(1 - a));
+    return earthRadiusKm * c;
   }
 
   Map<String, String> _buildNextEligibleText(
@@ -442,7 +493,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: _InfoTile(
                       title: 'Blood Group',
                       value: _bloodGroup,
-                      status: _bloodGroup == 'Unknown' ? 'Not recorded' : 'Verified',
+                      status: _donorInfo?.isVerified == true ? 'Verified' : 'Not verified',
                       responsive: responsive,
                     ),
                   ),
@@ -488,6 +539,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       spacing: responsive.getPadding(14),
                       runSpacing: responsive.getPadding(14),
                       children: [
+                        SizedBox(
+                          width: itemWidth,
+                          child: _ShortcutCard(
+                            label: 'Request Blood',
+                            icon: Icons.bloodtype,
+                            responsive: responsive,
+                            onPressed: () => Navigator.of(context).pushNamed('/blood-request'),
+                          ),
+                        ),
                         SizedBox(
                           width: itemWidth,
                           child: _ShortcutCard(

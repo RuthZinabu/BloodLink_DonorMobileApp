@@ -16,10 +16,19 @@ import 'package:bloodlink_donor_mobile_app/screens/login_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/sign_up_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/test_results_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/notifications_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/blood_request_screen.dart';
+import 'package:bloodlink_donor_mobile_app/screens/my_requests_screen.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
+import 'package:bloodlink_donor_mobile_app/services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize notifications
+  final notificationService = NotificationService();
+  await notificationService.initialize();
+
   runApp(const BloodLinkApp());
 }
 
@@ -74,6 +83,8 @@ class BloodLinkApp extends StatelessWidget {
         '/about': (_) => const AboutUsScreen(),
         '/privacy': (_) => const PrivacyPolicyScreen(),
         '/terms': (_) => const TermsOfServiceScreen(),
+        '/blood-request': (_) => const BloodRequestScreen(),
+        '/my-requests': (_) => const MyRequestsScreen(),
       },
     );
   }
