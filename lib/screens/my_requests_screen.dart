@@ -164,7 +164,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          initialValue: _selectedStatus,
+                          value: _selectedStatus,
                           decoration: InputDecoration(
                             labelText: 'Status',
                             border: OutlineInputBorder(

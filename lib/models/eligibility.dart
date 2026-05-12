@@ -38,6 +38,10 @@ class DonorInfo {
   final String status;
   final String overallStatus;
   final String? lastDonationDate;
+  final int? totalDonations;
+  final bool isVerified;
+
+  String get bloodGroup => bloodType;
 
   DonorInfo({
     required this.donorId,
@@ -45,6 +49,8 @@ class DonorInfo {
     required this.status,
     required this.overallStatus,
     this.lastDonationDate,
+    this.totalDonations,
+    this.isVerified = false,
   });
 
   /// Parse donor info from API response
@@ -55,6 +61,8 @@ class DonorInfo {
       status: json['status'] ?? 'PENDING',
       overallStatus: json['overall_status'] ?? 'UNKNOWN',
       lastDonationDate: json['last_donation_date'],
+      totalDonations: json['total_donations'] as int?,
+      isVerified: json['is_verified'] ?? false,
     );
   }
 

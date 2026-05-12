@@ -2,21 +2,19 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:bloodlink_donor_mobile_app/models/app_notification.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
   static const String baseUrl = 'https://bloodlink-backend-bpll.onrender.com';
   static const String _tokenKey = 'access_token';
-  static const String _fcmTokenKey = 'fcm_token';
 
   final FlutterSecureStorage _secureStorage;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   NotificationService({FlutterSecureStorage? secureStorage})
       : _secureStorage = secureStorage ?? const FlutterSecureStorage();
+
+  Future<void> initialize() async {
+    // Notification initialization is handled at the platform level
+  }
 
   /// Get stored access token
   Future<String?> _getAccessToken() async {

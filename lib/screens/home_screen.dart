@@ -94,15 +94,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
       setState(() {
         _userName = profile['full_name'] ?? profile['name'] ?? 'User';
-        _bloodGroup = _donorInfo?.bloodGroup ?? 'Unknown';
-        _donationsCount = _donorInfo?.totalDonations?.toString() ?? '0';
-        _donationsStatus = _donorInfo?.totalDonations != null && _donorInfo!.totalDonations > 0 
-            ? '${_donorInfo!.totalDonations} successful donations' 
+        _bloodGroup = donorInfo.bloodGroup;
+        _donationsCount = donorInfo.totalDonations?.toString() ?? '0';
+        _donationsStatus = donorInfo.totalDonations != null && donorInfo.totalDonations! > 0
+            ? '${donorInfo.totalDonations} successful donations'
             : 'No donations yet';
-        _lastDonationDate = _donorInfo?.lastDonationDate != null
-            ? _formatDate(_donorInfo!.lastDonationDate!)
+        _lastDonationDate = donorInfo.lastDonationDate != null
+            ? (_parseDate(donorInfo.lastDonationDate!) != null
+                ? _formatDate(_parseDate(donorInfo.lastDonationDate!)!)
+                : donorInfo.lastDonationDate!)
             : 'No donation';
-        _lastDonationLocation = _donorInfo?.isVerified == true ? 'Verified' : 'Not verified';
+        _lastDonationLocation = donorInfo.isVerified ? 'Verified' : 'Not verified';
         _nextEligibleDays = nextEligible['days']!;
         _nextEligibleMessage = nextEligible['message']!;
         
@@ -493,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: _InfoTile(
                       title: 'Blood Group',
                       value: _bloodGroup,
-                      status: _donorInfo?.isVerified == true ? 'Verified' : 'Not verified',
+                      status: _donorInfo.isVerified ? 'Verified' : 'Not verified',
                       responsive: responsive,
                     ),
                   ),
