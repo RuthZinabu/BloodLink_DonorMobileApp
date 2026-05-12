@@ -137,7 +137,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     @override
   Widget build(BuildContext context) {
     final responsive = context.responsive;
-    final profilePhotoUrl = _profileData?['profile_picture_url']?.toString() ?? '';
+    // Backend may return the photo URL under different key names or nested inside donor_info
+    final donorInfoMap = _profileData?['donor_info'] as Map<String, dynamic>?;
+    final profilePhotoUrl = (_profileData?['profile_picture_url'] ??
+            _profileData?['ProfilePictureUrl'] ??
+            _profileData?['photo_url'] ??
+            _profileData?['avatar_url'] ??
+            _profileData?['picture_url'] ??
+            _profileData?['image_url'] ??
+            donorInfoMap?['profile_picture_url'] ??
+            donorInfoMap?['ProfilePictureUrl'] ??
+            donorInfoMap?['photo_url'] ??
+            donorInfoMap?['avatar_url'])
+        ?.toString() ??
+    '';
 
     return SafeArea(
       child: Scaffold(

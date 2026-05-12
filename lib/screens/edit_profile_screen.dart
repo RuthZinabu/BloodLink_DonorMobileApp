@@ -41,8 +41,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneController.text = widget.initialProfile?['phone']?.toString() ?? '';
     _addressController.text =
         widget.initialProfile?['address']?.toString() ?? '';
-    _currentPhotoUrl =
-        widget.initialProfile?['profile_picture_url']?.toString() ?? '';
+    final donorInfoMap =
+        widget.initialProfile?['donor_info'] as Map<String, dynamic>?;
+    _currentPhotoUrl = (widget.initialProfile?['profile_picture_url'] ??
+            widget.initialProfile?['ProfilePictureUrl'] ??
+            widget.initialProfile?['photo_url'] ??
+            widget.initialProfile?['avatar_url'] ??
+            widget.initialProfile?['picture_url'] ??
+            widget.initialProfile?['image_url'] ??
+            donorInfoMap?['profile_picture_url'] ??
+            donorInfoMap?['ProfilePictureUrl'] ??
+            donorInfoMap?['photo_url'] ??
+            donorInfoMap?['avatar_url'])
+        ?.toString() ??
+    '';
   }
 
   @override
