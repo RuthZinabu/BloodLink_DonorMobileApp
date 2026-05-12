@@ -54,41 +54,33 @@ class BloodRequest {
       return DateTime.now();
     }
 
-    // Hospital fields may come back as snake_case, camelCase,
-    // or nested inside a "hospital" object — handle all variants.
+    // Backend returns PascalCase keys — fall back to snake_case/camelCase too.
     final hospital = json['hospital'] as Map<String, dynamic>?;
 
-    String resolveHospitalName() {
-      final v = json['hospital_name'] ?? json['hospitalName'] ??
-          hospital?['name'] ?? hospital?['hospital_name'] ?? '';
-      return parseString(v);
-    }
-
-    String resolveHospitalAddress() {
-      final v = json['hospital_address'] ?? json['hospitalAddress'] ??
-          hospital?['address'] ?? hospital?['hospital_address'] ?? '';
-      return parseString(v);
-    }
-
-    String resolveHospitalPhone() {
-      final v = json['hospital_phone'] ?? json['hospitalPhone'] ??
-          hospital?['phone'] ?? hospital?['contact_phone'] ??
-          hospital?['hospital_phone'] ?? '';
-      return parseString(v);
-    }
-
     return BloodRequest(
-      requestId: parseString(json['request_id'] ?? json['id'] ?? json['_id']),
-      donorId: parseString(json['donor_id'] ?? json['donorId']),
-      donorName: parseString(json['donor_name'] ?? json['donorName']),
-      bloodType: parseString(json['blood_type'] ?? json['bloodType']),
-      quantityMl: parseInt(json['quantity_ml'] ?? json['quantityMl']),
-      reason: parseString(json['reason']),
-      hospitalName: resolveHospitalName(),
-      hospitalAddress: resolveHospitalAddress(),
-      hospitalPhone: resolveHospitalPhone(),
-      status: parseString(json['status']),
-      createdAt: parseDateTime(json['created_at'] ?? json['createdAt']),
+      requestId: parseString(
+          json['RequestID'] ?? json['request_id'] ?? json['id'] ?? json['_id']),
+      donorId: parseString(
+          json['DonorID'] ?? json['donor_id'] ?? json['donorId']),
+      donorName: parseString(
+          json['DonorName'] ?? json['donor_name'] ?? json['donorName']),
+      bloodType: parseString(
+          json['BloodType'] ?? json['blood_type'] ?? json['bloodType']),
+      quantityMl: parseInt(
+          json['QuantityML'] ?? json['quantity_ml'] ?? json['quantityMl']),
+      reason: parseString(json['Reason'] ?? json['reason']),
+      hospitalName: parseString(
+          json['HospitalName'] ?? json['hospital_name'] ??
+          json['hospitalName'] ?? hospital?['name'] ?? ''),
+      hospitalAddress: parseString(
+          json['HospitalAddress'] ?? json['hospital_address'] ??
+          json['hospitalAddress'] ?? hospital?['address'] ?? ''),
+      hospitalPhone: parseString(
+          json['HospitalPhone'] ?? json['hospital_phone'] ??
+          json['hospitalPhone'] ?? hospital?['phone'] ?? ''),
+      status: parseString(json['Status'] ?? json['status']),
+      createdAt: parseDateTime(
+          json['CreatedAt'] ?? json['created_at'] ?? json['createdAt']),
       successfulDonations: parseNullableInt(
           json['successful_donations'] ?? json['successfulDonations']),
     );
