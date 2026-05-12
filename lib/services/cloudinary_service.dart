@@ -10,7 +10,7 @@ class CloudinaryUploadResult {
 }
 
 class CloudinaryService {
-  static const String _cloudName = 'ruthzenabu';
+  static const String _cloudName = 'dopadrrih';
   static const String _uploadPreset = 'profile image';
   static const String _uploadUrl =
       'https://api.cloudinary.com/v1_1/$_cloudName/image/upload';
