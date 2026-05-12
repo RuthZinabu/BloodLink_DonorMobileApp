@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   // Eligibility status from backend
   DonorInfo _donorInfo = DonorInfo.empty();
+  Eligibility _eligibility = Eligibility.empty();
 
   List<Emergency> _nearbyEmergencies = [];
   bool _locationEnabled = false;
@@ -65,32 +66,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final result = await _apiService.fetchUserProfile();
     if (result['success'] == true && result['profile'] != null) {
       final profile = result['profile'] as Map<String, dynamic>;
-      final lastDonationRaw = profile['last_donation_date'] ??
-          profile['last_donation'] ??
-          profile['lastDonationDate'];
-      final lastDonationDate = _parseDate(lastDonationRaw?.toString());
-      final nextEligibleRaw = profile['next_eligible_date'] ??
-          profile['next_donation_date'] ??
-          profile['next_eligible_donation'] ??
-          profile['nextEligibleDate'];
-      final nextEligibleDate = _parseDate(nextEligibleRaw?.toString());
-      final nextEligible = _buildNextEligibleText(
-        nextEligibleDate,
-        lastDonationDate,
-        profile,
-      );
 
-      // Extract eligibility data from profile
+      // Parse eligibility and donor_info from backend response
       Eligibility eligibility = Eligibility.empty();
       DonorInfo donorInfo = DonorInfo.empty();
-      
+
       if (profile['eligibility'] is Map<String, dynamic>) {
         eligibility = Eligibility.fromJson(profile['eligibility']);
       }
-      
+
       if (profile['donor_info'] is Map<String, dynamic>) {
         donorInfo = DonorInfo.fromJson(profile['donor_info']);
       }
+
+      // Build "Next eligible donation" text directly from the backend eligibility object
+      final nextEligible = _buildNextEligibleFromEligibility(eligibility, donorInfo);
 
       setState(() {
         _userName = profile['full_name'] ?? profile['name'] ?? 'User';
@@ -107,10 +97,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _lastDonationLocation = donorInfo.isVerified ? 'Verified' : 'Not verified';
         _nextEligibleDays = nextEligible['days']!;
         _nextEligibleMessage = nextEligible['message']!;
-        
-        // Set donor info
+        _eligibility = eligibility;
         _donorInfo = donorInfo;
-        
         _isLoading = false;
       });
     } else {
@@ -118,6 +106,61 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _isLoading = false;
       });
     }
+  }
+
+  /// Derives the "Next eligible donation" display values directly from
+  /// the backend eligibility object, following the documented rules:
+  ///   • is_eligible = true  → donor can donate now
+  ///   • countdown_days > 0  → donor must wait N more days
+  ///   • PERMANENTLY_DEFERRED → donor can never donate again
+  Map<String, String> _buildNextEligibleFromEligibility(
+    Eligibility eligibility,
+    DonorInfo donorInfo,
+  ) {
+    // Permanently deferred takes top priority
+    if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
+      return {
+        'days': 'Permanently Deferred',
+        'message': 'You are permanently deferred from donating blood.',
+      };
+    }
+
+    // Eligible right now
+    if (eligibility.isEligible) {
+      return {
+        'days': 'Eligible Now',
+        'message': eligibility.eligibilityMessage.isNotEmpty
+            ? eligibility.eligibilityMessage
+            : 'You can come and donate at any time.',
+      };
+    }
+
+    // Not yet eligible — use countdown_days from the backend
+    if (eligibility.countdownDays > 0) {
+      // Compute the concrete date so the donor knows exactly when
+      final nextDate = DateTime.now().add(Duration(days: eligibility.countdownDays));
+      return {
+        'days': '${eligibility.countdownDays} days',
+        'message': eligibility.eligibilityMessage.isNotEmpty
+            ? eligibility.eligibilityMessage
+            : 'You can donate again on ${_formatDate(nextDate)}.',
+      };
+    }
+
+    // Fallback — use whatever the backend message says
+    if (eligibility.eligibilityMessage.isNotEmpty) {
+      return {
+        'days': eligibility.eligibilityStatus.isNotEmpty
+            ? eligibility.eligibilityStatus
+            : 'Not available',
+        'message': eligibility.eligibilityMessage,
+      };
+    }
+
+    return {
+      'days': 'Not available',
+      'message': 'Eligibility data is unavailable.',
+    };
   }
 
   Future<void> _checkLocationAndFetchNearby() async {
@@ -232,54 +275,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             (sin(deltaLng / 2) * sin(deltaLng / 2));
     final c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return earthRadiusKm * c;
-  }
-
-  Map<String, String> _buildNextEligibleText(
-    DateTime? nextEligibleDate,
-    DateTime? lastDonationDate,
-    Map<String, dynamic> profile,
-  ) {
-    if (nextEligibleDate != null) {
-      return {
-        'days': _formatRelativeDays(nextEligibleDate),
-        'message': 'You can donate again on ${_formatDate(nextEligibleDate)}.',
-      };
-    }
-
-    final eligibility = profile['eligibility_status']?.toString();
-    if (eligibility != null && eligibility.isNotEmpty) {
-      final normalized = eligibility.replaceAll('_', ' ').toUpperCase();
-      if (normalized.toLowerCase().contains('eligible')) {
-        return {
-          'days': normalized,
-          'message': eligibility,
-        };
-      }
-      if (lastDonationDate != null) {
-        final nextDate = lastDonationDate.add(const Duration(days: 90));
-        return {
-          'days': _formatRelativeDays(nextDate),
-          'message': 'You can donate again on ${_formatDate(nextDate)}.',
-        };
-      }
-      return {
-        'days': normalized,
-        'message': eligibility,
-      };
-    }
-
-    if (lastDonationDate != null) {
-      final nextDate = lastDonationDate.add(const Duration(days: 90));
-      return {
-        'days': _formatRelativeDays(nextDate),
-        'message': 'You can donate again on ${_formatDate(nextDate)}.',
-      };
-    }
-
-    return {
-      'days': 'Not available',
-      'message': 'Next donation data is unavailable.',
-    };
   }
 
   String _getUrgencyLabel(String urgencyLevel) {
@@ -432,60 +427,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ],
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
-              CustomCard(
-                backgroundColor: AppColors.secondary.withAlpha((0.16 * 255).round()),
-                borderRadius: responsive.getBorderRadius(28),
-                padding: EdgeInsets.all(responsive.getPadding(22)),
-                elevation: 0,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Next eligible donation',
-                      style: AppTextStyles.subtitle.copyWith(
-                        fontSize: responsive.getFont(16),
-                      ),
-                    ),
-                    SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 16)),
-
-                    // 👇 THIS ROW FIXES YOUR PROBLEM
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            _nextEligibleDays,
-                            style: AppTextStyles.heading.copyWith(
-                              color: AppColors.primary,
-                              fontSize: responsive.getFont(38),
-                            ),
-                          ),
-                        ),
-
-                        Container(
-                          padding: EdgeInsets.all(responsive.getPadding(12)),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withAlpha((0.22 * 255).round()),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.calendar_month,
-                            color: AppColors.primary,
-                            size: responsive.getIconSize(24),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: responsive.getSpacing(small: 6, medium: 10, large: 12)),
-                    Text(
-                      _nextEligibleMessage,
-                      style: AppTextStyles.body.copyWith(
-                        fontSize: responsive.getFont(14),
-                      ),
-                    ),
-                  ],
-                ),
+              _EligibilityCard(
+                nextEligibleDays: _nextEligibleDays,
+                nextEligibleMessage: _nextEligibleMessage,
+                eligibility: _eligibility,
+                donorInfo: _donorInfo,
+                isLoading: _isLoading,
+                responsive: responsive,
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
 
@@ -734,6 +682,187 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       ),
     ),
+    );
+  }
+}
+
+class _EligibilityCard extends StatelessWidget {
+  final String nextEligibleDays;
+  final String nextEligibleMessage;
+  final Eligibility eligibility;
+  final DonorInfo donorInfo;
+  final bool isLoading;
+  final ResponsiveUtils responsive;
+
+  const _EligibilityCard({
+    required this.nextEligibleDays,
+    required this.nextEligibleMessage,
+    required this.eligibility,
+    required this.donorInfo,
+    required this.isLoading,
+    required this.responsive,
+  });
+
+  /// Determines the card accent color based on eligibility state
+  Color get _accentColor {
+    if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
+      return const Color(0xFF5F6D7E); // grey — permanently deferred
+    }
+    if (eligibility.isEligible) {
+      return const Color(0xFF1BC47D); // green — eligible now
+    }
+    return const Color(0xFFFA4A4A); // red — waiting
+  }
+
+  IconData get _icon {
+    if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
+      return Icons.block;
+    }
+    if (eligibility.isEligible) {
+      return Icons.check_circle_outline;
+    }
+    return Icons.hourglass_top;
+  }
+
+  String get _statusBadge {
+    if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') return 'Deferred';
+    if (eligibility.isEligible) return 'Ready';
+    return 'Waiting';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = _accentColor;
+    return CustomCard(
+      backgroundColor: accent.withAlpha((0.10 * 255).round()),
+      borderRadius: responsive.getBorderRadius(28),
+      padding: EdgeInsets.all(responsive.getPadding(22)),
+      elevation: 0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row: label + status badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Next eligible donation',
+                style: AppTextStyles.subtitle.copyWith(
+                  fontSize: responsive.getFont(16),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: responsive.getPadding(10),
+                  vertical: responsive.getPadding(4),
+                ),
+                decoration: BoxDecoration(
+                  color: accent.withAlpha((0.18 * 255).round()),
+                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
+                ),
+                child: Text(
+                  _statusBadge,
+                  style: AppTextStyles.label.copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: responsive.getFont(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 16)),
+
+          // Main value + icon
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: isLoading
+                    ? SizedBox(
+                        height: responsive.getFont(38),
+                        child: LinearProgressIndicator(
+                          color: accent,
+                          backgroundColor: accent.withAlpha((0.15 * 255).round()),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      )
+                    : Text(
+                        nextEligibleDays,
+                        style: AppTextStyles.heading.copyWith(
+                          color: accent,
+                          fontSize: responsive.getFont(36),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ),
+              Container(
+                padding: EdgeInsets.all(responsive.getPadding(12)),
+                decoration: BoxDecoration(
+                  color: accent.withAlpha((0.20 * 255).round()),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  _icon,
+                  color: accent,
+                  size: responsive.getIconSize(24),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: responsive.getSpacing(small: 6, medium: 10, large: 12)),
+
+          // Message subtitle
+          Text(
+            isLoading ? 'Loading eligibility status…' : nextEligibleMessage,
+            style: AppTextStyles.body.copyWith(
+              fontSize: responsive.getFont(14),
+              color: AppColors.textSecondary,
+            ),
+          ),
+
+          // Progress bar when waiting (shows how close donor is to 90-day mark)
+          if (!isLoading &&
+              !eligibility.isEligible &&
+              donorInfo.overallStatus != 'PERMANENTLY_DEFERRED' &&
+              eligibility.countdownDays > 0) ...[
+            SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${90 - eligibility.countdownDays} / 90 days completed',
+                  style: AppTextStyles.label.copyWith(
+                    color: AppColors.textSecondary,
+                    fontSize: responsive.getFont(11),
+                  ),
+                ),
+                Text(
+                  '${((90 - eligibility.countdownDays) / 90 * 100).toStringAsFixed(0)}%',
+                  style: AppTextStyles.label.copyWith(
+                    color: accent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: responsive.getFont(11),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 6)),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: (90 - eligibility.countdownDays).clamp(0, 90) / 90,
+                minHeight: 6,
+                color: accent,
+                backgroundColor: accent.withAlpha((0.15 * 255).round()),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
