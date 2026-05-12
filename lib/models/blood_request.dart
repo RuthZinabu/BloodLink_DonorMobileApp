@@ -54,19 +54,43 @@ class BloodRequest {
       return DateTime.now();
     }
 
+    // Hospital fields may come back as snake_case, camelCase,
+    // or nested inside a "hospital" object — handle all variants.
+    final hospital = json['hospital'] as Map<String, dynamic>?;
+
+    String resolveHospitalName() {
+      final v = json['hospital_name'] ?? json['hospitalName'] ??
+          hospital?['name'] ?? hospital?['hospital_name'] ?? '';
+      return parseString(v);
+    }
+
+    String resolveHospitalAddress() {
+      final v = json['hospital_address'] ?? json['hospitalAddress'] ??
+          hospital?['address'] ?? hospital?['hospital_address'] ?? '';
+      return parseString(v);
+    }
+
+    String resolveHospitalPhone() {
+      final v = json['hospital_phone'] ?? json['hospitalPhone'] ??
+          hospital?['phone'] ?? hospital?['contact_phone'] ??
+          hospital?['hospital_phone'] ?? '';
+      return parseString(v);
+    }
+
     return BloodRequest(
-      requestId: parseString(json['request_id']),
-      donorId: parseString(json['donor_id']),
-      donorName: parseString(json['donor_name']),
-      bloodType: parseString(json['blood_type']),
-      quantityMl: parseInt(json['quantity_ml']),
+      requestId: parseString(json['request_id'] ?? json['id'] ?? json['_id']),
+      donorId: parseString(json['donor_id'] ?? json['donorId']),
+      donorName: parseString(json['donor_name'] ?? json['donorName']),
+      bloodType: parseString(json['blood_type'] ?? json['bloodType']),
+      quantityMl: parseInt(json['quantity_ml'] ?? json['quantityMl']),
       reason: parseString(json['reason']),
-      hospitalName: parseString(json['hospital_name']),
-      hospitalAddress: parseString(json['hospital_address']),
-      hospitalPhone: parseString(json['hospital_phone']),
+      hospitalName: resolveHospitalName(),
+      hospitalAddress: resolveHospitalAddress(),
+      hospitalPhone: resolveHospitalPhone(),
       status: parseString(json['status']),
-      createdAt: parseDateTime(json['created_at']),
-      successfulDonations: parseNullableInt(json['successful_donations']),
+      createdAt: parseDateTime(json['created_at'] ?? json['createdAt']),
+      successfulDonations: parseNullableInt(
+          json['successful_donations'] ?? json['successfulDonations']),
     );
   }
 
