@@ -21,7 +21,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final ApiService _apiService = ApiService();
   final NotificationService _notificationService = NotificationService();
-  String _userName = 'Alex'; // Default name
+  String _userName = 'Loading name'; // Default name
   bool _isLoading = true;
   String _bloodGroup = 'Unknown';
   String _donationsCount = '0';
