@@ -67,22 +67,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     try {
       final bytes = await picked.readAsBytes();
-      final url = await _cloudinaryService.uploadImageBytes(
+      final result = await _cloudinaryService.uploadImageBytes(
         bytes: bytes,
         filename: picked.name,
       );
 
       if (!mounted) return;
 
-      if (url != null) {
-        setState(() => _currentPhotoUrl = url);
+      if (result.success) {
+        setState(() => _currentPhotoUrl = result.url!);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Photo uploaded successfully')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Photo upload failed. Please try again.')),
+          SnackBar(content: Text(result.error ?? 'Photo upload failed.')),
         );
       }
     } finally {

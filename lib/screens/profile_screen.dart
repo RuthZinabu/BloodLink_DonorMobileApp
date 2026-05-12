@@ -126,13 +126,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   //   return date;
   // }
 
-  String _formatEligibilityStatus(Map<String, dynamic>? profileData) {
-    final status = profileData?['eligibility_status']?.toString().trim();
-    if (status == null || status.isEmpty) {
-      return 'Status not available';
-    }
-    return status;
-  }
+  // String _formatEligibilityStatus(Map<String, dynamic>? profileData) {
+  //   final status = profileData?['eligibility_status']?.toString().trim();
+  //   if (status == null || status.isEmpty) {
+  //     return 'Status not available';
+  //   }
+  //   return status;
+  // }
 
     @override
   Widget build(BuildContext context) {
@@ -279,57 +279,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           child: Column(
                             children: [
-                              Card(
-                                elevation: 4,
-                                color: AppColors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsets.all(responsive.getPadding(18)),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: responsive.getWidth(10.5),
-                                        height: responsive.getWidth(10.5),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFE8F7EE),
-                                          borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
-                                        ),
-                                        child: Icon(
-                                          Icons.shield,
-                                          color: const Color(0xFF1BC47D),
-                                          size: responsive.getIconSize(20),
-                                        ),
-                                      ),
-                                      SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Eligibility Status',
-                                              style: AppTextStyles.title.copyWith(
-                                                fontSize: responsive.getFont(14),
-                                              ),
-                                            ),
-                                            SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
-                                            Text(
-                                              _formatEligibilityStatus(_profileData),
-                                              style: TextStyle(
-                                                color: const Color(0xFF1BC47D),
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: responsive.getFont(12),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
+                              // Card(
+                              //   elevation: 4,
+                              //   color: AppColors.white,
+                              //   shape: RoundedRectangleBorder(
+                              //     borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
+                              //   ),
+                              //   child: Padding(
+                              //     padding: EdgeInsets.all(responsive.getPadding(18)),
+                              //     child: Row(
+                              //       children: [
+                              //         Container(
+                              //           width: responsive.getWidth(10.5),
+                              //           height: responsive.getWidth(10.5),
+                              //           decoration: BoxDecoration(
+                              //             color: const Color(0xFFE8F7EE),
+                              //             borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
+                              //           ),
+                              //           child: Icon(
+                              //             Icons.shield,
+                              //             color: const Color(0xFF1BC47D),
+                              //             size: responsive.getIconSize(20),
+                              //           ),
+                              //         ),
+                              //         SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+                              //         Expanded(
+                              //           child: Column(
+                              //             crossAxisAlignment: CrossAxisAlignment.start,
+                              //             children: [
+                              //               // Text(
+                              //               //   'Eligibility Status',
+                              //               //   style: AppTextStyles.title.copyWith(
+                              //               //     fontSize: responsive.getFont(14),
+                              //               //   ),
+                              //               // ),
+                              //               // SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
+                              //               Text(
+                              //                 _formatEligibilityStatus(_profileData),
+                              //                 style: TextStyle(
+                              //                   color: const Color(0xFF1BC47D),
+                              //                   fontWeight: FontWeight.w600,
+                              //                   fontSize: responsive.getFont(12),
+                              //                 ),
+                              //               ),
+                              //             ],
+                              //           ),
+                              //         ),
+                              //       ],
+                              //     ),
+                              //   ),
+                              // ),
+                              // SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
                               Card(
                                 elevation: 4,
                                 color: AppColors.white,
