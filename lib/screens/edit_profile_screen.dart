@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
+import 'package:bloodlink_donor_mobile_app/services/cloudinary_service.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
@@ -20,10 +22,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
-  final _photoUrlController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final ApiService _apiService = ApiService();
+  final CloudinaryService _cloudinaryService = CloudinaryService();
+  final ImagePicker _picker = ImagePicker();
+
   bool _isSaving = false;
+  bool _isUploadingPhoto = false;
+  String _currentPhotoUrl = '';
 
   @override
   void initState() {
@@ -33,8 +39,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         '';
     _emailController.text = widget.initialProfile?['email']?.toString() ?? '';
     _phoneController.text = widget.initialProfile?['phone']?.toString() ?? '';
-    _addressController.text = widget.initialProfile?['address']?.toString() ?? '';
-    _photoUrlController.text = widget.initialProfile?['profile_picture_url']?.toString() ?? '';
+    _addressController.text =
+        widget.initialProfile?['address']?.toString() ?? '';
+    _currentPhotoUrl =
+        widget.initialProfile?['profile_picture_url']?.toString() ?? '';
   }
 
   @override
@@ -43,43 +51,72 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
-    _photoUrlController.dispose();
     super.dispose();
+  }
+
+  /// Opens the gallery, uploads the selected photo to Cloudinary,
+  /// and stores the returned public URL.
+  Future<void> _pickAndUploadPhoto() async {
+    final XFile? picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    setState(() => _isUploadingPhoto = true);
+
+    try {
+      final bytes = await picked.readAsBytes();
+      final url = await _cloudinaryService.uploadImageBytes(
+        bytes: bytes,
+        filename: picked.name,
+      );
+
+      if (!mounted) return;
+
+      if (url != null) {
+        setState(() => _currentPhotoUrl = url);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo uploaded successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Photo upload failed. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isUploadingPhoto = false);
+    }
   }
 
   Future<void> _saveProfile() async {
     if (_isSaving) return;
-
-    setState(() {
-      _isSaving = true;
-    });
-
-    final photoUrl = _photoUrlController.text.trim().isEmpty
-        ? null
-        : _photoUrlController.text.trim();
+    setState(() => _isSaving = true);
 
     final result = await _apiService.updateUserProfile(
       fullName: _nameController.text.trim(),
       email: _emailController.text.trim(),
       phone: _phoneController.text.trim(),
       address: _addressController.text.trim(),
-      photoUrl: photoUrl,
+      photoUrl: _currentPhotoUrl.isNotEmpty ? _currentPhotoUrl : null,
     );
 
     if (!mounted) return;
-
-    setState(() {
-      _isSaving = false;
-    });
+    setState(() => _isSaving = false);
 
     if (result['success'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message']?.toString() ?? 'Profile updated successfully')),
+        SnackBar(
+            content: Text(
+                result['message']?.toString() ?? 'Profile updated successfully')),
       );
       Navigator.of(context).pop(true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['message']?.toString() ?? 'Unable to update profile.')),
+        SnackBar(
+            content: Text(
+                result['message']?.toString() ?? 'Unable to update profile.')),
       );
     }
   }
@@ -87,16 +124,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final responsive = ResponsiveUtils.of(context);
-
-    final String? profilePhotoUrl;
-    if (_photoUrlController.text.trim().isEmpty) {
-      profilePhotoUrl = widget.initialProfile != null && widget.initialProfile!['profile_picture_url'] != null
-          ? widget.initialProfile!['profile_picture_url'].toString()
-          : null;
-    } else {
-      profilePhotoUrl = _photoUrlController.text.trim();
-    }
-    final String resolvedPhotoUrl = profilePhotoUrl?.trim() ?? '';
+    final bool hasPhoto = _currentPhotoUrl.isNotEmpty &&
+        (_currentPhotoUrl.startsWith('https://') ||
+            _currentPhotoUrl.startsWith('http://'));
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -117,70 +147,95 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              CircleAvatar(
-                radius: responsive.getWidth(15.5),
-                backgroundColor: AppColors.surface,
-                child: resolvedPhotoUrl.isNotEmpty &&
-                        (resolvedPhotoUrl.startsWith('https://') || resolvedPhotoUrl.startsWith('http://'))
-                    ? ClipOval(
-                        child: Image.network(
-                          resolvedPhotoUrl,
-                          fit: BoxFit.cover,
-                          width: responsive.getWidth(31),
-                          height: responsive.getWidth(31),
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return const Center(child: CircularProgressIndicator());
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              'assets/image/default_profile.png',
-                              fit: BoxFit.cover,
-                              width: responsive.getWidth(31),
-                              height: responsive.getWidth(31),
-                            );
-                          },
+              // ── Profile photo with tap-to-change overlay ──
+              GestureDetector(
+                onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
+                child: Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    CircleAvatar(
+                      radius: responsive.getWidth(15.5),
+                      backgroundColor: AppColors.surface,
+                      child: _isUploadingPhoto
+                          ? SizedBox(
+                              width: responsive.getWidth(10),
+                              height: responsive.getWidth(10),
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : ClipOval(
+                              child: hasPhoto
+                                  ? Image.network(
+                                      _currentPhotoUrl,
+                                      fit: BoxFit.cover,
+                                      width: responsive.getWidth(31),
+                                      height: responsive.getWidth(31),
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return const Center(
+                                            child:
+                                                CircularProgressIndicator());
+                                      },
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/image/default_profile.png',
+                                          fit: BoxFit.cover,
+                                          width: responsive.getWidth(31),
+                                          height: responsive.getWidth(31),
+                                        );
+                                      },
+                                    )
+                                  : Image.asset(
+                                      'assets/image/default_profile.png',
+                                      fit: BoxFit.cover,
+                                      width: responsive.getWidth(31),
+                                      height: responsive.getWidth(31),
+                                    ),
+                            ),
+                    ),
+                    // Camera badge
+                    if (!_isUploadingPhoto)
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: AppColors.white, width: 2),
                         ),
-                      )
-                    : Image.asset(
-                        'assets/image/default_profile.png',
-                        fit: BoxFit.cover,
-                        width: responsive.getWidth(31),
-                        height: responsive.getWidth(31),
+                        child: Icon(
+                          Icons.camera_alt,
+                          color: AppColors.white,
+                          size: responsive.getIconSize(16),
+                        ),
                       ),
-              ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
-              Text(
-                'Profile Picture URL',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                  fontSize: responsive.getFont(14),
+                  ],
                 ),
               ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
-              CustomTextField(
-                label: 'Profile Picture URL',
-                hintText: 'Enter a public image URL',
-                controller: _photoUrlController,
-                keyboardType: TextInputType.url,
-                onChanged: (_) => setState(() {}),
-                prefixIcon: Icon(
-                  Icons.link,
-                  color: AppColors.primary,
-                  size: responsive.getIconSize(20),
-                ),
-              ),
-              SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+
+              SizedBox(
+                  height: responsive.getSpacing(
+                      small: 8, medium: 10, large: 12)),
               Text(
-                'Use a publicly accessible image link. For Google Drive, set sharing to "Anyone with the link" and use the direct image URL.',
-                textAlign: TextAlign.center,
+                _isUploadingPhoto
+                    ? 'Uploading photo…'
+                    : 'Tap photo to change',
                 style: AppTextStyles.body.copyWith(
-                  fontSize: responsive.getFont(12),
+                  fontSize: responsive.getFont(13),
                   color: AppColors.textSecondary,
                 ),
               ),
-              SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 30)),
+
+              SizedBox(
+                  height: responsive.getSpacing(
+                      small: 24, medium: 28, large: 32)),
+
+              // ── Text fields ──
               CustomTextField(
                 label: 'Full Name',
                 hintText: widget.initialProfile?['full_name']?.toString() ??
@@ -193,20 +248,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   size: responsive.getIconSize(20),
                 ),
               ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
-              // CustomTextField(
-              //   label: 'Email Address',
-              //   hintText: widget.initialProfile?['email']?.toString() ??
-              //       'Enter your email address',
-              //   controller: _emailController,
-              //   keyboardType: TextInputType.emailAddress,
-              //   prefixIcon: Icon(
-              //     Icons.email,
-              //     color: AppColors.primary,
-              //     size: responsive.getIconSize(20),
-              //   ),
-              // ),
-              // SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
+              SizedBox(
+                  height: responsive.getSpacing(
+                      small: 12, medium: 16, large: 18)),
               CustomTextField(
                 label: 'Phone Number',
                 hintText: widget.initialProfile?['phone']?.toString() ??
@@ -219,7 +263,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   size: responsive.getIconSize(20),
                 ),
               ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
+              SizedBox(
+                  height: responsive.getSpacing(
+                      small: 12, medium: 16, large: 18)),
               CustomTextField(
                 label: 'Address',
                 hintText: widget.initialProfile?['address']?.toString() ??
@@ -231,7 +277,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   size: responsive.getIconSize(20),
                 ),
               ),
-              SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
+              SizedBox(
+                  height: responsive.getSpacing(
+                      small: 16, medium: 20, large: 24)),
+
+              // ── Info card ──
               Card(
                 elevation: 4,
                 child: Padding(
@@ -240,14 +290,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(top: responsive.getPadding(4)),
+                        padding:
+                            EdgeInsets.only(top: responsive.getPadding(4)),
                         child: Icon(
                           Icons.info_outline,
                           color: AppColors.primary,
                           size: responsive.getIconSize(20),
                         ),
                       ),
-                      SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                      SizedBox(
+                          width: responsive.getSpacing(
+                              small: 8, medium: 10, large: 12)),
                       Expanded(
                         child: Text(
                           'Accurate information helps us match you with compatible donation centers and urgent needs.',
@@ -260,10 +313,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
+              SizedBox(
+                  height: responsive.getSpacing(
+                      small: 20, medium: 24, large: 28)),
+
               CustomButton(
                 label: _isSaving ? 'Saving...' : 'Save Changes',
-                onPressed: _isSaving ? null : () { _saveProfile(); },
+                onPressed:
+                    (_isSaving || _isUploadingPhoto) ? null : _saveProfile,
                 backgroundColor: AppColors.primary,
               ),
             ],
