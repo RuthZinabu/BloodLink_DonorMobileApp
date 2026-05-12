@@ -1,15 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+class CloudinaryUploadResult {
+  final String? url;
+  final String? error;
+  bool get success => url != null;
+
+  const CloudinaryUploadResult({this.url, this.error});
+}
+
 class CloudinaryService {
   static const String _cloudName = 'ruthzenabu';
   static const String _uploadPreset = 'profile image';
   static const String _uploadUrl =
       'https://api.cloudinary.com/v1_1/$_cloudName/image/upload';
 
-  /// Uploads raw bytes to Cloudinary and returns the secure public URL.
-  /// Works on Flutter Web (no dart:io File needed).
-  Future<String?> uploadImageBytes({
+  Future<CloudinaryUploadResult> uploadImageBytes({
     required List<int> bytes,
     required String filename,
   }) async {
@@ -29,11 +35,25 @@ class CloudinaryService {
 
       if (streamResponse.statusCode == 200) {
         final data = jsonDecode(responseBody) as Map<String, dynamic>;
-        return data['secure_url'] as String?;
+        final url = data['secure_url'] as String?;
+        if (url != null) return CloudinaryUploadResult(url: url);
+        return const CloudinaryUploadResult(
+            error: 'Cloudinary returned no URL.');
       }
-      return null;
-    } catch (_) {
-      return null;
+
+      // Parse Cloudinary error message
+      String errorMsg =
+          'Upload failed (HTTP ${streamResponse.statusCode})';
+      try {
+        final data = jsonDecode(responseBody) as Map<String, dynamic>;
+        final cloudErr = data['error'] as Map<String, dynamic>?;
+        if (cloudErr != null) {
+          errorMsg = cloudErr['message']?.toString() ?? errorMsg;
+        }
+      } catch (_) {}
+      return CloudinaryUploadResult(error: errorMsg);
+    } catch (e) {
+      return CloudinaryUploadResult(error: 'Network error: $e');
     }
   }
 }
