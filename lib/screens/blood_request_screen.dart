@@ -5,6 +5,7 @@ import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_card.dart';
 import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
+import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
 class BloodRequestScreen extends StatefulWidget {
   const BloodRequestScreen({super.key});
@@ -62,8 +63,6 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
           _successMessage = result['message'];
           _isLoading = false;
         });
-
-        // Clear form on success
         _formKey.currentState!.reset();
         _quantityController.clear();
         _reasonController.clear();
@@ -103,26 +102,18 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: AppColors.primary,
-                      size: responsive.getIconSize(24),
-                    ),
+                    icon: Icon(Icons.arrow_back, color: AppColors.primary, size: responsive.getIconSize(24)),
                   ),
                   SizedBox(width: responsive.getSpacing(small: 12, medium: 16, large: 20)),
                   Expanded(
                     child: Text(
-                      'Request Blood',
-                      style: AppTextStyles.heading.copyWith(
-                        fontSize: responsive.getFont(24),
-                      ),
+                      context.tr('blood_request_title'),
+                      style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(24)),
                     ),
                   ),
                 ],
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
-
-              // Info Card
               CustomCard(
                 backgroundColor: AppColors.secondary.withAlpha((0.12 * 255).round()),
                 borderRadius: responsive.getBorderRadius(20),
@@ -130,15 +121,11 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                 elevation: 0,
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: AppColors.primary,
-                      size: responsive.getIconSize(24),
-                    ),
+                    Icon(Icons.info_outline, color: AppColors.primary, size: responsive.getIconSize(24)),
                     SizedBox(width: responsive.getSpacing(small: 12, medium: 16, large: 18)),
                     Expanded(
                       child: Text(
-                        'You must have at least one successful donation to request blood. Requests are reviewed by blood bank administrators.',
+                        context.tr('blood_request_info'),
                         style: AppTextStyles.body.copyWith(
                           fontSize: responsive.getFont(14),
                           color: AppColors.textSecondary,
@@ -149,8 +136,6 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                 ),
               ),
               SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
-
-              // Success Message
               if (_successMessage != null)
                 Container(
                   padding: EdgeInsets.all(responsive.getPadding(16)),
@@ -161,11 +146,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.check_circle,
-                        color: AppColors.primary,
-                        size: responsive.getIconSize(20),
-                      ),
+                      Icon(Icons.check_circle, color: AppColors.primary, size: responsive.getIconSize(20)),
                       SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                       Expanded(
                         child: Text(
@@ -180,8 +161,6 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                     ],
                   ),
                 ),
-
-              // Error Message
               if (_errorMessage != null)
                 Container(
                   padding: EdgeInsets.all(responsive.getPadding(16)),
@@ -192,11 +171,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: AppColors.warning,
-                        size: responsive.getIconSize(20),
-                      ),
+                      Icon(Icons.error_outline, color: AppColors.warning, size: responsive.getIconSize(20)),
                       SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                       Expanded(
                         child: Text(
@@ -211,22 +186,16 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                     ],
                   ),
                 ),
-
               if (_successMessage != null || _errorMessage != null)
                 SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
-
-              // Form
               Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Quantity Selection
                     Text(
-                      'Blood Quantity Needed (ml)',
-                      style: AppTextStyles.subtitle.copyWith(
-                        fontSize: responsive.getFont(16),
-                      ),
+                      context.tr('blood_request_quantity_label'),
+                      style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(16)),
                     ),
                     SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 16)),
                     Wrap(
@@ -235,11 +204,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                       children: _quantityOptions.map((quantity) {
                         final isSelected = _quantityController.text == quantity.toString();
                         return InkWell(
-                          onTap: () {
-                            setState(() {
-                              _quantityController.text = quantity.toString();
-                            });
-                          },
+                          onTap: () => setState(() => _quantityController.text = quantity.toString()),
                           borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
                           child: Container(
                             padding: EdgeInsets.symmetric(
@@ -266,20 +231,16 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                       }).toList(),
                     ),
                     SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
-
-                    // Reason
                     Text(
-                      'Reason for Request',
-                      style: AppTextStyles.subtitle.copyWith(
-                        fontSize: responsive.getFont(16),
-                      ),
+                      context.tr('blood_request_reason_label'),
+                      style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(16)),
                     ),
                     SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 16)),
                     TextFormField(
                       controller: _reasonController,
                       maxLines: 3,
                       decoration: InputDecoration(
-                        hintText: 'Please describe why you need blood (e.g., surgery, medical treatment)',
+                        hintText: context.tr('blood_request_reason_hint'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
                         ),
@@ -287,31 +248,25 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please provide a reason for your request';
+                          return context.tr('blood_request_reason_required');
                         }
                         if (value.trim().length < 10) {
-                          return 'Please provide more details (at least 10 characters)';
+                          return context.tr('blood_request_reason_short');
                         }
                         return null;
                       },
                     ),
                     SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
-
-                    // Hospital Information
                     Text(
-                      'Hospital Information',
-                      style: AppTextStyles.subtitle.copyWith(
-                        fontSize: responsive.getFont(16),
-                      ),
+                      context.tr('blood_request_hospital_info'),
+                      style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(16)),
                     ),
                     SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
-
-                    // Hospital Name
                     TextFormField(
                       controller: _hospitalNameController,
                       decoration: InputDecoration(
-                        labelText: 'Hospital Name',
-                        hintText: 'e.g., Tikur Anbessa Hospital',
+                        labelText: context.tr('blood_request_hospital_name'),
+                        hintText: context.tr('blood_request_name_hint'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
                         ),
@@ -319,19 +274,17 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please enter the hospital name';
+                          return context.tr('blood_request_name_required');
                         }
                         return null;
                       },
                     ),
                     SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
-
-                    // Hospital Address
                     TextFormField(
                       controller: _hospitalAddressController,
                       decoration: InputDecoration(
-                        labelText: 'Hospital Address',
-                        hintText: 'e.g., Addis Ababa, Churchill Ave',
+                        labelText: context.tr('blood_request_hospital_address'),
+                        hintText: context.tr('blood_request_address_hint'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
                         ),
@@ -339,20 +292,18 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please enter the hospital address';
+                          return context.tr('blood_request_address_required');
                         }
                         return null;
                       },
                     ),
                     SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
-
-                    // Hospital Phone
                     TextFormField(
                       controller: _hospitalPhoneController,
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
-                        labelText: 'Hospital Phone',
-                        hintText: 'e.g., +251911234567',
+                        labelText: context.tr('blood_request_hospital_phone'),
+                        hintText: context.tr('blood_request_phone_hint'),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
                         ),
@@ -360,21 +311,18 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Please enter the hospital phone number';
+                          return context.tr('blood_request_phone_required');
                         }
-                        // Basic phone validation
                         final phoneRegex = RegExp(r'^\+?[\d\s\-\(\)]+$');
                         if (!phoneRegex.hasMatch(value.trim())) {
-                          return 'Please enter a valid phone number';
+                          return context.tr('blood_request_phone_invalid');
                         }
                         return null;
                       },
                     ),
                     SizedBox(height: responsive.getSpacing(small: 24, medium: 28, large: 32)),
-
-                    // Submit Button
                     CustomButton(
-                      label: _isLoading ? 'Submitting...' : 'Submit Request',
+                      label: _isLoading ? context.tr('blood_request_submitting') : context.tr('blood_request_submit'),
                       onPressed: _isLoading ? null : _submitRequest,
                       backgroundColor: AppColors.primary,
                       textColor: AppColors.white,

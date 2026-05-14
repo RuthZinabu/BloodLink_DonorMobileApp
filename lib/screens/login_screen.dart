@@ -6,6 +6,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
 import 'package:bloodlink_donor_mobile_app/services/auth_manager.dart';
+import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -39,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty) {
       setState(() {
-        _errorMessage = 'Please enter your email';
+        _errorMessage = context.tr('login_email_required');
         _isLoading = false;
       });
       return;
@@ -47,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (password.isEmpty) {
       setState(() {
-        _errorMessage = 'Please enter your password';
+        _errorMessage = context.tr('login_password_required');
         _isLoading = false;
       });
       return;
@@ -62,17 +63,16 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (result['success']) {
-        // Navigate to home screen on successful login
         Navigator.of(context).pushReplacementNamed('/profile');
       } else {
         setState(() {
-          _errorMessage = result['message'] ?? 'Login failed';
+          _errorMessage = result['message'] ?? context.tr('login_btn');
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'An error occurred: ${e.toString()}';
+          _errorMessage = e.toString();
         });
       }
     } finally {
@@ -125,7 +125,6 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(height: h20),
-              // Logo
               Container(
                 width: iconBoxSize,
                 height: iconBoxSize,
@@ -140,20 +139,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: h28),
-              // Heading
               Text(
-                'Welcome Back',
+                context.tr('login_title'),
                 style: AppTextStyles.heading.copyWith(fontSize: headingFontSize),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
               Text(
-                'Sign in to continue saving lives',
+                context.tr('login_subtitle'),
                 style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: h32),
-              // Error message
               if (_errorMessage != null) ...[
                 Container(
                   padding: EdgeInsets.all(errorPadding),
@@ -184,21 +181,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: h20),
               ],
-              // Email field
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Username',
-                    style: AppTextStyles.subtitle
-                        .copyWith(fontSize: responsive.getFont(14)),
+                    context.tr('login_email'),
+                    style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(14)),
                   ),
                   SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                   TextField(
                     controller: _emailController,
                     style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                     decoration: InputDecoration(
-                      hintText: 'name@email.com',
+                      hintText: context.tr('login_email_hint'),
                       hintStyle: AppTextStyles.body.copyWith(
                         color: AppColors.border,
                         fontSize: bodyFontSize,
@@ -219,14 +214,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               SizedBox(height: h18),
-              // Password field
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Password',
-                    style: AppTextStyles.subtitle
-                        .copyWith(fontSize: responsive.getFont(14)),
+                    context.tr('login_password'),
+                    style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(14)),
                   ),
                   SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                   TextField(
@@ -234,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      hintText: '••••••••',
+                      hintText: context.tr('login_password_hint'),
                       hintStyle: AppTextStyles.body.copyWith(
                         color: AppColors.border,
                         fontSize: bodyFontSize,
@@ -267,7 +260,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               SizedBox(height: h18),
-              // Forgot password
               Align(
                 alignment: Alignment.centerRight,
                 child: GestureDetector(
@@ -279,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                   child: Text(
-                    'Forgot Password?',
+                    context.tr('login_forgot_password'),
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
@@ -289,14 +281,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: h28),
-              // Login button
               CustomButton(
-                label: _isLoading ? 'Logging in...' : 'Login',
+                label: _isLoading ? context.tr('login_loading') : context.tr('login_btn'),
                 onPressed: _isLoading ? () {} : _login,
                 width: double.infinity,
               ),
               SizedBox(height: h24),
-              // Divider with OR text
               Row(
                 children: [
                   const Expanded(child: Divider(color: AppColors.border)),
@@ -305,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       horizontal: responsive.getPadding(12),
                     ),
                     child: Text(
-                      'OR',
+                      context.tr('login_or'),
                       style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                     ),
                   ),
@@ -313,12 +303,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               SizedBox(height: h24),
-              // Sign up link
               Wrap(
                 alignment: WrapAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account? ",
+                    context.tr('login_no_account'),
                     style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                   ),
                   GestureDetector(
@@ -328,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     },
                     child: Text(
-                      'Register',
+                      context.tr('login_register'),
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700,

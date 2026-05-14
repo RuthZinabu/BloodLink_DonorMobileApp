@@ -8,6 +8,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
+import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -82,8 +83,101 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     Navigator.of(context).pushReplacementNamed('/login');
   }
 
-  Widget _buildFeatureCard(
-      BuildContext context, ResponsiveUtils responsive, String title, String subtitle) {
+  void _showLanguagePicker(BuildContext context) {
+    final service = LocalizationService();
+    final languages = LocalizationService.supportedLanguages;
+    final currentLocale = service.currentLocale;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: AppColors.textSecondary.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  context.tr('select_language'),
+                  style: AppTextStyles.heading.copyWith(fontSize: 18),
+                ),
+                const SizedBox(height: 16),
+                ...languages.entries.map((entry) {
+                  final isSelected = entry.key == currentLocale;
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.primary.withOpacity(0.12)
+                            : AppColors.surface,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          _languageFlag(entry.key),
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      entry.value,
+                      style: AppTextStyles.body.copyWith(
+                        fontSize: 16,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.normal,
+                        color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(Icons.check_circle, color: AppColors.primary, size: 22)
+                        : null,
+                    onTap: () async {
+                      await service.setLocale(entry.key);
+                      if (ctx.mounted) Navigator.of(ctx).pop();
+                    },
+                  );
+                }),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _languageFlag(String code) {
+    switch (code) {
+      case 'en':
+        return '🇬🇧';
+      case 'am':
+        return '🇪🇹';
+      case 'om':
+        return '🇪🇹';
+      case 'ti':
+        return '🇪🇹';
+      case 'so':
+        return '🇸🇴';
+      default:
+        return '🌐';
+    }
+  }
+
+  Widget _buildFeatureCard(BuildContext context, ResponsiveUtils responsive, String title, String subtitle) {
     return GestureDetector(
       onTap: () => _goToLogin(context),
       child: Container(
@@ -111,30 +205,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 color: AppColors.primary.withAlpha(31),
                 borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
               ),
-              child: Icon(
-                Icons.bloodtype,
-                color: AppColors.primary,
-                size: responsive.getIconSize(22),
-              ),
+              child: Icon(Icons.bloodtype, color: AppColors.primary, size: responsive.getIconSize(22)),
             ),
             SizedBox(width: responsive.getSpacing(small: 12, medium: 14, large: 18)),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: AppTextStyles.subheading.copyWith(
-                      fontSize: responsive.getFont(16),
-                    ),
-                  ),
+                  Text(title, style: AppTextStyles.subheading.copyWith(fontSize: responsive.getFont(16))),
                   SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
-                  Text(
-                    subtitle,
-                    style: AppTextStyles.body.copyWith(
-                      fontSize: responsive.getFont(14),
-                    ),
-                  ),
+                  Text(subtitle, style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14))),
                 ],
               ),
             ),
@@ -146,25 +226,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   Widget _buildCampaignsSection(BuildContext context, ResponsiveUtils responsive) {
     if (_isLoadingCampaigns) {
-      return Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primary,
-        ),
-      );
+      return Center(child: CircularProgressIndicator(color: AppColors.primary));
     } else if (_campaignError != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Unable to load campaigns',
-            style: AppTextStyles.body.copyWith(
-              color: AppColors.warning,
-              fontSize: responsive.getFont(16),
-            ),
+            context.tr('welcome_unable_load_campaigns'),
+            style: AppTextStyles.body.copyWith(color: AppColors.warning, fontSize: responsive.getFont(16)),
           ),
           SizedBox(height: responsive.getSpacing(small: 10, medium: 12, large: 14)),
           CustomButton(
-            label: 'Retry',
+            label: context.tr('retry'),
             onPressed: _loadCampaigns,
             backgroundColor: AppColors.primary,
             textColor: AppColors.white,
@@ -173,11 +246,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       );
     } else if (_campaigns.isEmpty) {
       return Text(
-        'No active campaigns are available at this time. Check back later for new opportunities to give.',
-        style: AppTextStyles.body.copyWith(
-          fontSize: responsive.getFont(14),
-          color: AppColors.textSecondary,
-        ),
+        context.tr('welcome_no_campaigns'),
+        style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14), color: AppColors.textSecondary),
       );
     } else {
       return Column(
@@ -194,9 +264,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget _buildCampaignCard(BuildContext context, ResponsiveUtils responsive, Campaign campaign) {
     return GestureDetector(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => CampaignDetailScreen(campaign: campaign),
-        ),
+        MaterialPageRoute(builder: (_) => CampaignDetailScreen(campaign: campaign)),
       ),
       child: Container(
         width: double.infinity,
@@ -243,9 +311,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
                       Text(
                         campaign.title,
-                        style: AppTextStyles.heading.copyWith(
-                          fontSize: responsive.getFont(18),
-                        ),
+                        style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(18)),
                       ),
                     ],
                   ),
@@ -256,10 +322,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   backgroundColor: AppColors.primary.withOpacity(0.14),
                   child: Text(
                     campaign.initial,
-                    style: AppTextStyles.heading.copyWith(
-                      color: AppColors.primary,
-                      fontSize: responsive.getFont(18),
-                    ),
+                    style: AppTextStyles.heading.copyWith(color: AppColors.primary, fontSize: responsive.getFont(18)),
                   ),
                 ),
               ],
@@ -269,55 +332,33 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               campaign.content,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.body.copyWith(
-                fontSize: responsive.getFont(14),
-              ),
+              style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
             ),
             SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
             Row(
               children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: responsive.getIconSize(18),
-                  color: AppColors.textSecondary,
-                ),
+                Icon(Icons.calendar_today_outlined, size: responsive.getIconSize(18), color: AppColors.textSecondary),
                 SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                 Expanded(
-                  child: Text(
-                    campaign.formattedDate,
-                    style: AppTextStyles.body.copyWith(
-                      fontSize: responsive.getFont(14),
-                    ),
-                  ),
+                  child: Text(campaign.formattedDate, style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14))),
                 ),
               ],
             ),
             SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
             Row(
               children: [
-                Icon(
-                  Icons.location_on_outlined,
-                  size: responsive.getIconSize(18),
-                  color: AppColors.textSecondary,
-                ),
+                Icon(Icons.location_on_outlined, size: responsive.getIconSize(18), color: AppColors.textSecondary),
                 SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                 Expanded(
-                  child: Text(
-                    campaign.displayLocation,
-                    style: AppTextStyles.body.copyWith(
-                      fontSize: responsive.getFont(14),
-                    ),
-                  ),
+                  child: Text(campaign.displayLocation, style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14))),
                 ),
               ],
             ),
             SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
             CustomButton(
-              label: 'View details',
+              label: context.tr('welcome_view_details'),
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CampaignDetailScreen(campaign: campaign),
-                ),
+                MaterialPageRoute(builder: (_) => CampaignDetailScreen(campaign: campaign)),
               ),
               backgroundColor: AppColors.primary.withOpacity(0.08),
               textColor: AppColors.primary,
@@ -339,56 +380,49 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-              ),
+              decoration: const BoxDecoration(color: AppColors.primary),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'BloodLink',
-                    style: AppTextStyles.heading.copyWith(
-                      color: AppColors.white,
-                      fontSize: responsive.getFont(24),
-                    ),
+                    style: AppTextStyles.heading.copyWith(color: AppColors.white, fontSize: responsive.getFont(24)),
                   ),
                   SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                   Text(
-                    'Helping donors connect with campaigns and stay informed.',
-                    style: AppTextStyles.body.copyWith(
-                      color: AppColors.white,
-                      fontSize: responsive.getFont(14),
-                    ),
+                    context.tr('drawer_tagline'),
+                    style: AppTextStyles.body.copyWith(color: AppColors.white, fontSize: responsive.getFont(14)),
                   ),
                 ],
               ),
-            ),Center(
+            ),
+            Center(
               child: Column(
                 children: [
-            ListTile(
-              leading: const Icon(Icons.info_outline, color: AppColors.primary),
-              title: Text('About Us', style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16))),
-              onTap: () => _navigateToDrawerItem('/about'),
+                  ListTile(
+                    leading: const Icon(Icons.info_outline, color: AppColors.primary),
+                    title: Text(context.tr('welcome_about_us'), style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16))),
+                    onTap: () => _navigateToDrawerItem('/about'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.privacy_tip_outlined, color: AppColors.primary),
+                    title: Text(context.tr('welcome_privacy_policy'), style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16))),
+                    onTap: () => _navigateToDrawerItem('/privacy'),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.article_outlined, color: AppColors.primary),
+                    title: Text(context.tr('welcome_terms'), style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16))),
+                    onTap: () => _navigateToDrawerItem('/terms'),
+                  ),
+                  const Divider(),
+                  ListTile(
+                    leading: const Icon(Icons.campaign_outlined, color: AppColors.primary),
+                    title: Text(context.tr('welcome_view_campaigns'), style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16))),
+                    onTap: () => Navigator.of(context).pushNamed('/campaigns'),
+                  ),
+                ],
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.privacy_tip_outlined, color: AppColors.primary),
-              title: Text('Privacy Policy', style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16))),
-              onTap: () => _navigateToDrawerItem('/privacy'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.article_outlined, color: AppColors.primary),
-              title: Text('Terms of Service', style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16))),
-              onTap: () => _navigateToDrawerItem('/terms'),
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.campaign_outlined, color: AppColors.primary),
-              title: Text('View Campaigns', style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16))),
-              onTap: () => Navigator.of(context).pushNamed('/campaigns'),
-            ),
-          ]
-        )
-        )
           ],
         ),
       ),
@@ -399,6 +433,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ),
         backgroundColor: AppColors.background,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: AppColors.primary),
+            tooltip: 'Select Language',
+            onPressed: () => _showLanguagePicker(context),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -414,7 +455,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 borderRadius: BorderRadius.circular(responsive.getBorderRadius(28)),
                 child: Container(
                   width: double.infinity,
-                  height: responsive.getHeight(32.5), // 260 on large screens
+                  height: responsive.getHeight(32.5),
                   color: AppColors.background,
                   child: AnimatedSwitcher(
                     duration: const Duration(seconds: 1),
@@ -432,43 +473,35 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
               Text(
-                'Your Blood Can Save a Life Today',
-                style: AppTextStyles.heading.copyWith(
-                  fontSize: responsive.getFont(24),
-                ),
+                context.tr('welcome_hero_title'),
+                style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(24)),
               ),
               SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
               Text(
-                'Join thousands of donors responding to emergencies and campaigns near you.',
-                style: AppTextStyles.body.copyWith(
-                  fontSize: responsive.getFont(16),
-                ),
+                context.tr('welcome_hero_subtitle'),
+                style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16)),
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
               CustomButton(
-                label: 'Donate Now',
+                label: context.tr('welcome_donate_now'),
                 onPressed: () => _goToLogin(context),
               ),
               SizedBox(height: responsive.getSpacing(small: 24, medium: 28, large: 32)),
               Text(
-                'How It Works',
-                style: AppTextStyles.heading.copyWith(
-                  fontSize: responsive.getFont(24),
-                ),
+                context.tr('welcome_how_it_works'),
+                style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(24)),
               ),
               SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
-              _buildFeatureCard(context, responsive, 'Register as a Donor',
-                  'Create your profile in seconds.'),
-              _buildFeatureCard(context, responsive, 'Get Emergency Alerts',
-                  'Receive notifications when needed.'),
-              _buildFeatureCard(context, responsive, 'Save Lives Nearby',
-                  'Donate at local centers & drives.'),
+              _buildFeatureCard(context, responsive,
+                  context.tr('welcome_feature_register_title'), context.tr('welcome_feature_register_sub')),
+              _buildFeatureCard(context, responsive,
+                  context.tr('welcome_feature_alerts_title'), context.tr('welcome_feature_alerts_sub')),
+              _buildFeatureCard(context, responsive,
+                  context.tr('welcome_feature_save_title'), context.tr('welcome_feature_save_sub')),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
               Text(
-                'Upcoming Campaigns',
-                style: AppTextStyles.heading.copyWith(
-                  fontSize: responsive.getFont(24),
-                ),
+                context.tr('welcome_upcoming_campaigns'),
+                style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(24)),
               ),
               SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
               _buildCampaignsSection(context, responsive),
@@ -476,21 +509,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _StatTile(
-                    value: '25k+',
-                    label: 'Donors Registered',
-                    responsive: responsive,
-                  ),
-                  _StatTile(
-                    value: '8.5k+',
-                    label: 'Lives Saved',
-                    responsive: responsive,
-                  ),
-                  _StatTile(
-                    value: '1.2k',
-                    label: 'Active Campaigns',
-                    responsive: responsive,
-                  ),
+                  _StatTile(value: '25k+', label: context.tr('welcome_stat_donors'), responsive: responsive),
+                  _StatTile(value: '8.5k+', label: context.tr('welcome_stat_lives'), responsive: responsive),
+                  _StatTile(value: '1.2k', label: context.tr('welcome_stat_campaigns'), responsive: responsive),
                 ],
               ),
               SizedBox(height: responsive.getSpacing(small: 24, medium: 28, large: 32)),
@@ -509,76 +530,46 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Someone near you needs blood right now.',
-                      style: AppTextStyles.heading.copyWith(
-                        fontSize: responsive.getFont(20),
-                      ),
+                      context.tr('welcome_someone_needs'),
+                      style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(20)),
                     ),
                     SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
                     CustomButton(
-                      label: 'Become a Donor Today',
+                      label: context.tr('welcome_become_donor'),
                       onPressed: () => _goToLogin(context),
                     ),
                   ],
                 ),
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pushNamed('/about'),
-                    child: Text(
-                      'About Us',
-                      style: AppTextStyles.body.copyWith(
-                        fontSize: responsive.getFont(14),
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                  
-                ],
+              GestureDetector(
+                onTap: () => Navigator.of(context).pushNamed('/about'),
+                child: Text(
+                  context.tr('welcome_about_us'),
+                  style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14), decoration: TextDecoration.underline),
+                ),
               ),
               SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pushNamed('/privacy'),
-                    child: Text(
-                      'Privacy Policy',
-                      style: AppTextStyles.body.copyWith(
-                        fontSize: responsive.getFont(14),
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
+              GestureDetector(
+                onTap: () => Navigator.of(context).pushNamed('/privacy'),
+                child: Text(
+                  context.tr('welcome_privacy_policy'),
+                  style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14), decoration: TextDecoration.underline),
+                ),
               ),
               SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pushNamed('/terms'),
-                    child: Text(
-                      'Terms of Service',
-                      style: AppTextStyles.body.copyWith(
-                        fontSize: responsive.getFont(14),
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
+              GestureDetector(
+                onTap: () => Navigator.of(context).pushNamed('/terms'),
+                child: Text(
+                  context.tr('welcome_terms'),
+                  style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14), decoration: TextDecoration.underline),
+                ),
               ),
               SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
               Center(
                 child: Text(
                   '© 2026 BloodLink Inc. All rights reserved.',
-                  style: AppTextStyles.subtitle.copyWith(
-                    fontSize: responsive.getFont(12),
-                  ),
+                  style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(12)),
                 ),
               ),
             ],
@@ -594,11 +585,7 @@ class _StatTile extends StatelessWidget {
   final String label;
   final ResponsiveUtils responsive;
 
-  const _StatTile({
-    required this.value,
-    required this.label,
-    required this.responsive,
-  });
+  const _StatTile({required this.value, required this.label, required this.responsive});
 
   @override
   Widget build(BuildContext context) {
@@ -608,17 +595,12 @@ class _StatTile extends StatelessWidget {
         children: [
           Text(
             value,
-            style: AppTextStyles.heading.copyWith(
-              color: AppColors.primary,
-              fontSize: responsive.getFont(24),
-            ),
+            style: AppTextStyles.heading.copyWith(color: AppColors.primary, fontSize: responsive.getFont(24)),
           ),
-          SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
+          SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
           Text(
             label,
-            style: AppTextStyles.subtitle.copyWith(
-              fontSize: responsive.getFont(12),
-            ),
+            style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(12), color: AppColors.textSecondary),
           ),
         ],
       ),

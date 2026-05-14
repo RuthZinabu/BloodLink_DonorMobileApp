@@ -6,6 +6,7 @@ import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
 import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
 import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
 import 'package:bloodlink_donor_mobile_app/screens/campaign_detail_screen.dart';
+import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
 class CampaignsScreen extends StatefulWidget {
   const CampaignsScreen({super.key});
@@ -32,9 +33,7 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
         _isLoading = true;
         _errorMessage = null;
       });
-
       final campaigns = await _apiService.fetchCampaigns();
-
       setState(() {
         _campaigns = campaigns;
         _isLoading = false;
@@ -65,10 +64,8 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Campaigns',
-                      style: AppTextStyles.heading.copyWith(
-                        fontSize: responsive.getFont(24),
-                      ),
+                      context.tr('campaigns_title'),
+                      style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(24)),
                     ),
                   ),
                   Container(
@@ -76,54 +73,34 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
                     height: responsive.getWidth(13),
                     decoration: BoxDecoration(
                       color: AppColors.surface,
-                      borderRadius:
-                          BorderRadius.circular(responsive.getBorderRadius(18)),
+                      borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
                     ),
-                    child: Icon(
-                      Icons.search,
-                      color: AppColors.primary,
-                      size: responsive.getIconSize(24),
-                    ),
+                    child: Icon(Icons.search, color: AppColors.primary, size: responsive.getIconSize(24)),
                   ),
                 ],
               ),
-              SizedBox(
-                  height:
-                      responsive.getSpacing(small: 14, medium: 18, large: 20)),
+              SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
               Row(
                 children: [
-                  _Pill(text: 'ALL', isActive: true, responsive: responsive),
-                  SizedBox(
-                      width: responsive.getSpacing(
-                          small: 8, medium: 10, large: 12)),
-                  _Pill(text: 'This week', responsive: responsive),
+                  _Pill(text: context.tr('campaigns_all'), isActive: true, responsive: responsive),
+                  SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                  _Pill(text: context.tr('campaigns_this_week'), responsive: responsive),
                 ],
               ),
-              SizedBox(
-                  height:
-                      responsive.getSpacing(small: 16, medium: 20, large: 24)),
+              SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
               if (_isLoading)
-                Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.primary,
-                  ),
-                )
+                Center(child: CircularProgressIndicator(color: AppColors.primary))
               else if (_errorMessage != null)
                 Center(
                   child: Column(
                     children: [
                       Text(
-                        'Failed to load campaigns',
-                        style: AppTextStyles.body.copyWith(
-                          color: AppColors.warning,
-                          fontSize: responsive.getFont(16),
-                        ),
+                        context.tr('campaigns_load_failed'),
+                        style: AppTextStyles.body.copyWith(color: AppColors.warning, fontSize: responsive.getFont(16)),
                       ),
-                      SizedBox(
-                          height: responsive.getSpacing(
-                              small: 8, medium: 10, large: 12)),
+                      SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                       CustomButton(
-                        label: 'Retry',
+                        label: context.tr('retry'),
                         onPressed: _loadCampaigns,
                         backgroundColor: AppColors.primary,
                         textColor: AppColors.white,
@@ -134,30 +111,15 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
               else if (_campaigns.isEmpty)
                 Center(
                   child: Text(
-                    'No campaigns available',
-                    style: AppTextStyles.body.copyWith(
-                      fontSize: responsive.getFont(16),
-                    ),
+                    context.tr('campaigns_empty'),
+                    style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16)),
                   ),
                 )
               else
                 ..._campaigns.map((campaign) => Padding(
                       padding: EdgeInsets.only(
-                          bottom: responsive.getSpacing(
-                              small: 12, medium: 14, large: 16)),
-                      child: _CampaignCard(
-                        campaign: campaign,
-                        responsive: responsive,
-                        // onTap: () {
-                        //   Navigator.push(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //       builder: (_) =>
-                        //           CampaignDetailScreen(campaign: campaign),
-                        //     ),
-                        //   );
-                        // },
-                      ),
+                          bottom: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+                      child: _CampaignCard(campaign: campaign, responsive: responsive),
                     )),
               SizedBox(height: responsive.getHeight(5)),
             ],
@@ -173,11 +135,7 @@ class _Pill extends StatelessWidget {
   final bool isActive;
   final ResponsiveUtils responsive;
 
-  const _Pill({
-    required this.text,
-    this.isActive = false,
-    required this.responsive,
-  });
+  const _Pill({required this.text, this.isActive = false, required this.responsive});
 
   @override
   Widget build(BuildContext context) {
@@ -206,11 +164,7 @@ class _CampaignCard extends StatelessWidget {
   final ResponsiveUtils responsive;
   final VoidCallback? onTap;
 
-  const _CampaignCard({
-    required this.campaign,
-    required this.responsive,
-    this.onTap,
-  });
+  const _CampaignCard({required this.campaign, required this.responsive, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -235,42 +189,27 @@ class _CampaignCard extends StatelessWidget {
                     height: responsive.getWidth(13),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.14),
-                      borderRadius:
-                          BorderRadius.circular(responsive.getBorderRadius(16)),
+                      borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
                     ),
                     child: Center(
                       child: Text(
                         campaign.initial,
-                        style: AppTextStyles.heading.copyWith(
-                          color: AppColors.primary,
-                          fontSize: responsive.getFont(22),
-                        ),
+                        style: AppTextStyles.heading.copyWith(color: AppColors.primary, fontSize: responsive.getFont(22)),
                       ),
                     ),
                   ),
-                  SizedBox(
-                      width: responsive.getSpacing(
-                          small: 10, medium: 12, large: 14)),
+                  SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          campaign.title,
-                          style: AppTextStyles.title.copyWith(
-                            fontSize: responsive.getFont(16),
-                          ),
-                        ),
-                        SizedBox(
-                            height: responsive.getSpacing(
-                                small: 2, medium: 4, large: 6)),
+                        Text(campaign.title, style: AppTextStyles.title.copyWith(fontSize: responsive.getFont(16))),
+                        SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
                         Text(
                           campaign.content,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.body.copyWith(
-                            fontSize: responsive.getFont(14),
-                          ),
+                          style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
                         ),
                       ],
                     ),
@@ -282,82 +221,41 @@ class _CampaignCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: campaign.statusColor.withOpacity(0.18),
-                      borderRadius:
-                          BorderRadius.circular(responsive.getBorderRadius(20)),
+                      borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
                     ),
                     child: Text(
                       campaign.displayStatus,
-                      style: AppTextStyles.subtitle.copyWith(
-                        color: campaign.statusColor,
-                        fontSize: responsive.getFont(12),
-                      ),
+                      style: AppTextStyles.subtitle.copyWith(color: campaign.statusColor, fontSize: responsive.getFont(12)),
                     ),
                   ),
                 ],
               ),
-              SizedBox(
-                  height:
-                      responsive.getSpacing(small: 12, medium: 16, large: 18)),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
               Row(
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    color: AppColors.primary,
-                    size: responsive.getIconSize(18),
-                  ),
-                  SizedBox(
-                      width: responsive.getSpacing(
-                          small: 6, medium: 8, large: 10)),
+                  Icon(Icons.calendar_today, color: AppColors.primary, size: responsive.getIconSize(18)),
+                  SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                   Expanded(
-                    child: Text(
-                      campaign.formattedDate,
-                      style: AppTextStyles.body.copyWith(
-                        fontSize: responsive.getFont(14),
-                      ),
-                    ),
+                    child: Text(campaign.formattedDate, style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14))),
                   ),
                 ],
               ),
-              SizedBox(
-                  height:
-                      responsive.getSpacing(small: 8, medium: 10, large: 12)),
+              SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
               Row(
                 children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    color: AppColors.primary,
-                    size: responsive.getIconSize(18),
-                  ),
-                  SizedBox(
-                      width: responsive.getSpacing(
-                          small: 6, medium: 8, large: 10)),
+                  Icon(Icons.location_on_outlined, color: AppColors.primary, size: responsive.getIconSize(18)),
+                  SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                   Expanded(
-                    child: Text(
-                      campaign.displayLocation,
-                      style: AppTextStyles.body.copyWith(
-                        fontSize: responsive.getFont(14),
-                      ),
-                    ),
+                    child: Text(campaign.displayLocation, style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14))),
                   ),
                 ],
               ),
-              SizedBox(
-                  height:
-                      responsive.getSpacing(small: 10, medium: 12, large: 14)),
-              Wrap(
-                spacing: responsive.getSpacing(small: 6, medium: 8, large: 10),
-                children: const [],
-              ),
-              SizedBox(
-                  height:
-                      responsive.getSpacing(small: 12, medium: 16, large: 18)),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
               CustomButton(
-                label: 'Details',
+                label: context.tr('campaigns_details'),
                 onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => CampaignDetailScreen(campaign: campaign),
+                  MaterialPageRoute(builder: (_) => CampaignDetailScreen(campaign: campaign)),
                 ),
-              ),
                 backgroundColor: AppColors.primary.withOpacity(0.08),
                 textColor: AppColors.primary,
                 isOutlined: true,

@@ -21,9 +21,13 @@ import 'package:bloodlink_donor_mobile_app/screens/my_requests_screen.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/services/notification_service.dart';
+import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize localization (loads saved language preference)
+  await LocalizationService().initialize();
 
   // Initialize notifications
   final notificationService = NotificationService();
@@ -37,55 +41,57 @@ class BloodLinkApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'BloodLink Donor',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-          secondary: AppColors.secondary,
-          background: AppColors.background,
-          surface: AppColors.surface,
-          onPrimary: AppColors.white,
-          onSecondary: AppColors.white,
-          onBackground: AppColors.textPrimary,
-          onSurface: AppColors.textPrimary,
+    return LocalizationProvider(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'BloodLink Donor',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: AppColors.primary,
+            primary: AppColors.primary,
+            secondary: AppColors.secondary,
+            background: AppColors.background,
+            surface: AppColors.surface,
+            onPrimary: AppColors.white,
+            onSecondary: AppColors.white,
+            onBackground: AppColors.textPrimary,
+            onSurface: AppColors.textPrimary,
+          ),
+          scaffoldBackgroundColor: AppColors.background,
+          useMaterial3: true,
+          textTheme: AppTextStyles.textTheme,
+          iconTheme: const IconThemeData(color: AppColors.iconColor),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: AppColors.background,
+            elevation: 0,
+            centerTitle: true,
+            titleTextStyle: AppTextStyles.heading,
+            iconTheme: IconThemeData(color: AppColors.textPrimary),
+          ),
         ),
-        scaffoldBackgroundColor: AppColors.background,
-        useMaterial3: true,
-        textTheme: AppTextStyles.textTheme,
-        iconTheme: const IconThemeData(color: AppColors.iconColor),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.background,
-          elevation: 0,
-          centerTitle: true,
-          titleTextStyle: AppTextStyles.heading,
-          iconTheme: IconThemeData(color: AppColors.textPrimary),
-        ),
+        home: const SplashScreen(),
+        routes: {
+          '/splash': (_) => const SplashScreen(),
+          '/welcome': (_) => const WelcomeScreen(),
+          '/home': (_) => const MainNavigationScreen(),
+          '/campaigns': (_) => const CampaignsScreen(),
+          '/urgent': (_) => const UrgentScreen(),
+          '/history': (_) => const HistoryScreen(),
+          '/profile': (_) => const MainNavigationScreen(),
+          '/profile/edit': (_) => const EditProfileScreen(),
+          '/leaderboard': (_) => const LeaderboardScreen(),
+          '/badges': (_) => const BadgesScreen(),
+          '/login': (_) => const LoginScreen(),
+          '/signup': (_) => const SignUpScreen(),
+          '/test-results': (_) => const TestResultsScreen(),
+          '/notifications': (_) => const NotificationsScreen(),
+          '/about': (_) => const AboutUsScreen(),
+          '/privacy': (_) => const PrivacyPolicyScreen(),
+          '/terms': (_) => const TermsOfServiceScreen(),
+          '/blood-request': (_) => const BloodRequestScreen(),
+          '/my-requests': (_) => const MyRequestsScreen(),
+        },
       ),
-      home: const SplashScreen(),
-      routes: {
-        '/splash': (_) => const SplashScreen(),
-        '/welcome': (_) => const WelcomeScreen(),
-        '/home': (_) => const MainNavigationScreen(),
-        '/campaigns': (_) => const CampaignsScreen(),
-        '/urgent': (_) => const UrgentScreen(),
-        '/history': (_) => const HistoryScreen(),
-        '/profile': (_) => const MainNavigationScreen(),
-        '/profile/edit': (_) => const EditProfileScreen(),
-        '/leaderboard': (_) => const LeaderboardScreen(),
-        '/badges': (_) => const BadgesScreen(),
-        '/login': (_) => const LoginScreen(),
-        '/signup': (_) => const SignUpScreen(),
-        '/test-results': (_) => const TestResultsScreen(),
-        '/notifications': (_) => const NotificationsScreen(),
-        '/about': (_) => const AboutUsScreen(),
-        '/privacy': (_) => const PrivacyPolicyScreen(),
-        '/terms': (_) => const TermsOfServiceScreen(),
-        '/blood-request': (_) => const BloodRequestScreen(),
-        '/my-requests': (_) => const MyRequestsScreen(),
-      },
     );
   }
 }
@@ -125,30 +131,30 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         backgroundColor: AppColors.white,
         labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: context.tr('nav_home'),
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.campaign_outlined),
-            selectedIcon: Icon(Icons.campaign),
-            label: 'Campaigns',
+          NavigationDestination(
+            icon: const Icon(Icons.campaign_outlined),
+            selectedIcon: const Icon(Icons.campaign),
+            label: context.tr('nav_campaigns'),
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.priority_high_outlined),
-            selectedIcon: Icon(Icons.priority_high),
-            label: 'Urgent',
+          NavigationDestination(
+            icon: const Icon(Icons.priority_high_outlined),
+            selectedIcon: const Icon(Icons.priority_high),
+            label: context.tr('nav_urgent'),
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'History',
+          NavigationDestination(
+            icon: const Icon(Icons.history_outlined),
+            selectedIcon: const Icon(Icons.history),
+            label: context.tr('nav_history'),
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
+          NavigationDestination(
+            icon: const Icon(Icons.person_outline),
+            selectedIcon: const Icon(Icons.person),
+            label: context.tr('nav_profile'),
           ),
         ],
       ),
