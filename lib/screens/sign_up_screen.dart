@@ -5,6 +5,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
 import 'package:bloodlink_donor_mobile_app/services/auth_manager.dart';
+import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -58,28 +59,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _passwordController.text.isEmpty ||
         _confirmPasswordController.text.isEmpty) {
       setState(() {
-        _errorMessage = 'Please fill in all fields';
+        _errorMessage = context.tr('signup_fill_all');
       });
       return;
     }
 
     if (_selectedBirthDate == null) {
       setState(() {
-        _errorMessage = 'Please select your birth date';
+        _errorMessage = context.tr('signup_select_date');
       });
       return;
     }
 
     if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
-        _errorMessage = 'Passwords do not match';
+        _errorMessage = context.tr('signup_passwords_mismatch');
       });
       return;
     }
 
     if (_passwordController.text.length < 8) {
       setState(() {
-        _errorMessage = 'Password must be at least 8 characters';
+        _errorMessage = context.tr('signup_password_short');
       });
       return;
     }
@@ -101,22 +102,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (!mounted) return;
 
       if (result['success']) {
-        // Show success message and navigate to login
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful! Please log in.')),
+          SnackBar(content: Text(context.tr('signup_success'))),
         );
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
       } else {
         setState(() {
-          _errorMessage = result['message'] ?? 'Registration failed';
+          _errorMessage = result['message'] ?? context.tr('signup_failed');
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'An error occurred: ${e.toString()}';
+          _errorMessage = e.toString();
         });
       }
     } finally {
@@ -141,14 +141,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       children: [
         Text(
           label,
-          style: AppTextStyles.subtitle
-              .copyWith(fontSize: responsive.getFont(14)),
+          style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(14)),
         ),
         SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
         TextField(
           controller: controller,
-          style: AppTextStyles.body
-              .copyWith(fontSize: responsive.getFont(14)),
+          style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
           keyboardType: keyboardType,
           obscureText: obscureText,
           decoration: InputDecoration(
@@ -220,26 +218,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   size: iconSize,
                 ),
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 16, medium: 24, large: 32),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 16, medium: 24, large: 32)),
               Text(
-                'Donor Registration',
-                style: AppTextStyles.heading
-                    .copyWith(fontSize: headingFontSize),
+                context.tr('signup_title'),
+                style: AppTextStyles.heading.copyWith(fontSize: headingFontSize),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 6, medium: 8, large: 10),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
               Text(
-                'Join us and help save lives',
+                context.tr('signup_subtitle'),
                 style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 16, medium: 20, large: 28),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 28)),
               if (_errorMessage != null)
                 Container(
                   padding: EdgeInsets.all(responsive.getFont(14)),
@@ -249,11 +240,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        color: AppColors.warning,
-                        size: responsive.getFont(20),
-                      ),
+                      Icon(Icons.error_outline, color: AppColors.warning, size: responsive.getFont(20)),
                       SizedBox(width: responsive.getSpacing(small: 8, medium: 12)),
                       Expanded(
                         child: Text(
@@ -269,54 +256,43 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
               if (_errorMessage != null)
-                SizedBox(
-                  height: responsive.getSpacing(small: 12, medium: 16, large: 20),
-                ),
+                SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
               _buildTextField(
-                label: 'Full Name',
-                hintText: 'Example User',
+                label: context.tr('signup_full_name'),
+                hintText: context.tr('signup_name_hint'),
                 controller: _nameController,
                 responsive: responsive,
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
               _buildTextField(
-                label: 'Email Address',
-                hintText: 'user@example.com',
+                label: context.tr('signup_email'),
+                hintText: context.tr('signup_email_hint'),
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 responsive: responsive,
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
               _buildTextField(
-                label: 'Phone Number',
-                hintText: '+1 (555) 000-0000',
+                label: context.tr('signup_phone'),
+                hintText: context.tr('signup_phone_hint'),
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 responsive: responsive,
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
               _buildTextField(
-                label: 'Address (Optional)',
-                hintText: 'Your residential address',
+                label: context.tr('signup_address'),
+                hintText: context.tr('signup_address_hint'),
                 controller: _addressController,
                 responsive: responsive,
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Birth Date',
-                    style: AppTextStyles.subtitle
-                        .copyWith(fontSize: responsive.getFont(14)),
+                    context.tr('signup_birth_date'),
+                    style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(14)),
                   ),
                   SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
                   GestureDetector(
@@ -335,7 +311,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         children: [
                           Text(
                             _selectedBirthDate == null
-                                ? 'Select date'
+                                ? context.tr('signup_date_hint')
                                 : '${_selectedBirthDate!.year}-${_selectedBirthDate!.month.toString().padLeft(2, '0')}-${_selectedBirthDate!.day.toString().padLeft(2, '0')}',
                             style: AppTextStyles.body.copyWith(
                               fontSize: responsive.getFont(14),
@@ -344,36 +320,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   : AppColors.textPrimary,
                             ),
                           ),
-                          Icon(
-                            Icons.calendar_today,
-                            color: AppColors.primary,
-                            size: responsive.getIconSize(20),
-                          ),
+                          Icon(Icons.calendar_today, color: AppColors.primary, size: responsive.getIconSize(20)),
                         ],
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 12, medium: 16, large: 20),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
               responsive.isSmallScreen
                   ? Column(
                       children: [
                         _buildTextField(
-                          label: 'Password',
+                          label: context.tr('signup_password'),
                           hintText: '••••••••',
                           controller: _passwordController,
                           obscureText: true,
                           responsive: responsive,
                         ),
-                        SizedBox(
-                          height: responsive.getSpacing(
-                              small: 12, medium: 16, large: 20),
-                        ),
+                        SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
                         _buildTextField(
-                          label: 'Confirm Password',
+                          label: context.tr('signup_confirm_password'),
                           hintText: '••••••••',
                           controller: _confirmPasswordController,
                           obscureText: true,
@@ -385,19 +352,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       children: [
                         Expanded(
                           child: _buildTextField(
-                            label: 'Password',
+                            label: context.tr('signup_password'),
                             hintText: '••••••••',
                             controller: _passwordController,
                             obscureText: true,
                             responsive: responsive,
                           ),
                         ),
-                        SizedBox(
-                          width: responsive.getSpacing(small: 12, medium: 16),
-                        ),
+                        SizedBox(width: responsive.getSpacing(small: 12, medium: 16)),
                         Expanded(
                           child: _buildTextField(
-                            label: 'Confirm',
+                            label: context.tr('signup_confirm_password'),
                             hintText: '••••••••',
                             controller: _confirmPasswordController,
                             obscureText: true,
@@ -406,22 +371,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       ],
                     ),
-              SizedBox(
-                height: responsive.getSpacing(small: 16, medium: 24, large: 32),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 16, medium: 24, large: 32)),
               CustomButton(
-                label: _isLoading ? 'Creating Account...' : 'Create Account',
+                label: _isLoading ? context.tr('signup_creating') : context.tr('signup_create_account'),
                 onPressed: _isLoading ? () {} : _signUp,
                 width: double.infinity,
               ),
-              SizedBox(
-                height: responsive.getSpacing(small: 12, medium: 18, large: 24),
-              ),
+              SizedBox(height: responsive.getSpacing(small: 12, medium: 18, large: 24)),
               Wrap(
                 alignment: WrapAlignment.center,
                 children: [
                   Text(
-                    'Already have an account? ',
+                    context.tr('signup_have_account'),
                     style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                   ),
                   GestureDetector(
@@ -431,7 +392,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       );
                     },
                     child: Text(
-                      'Sign in',
+                      context.tr('signup_sign_in'),
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.w700,

@@ -9,6 +9,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 import 'package:bloodlink_donor_mobile_app/widgets/custom_button.dart';
 import 'package:bloodlink_donor_mobile_app/services/auth_manager.dart';
+import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -49,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     } else {
       setState(() {
-        _profileError = result['message'] as String? ?? 'Unable to load profile.';
+        _profileError = result['message'] as String? ?? context.tr('profile_load_failed');
         _isLoadingProfile = false;
       });
     }
@@ -66,11 +67,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
 
       if (result['success']) {
-        // Navigate to login screen
         Navigator.of(context).pushReplacementNamed('/login');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Logout failed')),
+          SnackBar(content: Text(result['message'] ?? context.tr('profile_logout_failed'))),
         );
         setState(() {
           _isLoggingOut = false;
@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error during logout: ${e.toString()}')),
+          SnackBar(content: Text(e.toString())),
         );
         setState(() {
           _isLoggingOut = false;
@@ -89,55 +89,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  // String _formatBloodGroup(Map<String, dynamic>? profileData) {
-  //   final bloodType = profileData?['blood_type']?.toString().trim();
-  //   if (bloodType == null || bloodType.isEmpty) {
-  //     return 'Not recorded';
-  //   }
-  //   return bloodType;
-  // }
-
-  // String _formatDonationsCount(Map<String, dynamic>? profileData) {
-  //   final count = profileData?['donations_count'];
-  //   if (count == null) return '0';
-  //   return count.toString();
-  // }
-
-  // String _formatLastDonationDate(Map<String, dynamic>? profileData) {
-  //   final date = profileData?['last_donation_date']?.toString().trim();
-  //   if (date == null || date.isEmpty) {
-  //     return 'No donation';
-  //   }
-  //   // Try to parse and format the date
-  //   try {
-  //     final parsed = DateTime.tryParse(date);
-  //     if (parsed != null) {
-  //       const monthNames = [
-  //         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  //         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  //       ];
-  //       return '${monthNames[parsed.month - 1]} ${parsed.day}, ${parsed.year}';
-  //     }
-  //   } catch (_) {}
-  //   return date;
-  // }
-
-  // String _formatEligibilityStatus(Map<String, dynamic>? profileData) {
-  //   final status = profileData?['eligibility_status']?.toString().trim();
-  //   if (status == null || status.isEmpty) {
-  //     return 'Status not available';
-  //   }
-  //   return status;
-  // }
-
-    @override
   Widget build(BuildContext context) {
     final responsive = context.responsive;
-    final profilePhotoUrl = _profileData?['profile_picture_url']?.toString() ?? '';
+    final donorInfoMap = _profileData?['donor_info'] as Map<String, dynamic>?;
+    final profilePhotoUrl = (_profileData?['profile_picture_url'] ??
+            _profileData?['ProfilePictureUrl'] ??
+            _profileData?['photo_url'] ??
+            _profileData?['avatar_url'] ??
+            _profileData?['picture_url'] ??
+            _profileData?['image_url'] ??
+            donorInfoMap?['profile_picture_url'] ??
+            donorInfoMap?['ProfilePictureUrl'] ??
+            donorInfoMap?['photo_url'] ??
+            donorInfoMap?['avatar_url'])
+        ?.toString() ??
+    '';
 
     return SafeArea(
       child: Scaffold(
@@ -171,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                             Text(
-                              'BloodLink',
+                              context.tr('profile_title'),
                               style: TextStyle(
                                 fontSize: responsive.getFont(24),
                                 fontWeight: FontWeight.w800,
@@ -225,15 +191,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               onTap: () => Navigator.of(context)
                                   .push<bool>(
                                     MaterialPageRoute(
-                                      builder: (_) => EditProfileScreen(
-                                        initialProfile: _profileData,
-                                      ),
+                                      builder: (_) => EditProfileScreen(initialProfile: _profileData),
                                     ),
                                   )
                                   .then((updated) {
-                                if (updated == true) {
-                                  _loadProfile();
-                                }
+                                if (updated == true) _loadProfile();
                               }),
                               child: Container(
                                 width: responsive.getWidth(10.5),
@@ -242,11 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   color: AppColors.primary,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(
-                                  Icons.edit,
-                                  color: AppColors.white,
-                                  size: responsive.getIconSize(20),
-                                ),
+                                child: Icon(Icons.edit, color: AppColors.white, size: responsive.getIconSize(20)),
                               ),
                             ),
                           ],
@@ -255,10 +213,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Text(
                           _profileData?['full_name']?.toString() ??
                               _profileData?['name']?.toString() ??
-                              'Donor Name',
-                          style: AppTextStyles.heading.copyWith(
-                            fontSize: responsive.getFont(22),
-                          ),
+                              context.tr('profile_donor_name'),
+                          style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(22)),
                         ),
                         SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                         Container(
@@ -279,57 +235,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           child: Column(
                             children: [
-                              // Card(
-                              //   elevation: 4,
-                              //   color: AppColors.white,
-                              //   shape: RoundedRectangleBorder(
-                              //     borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
-                              //   ),
-                              //   child: Padding(
-                              //     padding: EdgeInsets.all(responsive.getPadding(18)),
-                              //     child: Row(
-                              //       children: [
-                              //         Container(
-                              //           width: responsive.getWidth(10.5),
-                              //           height: responsive.getWidth(10.5),
-                              //           decoration: BoxDecoration(
-                              //             color: const Color(0xFFE8F7EE),
-                              //             borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
-                              //           ),
-                              //           child: Icon(
-                              //             Icons.shield,
-                              //             color: const Color(0xFF1BC47D),
-                              //             size: responsive.getIconSize(20),
-                              //           ),
-                              //         ),
-                              //         SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
-                              //         Expanded(
-                              //           child: Column(
-                              //             crossAxisAlignment: CrossAxisAlignment.start,
-                              //             children: [
-                              //               // Text(
-                              //               //   'Eligibility Status',
-                              //               //   style: AppTextStyles.title.copyWith(
-                              //               //     fontSize: responsive.getFont(14),
-                              //               //   ),
-                              //               // ),
-                              //               // SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
-                              //               Text(
-                              //                 _formatEligibilityStatus(_profileData),
-                              //                 style: TextStyle(
-                              //                   color: const Color(0xFF1BC47D),
-                              //                   fontWeight: FontWeight.w600,
-                              //                   fontSize: responsive.getFont(12),
-                              //                 ),
-                              //               ),
-                              //             ],
-                              //           ),
-                              //         ),
-                              //       ],
-                              //     ),
-                              //   ),
-                              // ),
-                              // SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 18)),
                               Card(
                                 elevation: 4,
                                 color: AppColors.white,
@@ -342,67 +247,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     children: [
                                       _ProfileMenuItem(
                                         icon: Icons.person_outline,
-                                        title: 'Personal Information',
+                                        title: context.tr('profile_personal_info'),
                                         responsive: responsive,
                                         onTap: () => Navigator.of(context)
                                             .push<bool>(
                                               MaterialPageRoute(
-                                                builder: (_) => EditProfileScreen(
-                                                  initialProfile: _profileData,
-                                                ),
+                                                builder: (_) => EditProfileScreen(initialProfile: _profileData),
                                               ),
                                             )
                                             .then((updated) {
-                                          if (updated == true) {
-                                            _loadProfile();
-                                          }
+                                          if (updated == true) _loadProfile();
                                         }),
                                       ),
                                       _separator(responsive),
                                       _ProfileMenuItem(
                                         icon: Icons.medical_services_outlined,
-                                        title: 'Medical Information',
+                                        title: context.tr('profile_medical_info'),
                                         responsive: responsive,
                                         onTap: () => Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) => const TestResultsScreen(),
-                                          ),
+                                          MaterialPageRoute(builder: (_) => const TestResultsScreen()),
                                         ),
                                       ),
                                       _separator(responsive),
                                       _ProfileMenuItem(
                                         icon: Icons.emoji_events,
-                                        title: 'My Badges',
+                                        title: context.tr('profile_badges'),
                                         responsive: responsive,
                                         onTap: () => Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) => const BadgesScreen(),
-                                          ),
+                                          MaterialPageRoute(builder: (_) => const BadgesScreen()),
                                         ),
                                       ),
                                       _separator(responsive),
                                       _ProfileMenuItem(
                                         icon: Icons.history_rounded,
-                                        title: 'Donation History',
+                                        title: context.tr('profile_history'),
                                         responsive: responsive,
                                         onTap: () => Navigator.of(context).pushNamed('/history'),
                                       ),
                                       _separator(responsive),
                                       _ProfileMenuItem(
                                         icon: Icons.bloodtype,
-                                        title: 'Blood Requests',
+                                        title: context.tr('profile_blood_requests'),
                                         responsive: responsive,
                                         onTap: () => Navigator.of(context).pushNamed('/my-requests'),
                                       ),
                                       _separator(responsive),
                                       _ProfileMenuItem(
                                         icon: Icons.emoji_events_outlined,
-                                        title: 'Leaderboard Status',
+                                        title: context.tr('profile_leaderboard'),
                                         responsive: responsive,
                                         onTap: () => Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) => const LeaderboardScreen(),
-                                          ),
+                                          MaterialPageRoute(builder: (_) => const LeaderboardScreen()),
                                         ),
                                       ),
                                     ],
@@ -414,7 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
                         CustomButton(
-                          label: _isLoggingOut ? 'Logging out...' : 'Logout',
+                          label: _isLoggingOut ? context.tr('profile_logging_out') : context.tr('profile_logout'),
                           onPressed: _isLoggingOut ? () {} : _logout,
                           backgroundColor: AppColors.white,
                           textColor: AppColors.primary,
@@ -427,6 +322,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
   Widget _separator(ResponsiveUtils responsive) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: responsive.getPadding(16)),
@@ -467,16 +363,11 @@ class _ProfileMenuItem extends StatelessWidget {
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(responsive.getBorderRadius(14)),
               ),
-              child: Icon(
-                icon,
-                color: AppColors.primary,
-                size: responsive.getIconSize(20),
-              ),
+              child: Icon(icon, color: AppColors.primary, size: responsive.getIconSize(20)),
             ),
             const SizedBox(width: 14),
             Expanded(child: Text(title, style: AppTextStyles.title)),
-            const Icon(Icons.keyboard_arrow_right,
-                color: AppColors.textSecondary),
+            const Icon(Icons.keyboard_arrow_right, color: AppColors.textSecondary),
           ],
         ),
       ),
