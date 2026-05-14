@@ -9,6 +9,7 @@ import 'package:bloodlink_donor_mobile_app/services/api_service.dart';
 import 'package:bloodlink_donor_mobile_app/services/notification_service.dart';
 import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
 import 'package:bloodlink_donor_mobile_app/models/eligibility.dart';
+import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 import 'package:geolocator/geolocator.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -358,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             Navigator.of(context).pushNamed('/welcome');
                         },
                         child: Text(
-                          'Welcome',
+                          context.tr('app_name'),
                           style: AppTextStyles.heading.copyWith(
                             fontSize: responsive.getFont(26),
                           ),
@@ -366,7 +367,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ),
                         SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
                         Text(
-                          _isLoading ? 'Loading...' : 'Hi $_userName, ready to save a life?',
+                          _isLoading
+                              ? context.tr('loading')
+                              : context.tr('home_greeting').replaceAll('{name}', _userName),
                           style: AppTextStyles.subtitle.copyWith(
                             fontSize: responsive.getFont(16),
                           ),
@@ -441,27 +444,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 children: [
                   Expanded(
                     child: _InfoTile(
-                      title: 'Blood Group',
+                      title: context.tr('home_blood_group'),
                       value: _bloodGroup,
-                      status: _donorInfo.isVerified ? 'Verified' : 'Not verified',
+                      status: _donorInfo.isVerified ? context.tr('home_verified') : context.tr('home_not_verified'),
                       responsive: responsive,
                     ),
                   ),
-                  SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)), // 👈 reduced from 14
+                  SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
 
                   Expanded(
                     child: _InfoTile(
-                      title: 'Donations',
+                      title: context.tr('home_donations'),
                       value: _donationsCount,
                       status: _donationsStatus,
                       responsive: responsive,
                     ),
                   ),
-                  SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)), // 👈 reduced
+                  SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
 
                   Expanded(
                     child: _InfoTile(
-                      title: 'Last Donation',
+                      title: context.tr('home_last_donation'),
                       value: _lastDonationDate,
                       status: _lastDonationLocation,
                       responsive: responsive,
@@ -472,7 +475,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
               SizedBox(height: responsive.getSpacing(small: 18, medium: 22, large: 26)),
               Text(
-                'Shortcuts',
+                context.tr('home_shortcuts'),
                 style: AppTextStyles.subheading.copyWith(
                   fontSize: responsive.getFont(18),
                 ),
@@ -492,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         SizedBox(
                           width: itemWidth,
                           child: _ShortcutCard(
-                            label: 'Request Blood',
+                            label: context.tr('home_request_blood'),
                             icon: Icons.bloodtype,
                             responsive: responsive,
                             onPressed: () => Navigator.of(context).pushNamed('/blood-request'),
@@ -501,7 +504,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         SizedBox(
                           width: itemWidth,
                           child: _ShortcutCard(
-                            label: 'Emergency requests',
+                            label: context.tr('home_emergencies'),
                             icon: Icons.notifications_active,
                             responsive: responsive,
                             onPressed: () => Navigator.of(context).pushNamed('/urgent'),
@@ -510,7 +513,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         SizedBox(
                           width: itemWidth,
                           child: _ShortcutCard(
-                            label: 'Campaigns',
+                            label: context.tr('home_campaigns'),
                             icon: Icons.campaign,
                             responsive: responsive,
                             onPressed: () => Navigator.of(context).pushNamed('/campaigns'),
@@ -519,7 +522,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         SizedBox(
                           width: itemWidth,
                           child: _ShortcutCard(
-                            label: 'Test results',
+                            label: context.tr('home_test_results'),
                             icon: Icons.science,
                             responsive: responsive,
                             onPressed: () => Navigator.of(context).pushNamed('/test-results'),
@@ -528,7 +531,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         SizedBox(
                           width: itemWidth,
                           child: _ShortcutCard(
-                            label: 'History',
+                            label: context.tr('home_history'),
                             icon: Icons.history,
                             responsive: responsive,
                             onPressed: () => Navigator.of(context).pushNamed('/history'),
@@ -545,13 +548,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Urgent nearby',
+                    context.tr('home_urgent_nearby'),
                     style: AppTextStyles.subheading.copyWith(
                       fontSize: responsive.getFont(18),
                     ),
                   ),
                   Text(
-                    'View all',
+                    context.tr('home_view_all'),
                     style: TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
@@ -582,7 +585,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         SizedBox(width: responsive.getSpacing(small: 12, medium: 16, large: 18)),
                         Expanded(
                           child: Text(
-                            'Enable location in your phone to see nearby urgent requests',
+                            context.tr('home_enable_location'),
                             style: AppTextStyles.body.copyWith(
                               fontSize: responsive.getFont(14),
                               color: AppColors.textSecondary,
@@ -604,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     padding: EdgeInsets.all(responsive.getPadding(18)),
                     child: Center(
                       child: Text(
-                        'No nearby urgent requests found',
+                        context.tr('home_no_nearby'),
                         style: AppTextStyles.body.copyWith(
                           fontSize: responsive.getFont(14),
                           color: AppColors.textSecondary,
@@ -658,14 +661,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Donation tip',
+                            context.tr('home_donation_tip'),
                             style: AppTextStyles.title.copyWith(
                               fontSize: responsive.getFont(16),
                             ),
                           ),
                           SizedBox(height: responsive.getSpacing(small: 2, medium: 4, large: 6)),
                           Text(
-                            'Drink plenty of water and avoid heavy exercise 24 hours before and after your donation.',
+                            context.tr('home_donation_tip_text'),
                             style: AppTextStyles.body.copyWith(
                               fontSize: responsive.getFont(14),
                             ),
@@ -746,7 +749,7 @@ class _EligibilityCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Next eligible donation',
+                context.tr('home_next_eligible'),
                 style: AppTextStyles.subtitle.copyWith(
                   fontSize: responsive.getFont(16),
                 ),
@@ -817,7 +820,7 @@ class _EligibilityCard extends StatelessWidget {
 
           // Message subtitle
           Text(
-            isLoading ? 'Loading eligibility status…' : nextEligibleMessage,
+            isLoading ? context.tr('home_loading_eligibility') : nextEligibleMessage,
             style: AppTextStyles.body.copyWith(
               fontSize: responsive.getFont(14),
               color: AppColors.textSecondary,
