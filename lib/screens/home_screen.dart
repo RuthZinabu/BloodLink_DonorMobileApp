@@ -553,12 +553,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       fontSize: responsive.getFont(18),
                     ),
                   ),
-                  Text(
-                    context.tr('home_view_all'),
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                      fontSize: responsive.getFont(14),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pushNamed('/urgent'),
+                    child: Text(
+                      context.tr('home_view_all'),
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: responsive.getFont(14),
+                      ),
                     ),
                   ),
                 ],

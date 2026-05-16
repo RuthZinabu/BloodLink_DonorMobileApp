@@ -499,9 +499,25 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               _buildFeatureCard(context, responsive,
                   context.tr('welcome_feature_save_title'), context.tr('welcome_feature_save_sub')),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
-              Text(
-                context.tr('welcome_upcoming_campaigns'),
-                style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(24)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    context.tr('welcome_upcoming_campaigns'),
+                    style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(24)),
+                  ),
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).pushNamed('/campaigns'),
+                    child: Text(
+                      context.tr('home_view_all'),
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: responsive.getFont(14),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
               _buildCampaignsSection(context, responsive),

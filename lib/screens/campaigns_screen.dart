@@ -8,6 +8,8 @@ import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
 import 'package:bloodlink_donor_mobile_app/screens/campaign_detail_screen.dart';
 import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
+enum _CampaignFilter { all, thisWeek }
+
 class CampaignsScreen extends StatefulWidget {
   const CampaignsScreen({super.key});
 
@@ -20,6 +22,7 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
   List<Campaign> _campaigns = [];
   bool _isLoading = true;
   String? _errorMessage;
+  _CampaignFilter _activeFilter = _CampaignFilter.all;
 
   @override
   void initState() {
@@ -46,9 +49,25 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
     }
   }
 
+  /// Returns campaigns that overlap with the current calendar week (Mon–Sun).
+  List<Campaign> get _filteredCampaigns {
+    if (_activeFilter == _CampaignFilter.all) return _campaigns;
+
+    final now = DateTime.now();
+    final weekday = now.weekday; // 1 = Monday … 7 = Sunday
+    final startOfWeek = DateTime(now.year, now.month, now.day - (weekday - 1));
+    final endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
+
+    return _campaigns.where((c) {
+      return c.startDate.isBefore(endOfWeek) && c.endDate.isAfter(startOfWeek);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final responsive = ResponsiveUtils.of(context);
+    final displayed = _filteredCampaigns;
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -82,9 +101,19 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
               SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
               Row(
                 children: [
-                  _Pill(text: context.tr('campaigns_all'), isActive: true, responsive: responsive),
+                  _Pill(
+                    text: context.tr('campaigns_all'),
+                    isActive: _activeFilter == _CampaignFilter.all,
+                    responsive: responsive,
+                    onTap: () => setState(() => _activeFilter = _CampaignFilter.all),
+                  ),
                   SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
-                  _Pill(text: context.tr('campaigns_this_week'), responsive: responsive),
+                  _Pill(
+                    text: context.tr('campaigns_this_week'),
+                    isActive: _activeFilter == _CampaignFilter.thisWeek,
+                    responsive: responsive,
+                    onTap: () => setState(() => _activeFilter = _CampaignFilter.thisWeek),
+                  ),
                 ],
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
@@ -108,15 +137,45 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
                     ],
                   ),
                 )
-              else if (_campaigns.isEmpty)
+              else if (displayed.isEmpty)
                 Center(
-                  child: Text(
-                    context.tr('campaigns_empty'),
-                    style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16)),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: responsive.getPadding(32)),
+                    child: Column(
+                      children: [
+                        Icon(Icons.event_busy_outlined,
+                            size: responsive.getIconSize(48),
+                            color: AppColors.textSecondary),
+                        SizedBox(height: responsive.getSpacing(small: 12, medium: 16)),
+                        Text(
+                          _activeFilter == _CampaignFilter.thisWeek
+                              ? 'No campaigns scheduled for this week.'
+                              : context.tr('campaigns_empty'),
+                          style: AppTextStyles.body.copyWith(
+                              fontSize: responsive.getFont(16),
+                              color: AppColors.textSecondary),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (_activeFilter == _CampaignFilter.thisWeek) ...[
+                          SizedBox(height: responsive.getSpacing(small: 12, medium: 16)),
+                          GestureDetector(
+                            onTap: () => setState(() => _activeFilter = _CampaignFilter.all),
+                            child: Text(
+                              'View all campaigns',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: responsive.getFont(14),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 )
               else
-                ..._campaigns.map((campaign) => Padding(
+                ...displayed.map((campaign) => Padding(
                       padding: EdgeInsets.only(
                           bottom: responsive.getSpacing(small: 12, medium: 14, large: 16)),
                       child: _CampaignCard(campaign: campaign, responsive: responsive),
@@ -134,25 +193,35 @@ class _Pill extends StatelessWidget {
   final String text;
   final bool isActive;
   final ResponsiveUtils responsive;
+  final VoidCallback? onTap;
 
-  const _Pill({required this.text, this.isActive = false, required this.responsive});
+  const _Pill({
+    required this.text,
+    this.isActive = false,
+    required this.responsive,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: responsive.getPadding(18),
-        vertical: responsive.getPadding(12),
-      ),
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primary : AppColors.surface,
-        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-      ),
-      child: Text(
-        text,
-        style: AppTextStyles.subtitle.copyWith(
-          color: isActive ? AppColors.white : AppColors.textSecondary,
-          fontSize: responsive.getFont(14),
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: responsive.getPadding(18),
+          vertical: responsive.getPadding(12),
+        ),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+        ),
+        child: Text(
+          text,
+          style: AppTextStyles.subtitle.copyWith(
+            color: isActive ? AppColors.white : AppColors.textSecondary,
+            fontSize: responsive.getFont(14),
+          ),
         ),
       ),
     );

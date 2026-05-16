@@ -8,6 +8,8 @@ import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
 import 'package:bloodlink_donor_mobile_app/screens/emergency_detail_screen.dart';
 import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
+enum _UrgencyFilter { all, critical }
+
 class UrgentScreen extends StatefulWidget {
   const UrgentScreen({super.key});
 
@@ -20,6 +22,7 @@ class _UrgentScreenState extends State<UrgentScreen> {
   List<Emergency> _emergencies = [];
   bool _isLoading = true;
   String? _errorMessage;
+  _UrgencyFilter _activeFilter = _UrgencyFilter.all;
 
   @override
   void initState() {
@@ -33,9 +36,7 @@ class _UrgentScreenState extends State<UrgentScreen> {
         _isLoading = true;
         _errorMessage = null;
       });
-
       final emergencies = await _apiService.fetchEmergencies();
-
       setState(() {
         _emergencies = emergencies;
         _isLoading = false;
@@ -48,9 +49,18 @@ class _UrgentScreenState extends State<UrgentScreen> {
     }
   }
 
+  List<Emergency> get _filteredEmergencies {
+    if (_activeFilter == _UrgencyFilter.all) return _emergencies;
+    return _emergencies
+        .where((e) => e.urgencyLevel.toUpperCase() == 'CRITICAL')
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final responsive = ResponsiveUtils.of(context);
+    final displayed = _filteredEmergencies;
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -84,9 +94,19 @@ class _UrgentScreenState extends State<UrgentScreen> {
               SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
               Row(
                 children: [
-                  _Pill(text: context.tr('urgent_all'), isActive: true, responsive: responsive),
+                  _Pill(
+                    text: context.tr('urgent_all'),
+                    isActive: _activeFilter == _UrgencyFilter.all,
+                    responsive: responsive,
+                    onTap: () => setState(() => _activeFilter = _UrgencyFilter.all),
+                  ),
                   SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
-                  _Pill(text: context.tr('urgent_critical'), responsive: responsive),
+                  _Pill(
+                    text: context.tr('urgent_critical'),
+                    isActive: _activeFilter == _UrgencyFilter.critical,
+                    responsive: responsive,
+                    onTap: () => setState(() => _activeFilter = _UrgencyFilter.critical),
+                  ),
                 ],
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
@@ -110,15 +130,49 @@ class _UrgentScreenState extends State<UrgentScreen> {
                     ],
                   ),
                 )
-              else if (_emergencies.isEmpty)
+              else if (displayed.isEmpty)
                 Center(
-                  child: Text(
-                    context.tr('urgent_empty'),
-                    style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(16)),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: responsive.getPadding(32)),
+                    child: Column(
+                      children: [
+                        Icon(
+                          _activeFilter == _UrgencyFilter.critical
+                              ? Icons.health_and_safety_outlined
+                              : Icons.emergency_outlined,
+                          size: responsive.getIconSize(48),
+                          color: AppColors.textSecondary,
+                        ),
+                        SizedBox(height: responsive.getSpacing(small: 12, medium: 16)),
+                        Text(
+                          _activeFilter == _UrgencyFilter.critical
+                              ? 'No critical emergencies at the moment.'
+                              : context.tr('urgent_empty'),
+                          style: AppTextStyles.body.copyWith(
+                              fontSize: responsive.getFont(16),
+                              color: AppColors.textSecondary),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (_activeFilter == _UrgencyFilter.critical) ...[
+                          SizedBox(height: responsive.getSpacing(small: 12, medium: 16)),
+                          GestureDetector(
+                            onTap: () => setState(() => _activeFilter = _UrgencyFilter.all),
+                            child: Text(
+                              'View all emergencies',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: responsive.getFont(14),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 )
               else
-                ..._emergencies.map((emergency) => Padding(
+                ...displayed.map((emergency) => Padding(
                       padding: EdgeInsets.only(bottom: responsive.getSpacing(small: 12, medium: 14, large: 16)),
                       child: _EmergencyCard(
                         emergency: emergency,
@@ -146,25 +200,35 @@ class _Pill extends StatelessWidget {
   final String text;
   final bool isActive;
   final ResponsiveUtils responsive;
+  final VoidCallback? onTap;
 
-  const _Pill({required this.text, this.isActive = false, required this.responsive});
+  const _Pill({
+    required this.text,
+    this.isActive = false,
+    required this.responsive,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: responsive.getPadding(18),
-        vertical: responsive.getPadding(12),
-      ),
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primary : AppColors.surface,
-        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-      ),
-      child: Text(
-        text,
-        style: AppTextStyles.subtitle.copyWith(
-          color: isActive ? AppColors.white : AppColors.textSecondary,
-          fontSize: responsive.getFont(14),
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: responsive.getPadding(18),
+          vertical: responsive.getPadding(12),
+        ),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+        ),
+        child: Text(
+          text,
+          style: AppTextStyles.subtitle.copyWith(
+            color: isActive ? AppColors.white : AppColors.textSecondary,
+            fontSize: responsive.getFont(14),
+          ),
         ),
       ),
     );
