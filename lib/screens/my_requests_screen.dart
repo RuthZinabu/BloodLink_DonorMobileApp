@@ -381,7 +381,7 @@ class _RequestCard extends StatelessWidget {
       backgroundColor: AppColors.white,
       borderRadius: responsive.getBorderRadius(16),
       padding: EdgeInsets.all(responsive.getPadding(16)),
-      elevation: 2,
+      elevation: 0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -236,7 +236,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
               Card(
-                elevation: 4,
+                elevation: 0,
                 child: Padding(
                   padding: EdgeInsets.all(responsive.getPadding(16)),
                   child: Row(

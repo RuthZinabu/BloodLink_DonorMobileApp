@@ -216,7 +216,7 @@ class _EmergencyCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
       onTap: onTap,
       child: Card(
-        elevation: 3,
+        elevation: 0,
         color: AppColors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),

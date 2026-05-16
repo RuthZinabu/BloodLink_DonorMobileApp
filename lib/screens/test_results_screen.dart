@@ -248,7 +248,7 @@ class _TestResultItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 0,
       color: AppColors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),

@@ -172,7 +172,7 @@ class _CampaignCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
       onTap: onTap,
       child: Card(
-        elevation: 4,
+        elevation: 0,
         color: AppColors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),

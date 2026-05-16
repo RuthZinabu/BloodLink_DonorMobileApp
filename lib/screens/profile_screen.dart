@@ -297,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                             children: [
                               Card(
-                                elevation: 4,
+                                elevation: 0,
                                 color: AppColors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),

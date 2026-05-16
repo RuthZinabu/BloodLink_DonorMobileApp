@@ -134,7 +134,7 @@ class _HistoryItem extends StatelessWidget {
     final collectorName = donation.collectorName;
 
     return Card(
-      elevation: 4,
+      elevation: 0,
       color: AppColors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(responsive.getBorderRadius(22)),

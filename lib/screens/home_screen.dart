@@ -568,7 +568,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Center(child: CircularProgressIndicator())
               else if (!_locationEnabled)
                 Card(
-                  elevation: 4,
+                  elevation: 0,
                   color: AppColors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
@@ -598,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 )
               else if (_nearbyEmergencies.isEmpty)
                 Card(
-                  elevation: 4,
+                  elevation: 0,
                   color: AppColors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
@@ -635,7 +635,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
               Card(
-                elevation: 4,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(responsive.getBorderRadius(22)),
                 ),
@@ -886,7 +886,7 @@ class _InfoTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 0,
       color: AppColors.white,
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -958,7 +958,7 @@ class _ShortcutCard extends StatelessWidget {
       onTap: onPressed,
       borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
       child: Card(
-        elevation: 4,
+        elevation: 0,
         color: AppColors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
@@ -1021,7 +1021,7 @@ class _UrgentItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 0,
       color: AppColors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),

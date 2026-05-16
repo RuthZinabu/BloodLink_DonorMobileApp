@@ -26,12 +26,11 @@ class CustomCard extends StatelessWidget {
     final responsivePadding = padding ?? responsive.getSymmetricPadding(horizontal: 20, vertical: 20);
 
     return Card(
-      elevation: responsiveElevation,
+      elevation: 0,
       color: backgroundColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(responsiveBorderRadius),
       ),
-      shadowColor: AppColors.border.withAlpha((0.2 * 255).toInt()),
       child: Padding(
         padding: responsivePadding,
         child: child,
