@@ -22,14 +22,21 @@ class Campaign {
   });
 
   factory Campaign.fromJson(Map<String, dynamic> json) {
+    DateTime safeParse(dynamic value) {
+      if (value == null || value.toString().isEmpty) return DateTime.now();
+      return DateTime.tryParse(value.toString()) ?? DateTime.now();
+    }
+
     return Campaign(
-      id: json['CampaignID']?.toString() ?? json['id']?.toString() ?? '',
-      title: json['Title']?.toString() ?? json['title']?.toString() ?? '',
-      content: json['Content']?.toString() ?? json['content']?.toString() ?? '',
-      location: json['Location']?.toString() ?? json['location']?.toString() ?? '',
-      startDate: DateTime.parse(json['StartDate']?.toString() ?? json['start_date']?.toString() ?? DateTime.now().toIso8601String()),
-      endDate: DateTime.parse(json['EndDate']?.toString() ?? json['end_date']?.toString() ?? DateTime.now().toIso8601String()),
-      createdAt: DateTime.parse(json['CreatedAt']?.toString() ?? json['created_at']?.toString() ?? DateTime.now().toIso8601String()),
+      id: json['campaign_id']?.toString() ??
+          json['CampaignID']?.toString() ??
+          json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? json['Title']?.toString() ?? '',
+      content: json['content']?.toString() ?? json['Content']?.toString() ?? '',
+      location: json['location']?.toString() ?? json['Location']?.toString() ?? '',
+      startDate: safeParse(json['start_date'] ?? json['StartDate']),
+      endDate: safeParse(json['end_date'] ?? json['EndDate']),
+      createdAt: safeParse(json['created_at'] ?? json['CreatedAt']),
       distance: json['distance'] != null ? double.tryParse(json['distance'].toString()) : null,
     );
   }

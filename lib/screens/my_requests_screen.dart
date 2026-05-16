@@ -157,6 +157,49 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
               ),
             ),
             Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: responsive.getPadding(16),
+                vertical: responsive.getPadding(12),
+              ),
+              padding: EdgeInsets.all(responsive.getPadding(14)),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF3CD),
+                borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+                border: Border.all(color: const Color(0xFFFFB300), width: 1.2),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('⚠️', style: TextStyle(fontSize: 18)),
+                  SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 12)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Verification Required',
+                          style: AppTextStyles.subtitle.copyWith(
+                            fontSize: responsive.getFont(14),
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF795548),
+                          ),
+                        ),
+                        SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 6)),
+                        Text(
+                          'Blood requests are only available for eligible top donors with strong donation histories. Requests must be submitted under the supervision of a doctor or hospital. The provided hospital and medical information will be verified by contacting the hospital before approval. False or misleading information may result in request rejection and account suspension.',
+                          style: AppTextStyles.body.copyWith(
+                            fontSize: responsive.getFont(12),
+                            color: const Color(0xFF795548),
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
               padding: EdgeInsets.symmetric(
                 horizontal: responsive.getPadding(20),
                 vertical: responsive.getPadding(12),
@@ -372,32 +415,77 @@ class _RequestCard extends StatelessWidget {
           SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
           Row(
             children: [
-              Icon(Icons.bloodtype, color: AppColors.primary, size: responsive.getIconSize(20)),
+              Icon(Icons.bloodtype, color: AppColors.primary, size: responsive.getIconSize(18)),
               SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
-              Text(
-                request.bloodType.isNotEmpty
-                    ? '${request.bloodType} • ${request.quantityMl} ml'
-                    : '${context.tr('my_requests_blood_type_not_specified')} • ${request.quantityMl} ml',
-                style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14), fontWeight: FontWeight.w500),
+              Expanded(
+                child: Text(
+                  request.bloodType.isNotEmpty
+                      ? '${request.bloodType} · ${request.units} unit${request.units != 1 ? 's' : ''}'
+                      : '${request.units} unit${request.units != 1 ? 's' : ''}',
+                  style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14), fontWeight: FontWeight.w500),
+                ),
               ),
             ],
           ),
+          SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
+          Row(
+            children: [
+              Icon(Icons.science_outlined, color: AppColors.textSecondary, size: responsive.getIconSize(16)),
+              SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 8)),
+              Expanded(
+                child: Text(
+                  request.getComponentTypeDisplay(),
+                  style: AppTextStyles.body.copyWith(
+                    fontSize: responsive.getFont(13),
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (request.canFulfill) ...[
+            SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 8)),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: responsive.getPadding(10),
+                vertical: responsive.getPadding(5),
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50).withAlpha((0.12 * 255).round()),
+                borderRadius: BorderRadius.circular(responsive.getBorderRadius(8)),
+                border: Border.all(color: const Color(0xFF4CAF50).withAlpha((0.3 * 255).round())),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.local_hospital, color: const Color(0xFF4CAF50), size: responsive.getIconSize(14)),
+                  SizedBox(width: responsive.getSpacing(small: 4, medium: 6, large: 6)),
+                  Text(
+                    'Ready for Pickup',
+                    style: AppTextStyles.label.copyWith(
+                      fontSize: responsive.getFont(12),
+                      color: const Color(0xFF4CAF50),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
           Row(
             children: [
               Icon(
-                request.reason.isNotEmpty ? Icons.description : Icons.warning_amber,
+                request.reason.isNotEmpty ? Icons.description_outlined : Icons.warning_amber,
                 color: request.reason.isNotEmpty ? AppColors.textSecondary : AppColors.warning,
                 size: responsive.getIconSize(16),
               ),
               SizedBox(width: responsive.getSpacing(small: 4, medium: 6, large: 8)),
               Expanded(
                 child: Text(
-                  request.reason.isNotEmpty
-                      ? '${context.tr('my_requests_reason_not_provided').replaceAll('Reason: Not provided', 'Reason')}: ${request.reason}'
-                      : context.tr('my_requests_reason_not_provided'),
+                  request.reason.isNotEmpty ? request.reason : context.tr('my_requests_reason_not_provided'),
                   style: AppTextStyles.body.copyWith(
-                    fontSize: responsive.getFont(14),
+                    fontSize: responsive.getFont(13),
                     color: request.reason.isNotEmpty ? AppColors.textSecondary : AppColors.warning,
                   ),
                   maxLines: 2,
@@ -406,11 +494,11 @@ class _RequestCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+          SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
           Row(
             children: [
               Icon(
-                request.hospitalAddress.isNotEmpty ? Icons.location_on : Icons.warning_amber,
+                request.hospitalAddress.isNotEmpty ? Icons.location_on_outlined : Icons.warning_amber,
                 color: request.hospitalAddress.isNotEmpty ? AppColors.textSecondary : AppColors.warning,
                 size: responsive.getIconSize(16),
               ),
@@ -434,7 +522,7 @@ class _RequestCard extends StatelessWidget {
           Row(
             children: [
               Icon(
-                request.hospitalPhone.isNotEmpty ? Icons.phone : Icons.warning_amber,
+                request.hospitalPhone.isNotEmpty ? Icons.phone_outlined : Icons.warning_amber,
                 color: request.hospitalPhone.isNotEmpty ? AppColors.textSecondary : AppColors.warning,
                 size: responsive.getIconSize(16),
               ),
@@ -453,7 +541,7 @@ class _RequestCard extends StatelessWidget {
           SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
           Row(
             children: [
-              Icon(Icons.calendar_today, color: AppColors.textSecondary, size: responsive.getIconSize(16)),
+              Icon(Icons.calendar_today_outlined, color: AppColors.textSecondary, size: responsive.getIconSize(14)),
               SizedBox(width: responsive.getSpacing(small: 4, medium: 6, large: 8)),
               Text(
                 '${context.tr('my_requests_requested_on')} ${DateFormat('MMM dd, yyyy').format(request.createdAt)}',

@@ -18,21 +18,29 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
   final ApiService _apiService = ApiService();
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _unitsController = TextEditingController(text: '1');
   final TextEditingController _reasonController = TextEditingController();
   final TextEditingController _hospitalNameController = TextEditingController();
   final TextEditingController _hospitalAddressController = TextEditingController();
   final TextEditingController _hospitalPhoneController = TextEditingController();
 
+  String _selectedComponentType = 'PRBC';
   bool _isLoading = false;
   String? _errorMessage;
   String? _successMessage;
 
-  final List<int> _quantityOptions = [250, 350, 450, 500];
+  static const List<Map<String, String>> _componentTypes = [
+    {'value': 'WHOLE_BLOOD', 'label': 'Whole Blood'},
+    {'value': 'PRBC', 'label': 'Packed Red Blood Cells (PRBC)'},
+    {'value': 'PLATELETS', 'label': 'Platelets'},
+    {'value': 'PLASMA', 'label': 'Plasma'},
+    {'value': 'CRYOPRECIPITATE', 'label': 'Cryoprecipitate'},
+    {'value': 'CRYO_POOR_PLASMA', 'label': 'Cryo-Poor Plasma'},
+  ];
 
   @override
   void dispose() {
-    _quantityController.dispose();
+    _unitsController.dispose();
     _reasonController.dispose();
     _hospitalNameController.dispose();
     _hospitalAddressController.dispose();
@@ -51,7 +59,8 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
 
     try {
       final result = await _apiService.createBloodRequest(
-        quantityMl: int.parse(_quantityController.text),
+        units: int.parse(_unitsController.text.trim()),
+        componentType: _selectedComponentType,
         reason: _reasonController.text.trim(),
         hospitalName: _hospitalNameController.text.trim(),
         hospitalAddress: _hospitalAddressController.text.trim(),
@@ -64,11 +73,12 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
           _isLoading = false;
         });
         _formKey.currentState!.reset();
-        _quantityController.clear();
+        _unitsController.text = '1';
         _reasonController.clear();
         _hospitalNameController.clear();
         _hospitalAddressController.clear();
         _hospitalPhoneController.clear();
+        setState(() => _selectedComponentType = 'PRBC');
       } else {
         setState(() {
           _errorMessage = result['message'];
@@ -138,6 +148,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
               SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
               if (_successMessage != null)
                 Container(
+                  margin: EdgeInsets.only(bottom: responsive.getSpacing(small: 20, medium: 24, large: 28)),
                   padding: EdgeInsets.all(responsive.getPadding(16)),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withAlpha((0.12 * 255).round()),
@@ -163,6 +174,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                 ),
               if (_errorMessage != null)
                 Container(
+                  margin: EdgeInsets.only(bottom: responsive.getSpacing(small: 20, medium: 24, large: 28)),
                   padding: EdgeInsets.all(responsive.getPadding(16)),
                   decoration: BoxDecoration(
                     color: AppColors.warning.withAlpha((0.12 * 255).round()),
@@ -186,49 +198,95 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                     ],
                   ),
                 ),
-              if (_successMessage != null || _errorMessage != null)
-                SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
               Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.tr('blood_request_quantity_label'),
+                      'Blood Component Type',
                       style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(16)),
                     ),
                     SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 16)),
-                    Wrap(
-                      spacing: responsive.getPadding(8),
-                      runSpacing: responsive.getPadding(8),
-                      children: _quantityOptions.map((quantity) {
-                        final isSelected = _quantityController.text == quantity.toString();
-                        return InkWell(
-                          onTap: () => setState(() => _quantityController.text = quantity.toString()),
+                    DropdownButtonFormField<String>(
+                      value: _selectedComponentType,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: responsive.getPadding(16),
-                              vertical: responsive.getPadding(12),
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected ? AppColors.primary : AppColors.surface,
-                              borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
-                              border: Border.all(
-                                color: isSelected ? AppColors.primary : AppColors.textSecondary.withAlpha((0.2 * 255).round()),
-                              ),
-                            ),
-                            child: Text(
-                              '$quantity ml',
-                              style: AppTextStyles.body.copyWith(
-                                fontSize: responsive.getFont(14),
-                                color: isSelected ? AppColors.white : AppColors.textPrimary,
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                              ),
-                            ),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: responsive.getPadding(16),
+                          vertical: responsive.getPadding(14),
+                        ),
+                      ),
+                      isExpanded: true,
+                      items: _componentTypes.map((type) {
+                        return DropdownMenuItem<String>(
+                          value: type['value'],
+                          child: Text(
+                            type['label']!,
+                            style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
                           ),
                         );
                       }).toList(),
+                      onChanged: (value) {
+                        if (value != null) setState(() => _selectedComponentType = value);
+                      },
+                    ),
+                    SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
+                    Text(
+                      'Number of Units',
+                      style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(16)),
+                    ),
+                    SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 16)),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            final current = int.tryParse(_unitsController.text) ?? 1;
+                            if (current > 1) {
+                              setState(() => _unitsController.text = (current - 1).toString());
+                            }
+                          },
+                          icon: Icon(Icons.remove_circle_outline, color: AppColors.primary, size: responsive.getIconSize(28)),
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            controller: _unitsController,
+                            keyboardType: TextInputType.number,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(20)),
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: responsive.getPadding(12),
+                                vertical: responsive.getPadding(12),
+                              ),
+                              suffixText: 'units',
+                            ),
+                            onChanged: (val) => setState(() {}),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter number of units';
+                              }
+                              final parsed = int.tryParse(value.trim());
+                              if (parsed == null || parsed < 1) {
+                                return 'Must be at least 1 unit';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            final current = int.tryParse(_unitsController.text) ?? 1;
+                            setState(() => _unitsController.text = (current + 1).toString());
+                          },
+                          icon: Icon(Icons.add_circle_outline, color: AppColors.primary, size: responsive.getIconSize(28)),
+                        ),
+                      ],
                     ),
                     SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
                     Text(
@@ -260,6 +318,34 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                     Text(
                       context.tr('blood_request_hospital_info'),
                       style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(16)),
+                    ),
+                    SizedBox(height: responsive.getSpacing(small: 4, medium: 6, large: 8)),
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: responsive.getPadding(12),
+                        vertical: responsive.getPadding(8),
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF3CD),
+                        borderRadius: BorderRadius.circular(responsive.getBorderRadius(8)),
+                        border: Border.all(color: const Color(0xFFFFCA28)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('ℹ️', style: TextStyle(fontSize: 14)),
+                          SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 8)),
+                          Expanded(
+                            child: Text(
+                              'Hospital information will be verified by contacting the hospital directly.',
+                              style: AppTextStyles.body.copyWith(
+                                fontSize: responsive.getFont(12),
+                                color: const Color(0xFF795548),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
                     TextFormField(
@@ -327,6 +413,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                       backgroundColor: AppColors.primary,
                       textColor: AppColors.white,
                     ),
+                    SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
                   ],
                 ),
               ),

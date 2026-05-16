@@ -497,21 +497,31 @@ class ApiService {
   }
 
   /// Fetch public campaigns from the backend.
-  Future<List<Campaign>> fetchCampaigns() async {
+  Future<List<Campaign>> fetchCampaigns({
+    String? title,
+    String? location,
+    String? startDate,
+    String? endDate,
+  }) async {
     try {
+      final queryParams = <String, String>{};
+      if (title != null && title.isNotEmpty) queryParams['title'] = title;
+      if (location != null && location.isNotEmpty) queryParams['location'] = location;
+      if (startDate != null && startDate.isNotEmpty) queryParams['start_date'] = startDate;
+      if (endDate != null && endDate.isNotEmpty) queryParams['end_date'] = endDate;
+
+      final uri = Uri.parse('$baseUrL/api/campaigns')
+          .replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+
       final response = await http
-          .get(
-            Uri.parse('$baseUrL/api/campaigns/'),
-            headers: await _getHeaders(),
-          )
+          .get(uri, headers: await _getHeaders())
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        final campaignsData =
-            decoded is Map<String, dynamic> && decoded.containsKey('data')
-                ? decoded['data']
-                : decoded;
+        final campaignsData = decoded is Map<String, dynamic>
+            ? (decoded['campaigns'] ?? decoded['data'] ?? decoded)
+            : decoded;
 
         if (campaignsData is List) {
           return campaignsData
@@ -530,7 +540,8 @@ class ApiService {
 
   /// Create a blood request for the logged-in donor.
   Future<Map<String, dynamic>> createBloodRequest({
-    required int quantityMl,
+    required int units,
+    required String componentType,
     required String reason,
     required String hospitalName,
     required String hospitalAddress,
@@ -542,7 +553,8 @@ class ApiService {
             Uri.parse('$baseUrL/api/donor/blood-request'),
             headers: await _getHeaders(authenticated: true),
             body: jsonEncode({
-              'quantity_ml': quantityMl,
+              'units': units,
+              'component_type': componentType,
               'reason': reason,
               'hospital_name': hospitalName,
               'hospital_address': hospitalAddress,
@@ -563,12 +575,13 @@ class ApiService {
         return {
           'success': false,
           'message': errorBody['error'] ??
-              'You must have at least one successful donation to request blood',
+              'Only top 10 leaderboard donors are eligible to request blood',
         };
       } else {
+        final errorBody = jsonDecode(response.body);
         return {
           'success': false,
-          'message': 'Failed to create blood request: ${response.statusCode}',
+          'message': errorBody['error'] ?? 'Failed to create blood request: ${response.statusCode}',
         };
       }
     } catch (e) {

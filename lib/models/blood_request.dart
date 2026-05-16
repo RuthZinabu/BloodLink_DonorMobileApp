@@ -4,28 +4,38 @@ class BloodRequest {
   final String requestId;
   final String donorId;
   final String donorName;
+  final String donorEmail;
+  final String donorPhone;
+  final String donorAddress;
   final String bloodType;
-  final int quantityMl;
+  final String componentType;
+  final int units;
   final String reason;
   final String hospitalName;
   final String hospitalAddress;
   final String hospitalPhone;
   final String status;
   final DateTime createdAt;
+  final bool canFulfill;
   final int? successfulDonations;
 
   BloodRequest({
     required this.requestId,
     required this.donorId,
     required this.donorName,
+    required this.donorEmail,
+    required this.donorPhone,
+    required this.donorAddress,
     required this.bloodType,
-    required this.quantityMl,
+    required this.componentType,
+    required this.units,
     required this.reason,
     required this.hospitalName,
     required this.hospitalAddress,
     required this.hospitalPhone,
     required this.status,
     required this.createdAt,
+    required this.canFulfill,
     this.successfulDonations,
   });
 
@@ -46,6 +56,12 @@ class BloodRequest {
       return int.tryParse(value?.toString() ?? '') ?? 0;
     }
 
+    bool parseBool(dynamic value) {
+      if (value == null) return false;
+      if (value is bool) return value;
+      return value.toString().toLowerCase() == 'true';
+    }
+
     DateTime parseDateTime(dynamic value) {
       if (value is DateTime) return value;
       if (value is String && value.isNotEmpty) {
@@ -54,33 +70,36 @@ class BloodRequest {
       return DateTime.now();
     }
 
-    // Backend returns PascalCase keys — fall back to snake_case/camelCase too.
-    final hospital = json['hospital'] as Map<String, dynamic>?;
-
     return BloodRequest(
       requestId: parseString(
-          json['RequestID'] ?? json['request_id'] ?? json['id'] ?? json['_id']),
+          json['request_id'] ?? json['RequestID'] ?? json['id'] ?? json['_id']),
       donorId: parseString(
-          json['DonorID'] ?? json['donor_id'] ?? json['donorId']),
+          json['donor_id'] ?? json['DonorID'] ?? json['donorId']),
       donorName: parseString(
-          json['DonorName'] ?? json['donor_name'] ?? json['donorName']),
+          json['donor_name'] ?? json['DonorName'] ?? json['donorName']),
+      donorEmail: parseString(
+          json['donor_email'] ?? json['DonorEmail'] ?? json['donorEmail']),
+      donorPhone: parseString(
+          json['donor_phone'] ?? json['DonorPhone'] ?? json['donorPhone']),
+      donorAddress: parseString(
+          json['donor_address'] ?? json['DonorAddress'] ?? json['donorAddress']),
       bloodType: parseString(
-          json['BloodType'] ?? json['blood_type'] ?? json['bloodType']),
-      quantityMl: parseInt(
-          json['QuantityML'] ?? json['quantity_ml'] ?? json['quantityMl']),
-      reason: parseString(json['Reason'] ?? json['reason']),
+          json['blood_type'] ?? json['BloodType'] ?? json['bloodType']),
+      componentType: parseString(
+          json['component_type'] ?? json['ComponentType'] ?? json['componentType']),
+      units: parseInt(
+          json['units'] ?? json['Units'] ?? json['quantity_ml'] ?? json['QuantityML']),
+      reason: parseString(json['reason'] ?? json['Reason']),
       hospitalName: parseString(
-          json['HospitalName'] ?? json['hospital_name'] ??
-          json['hospitalName'] ?? hospital?['name'] ?? ''),
+          json['hospital_name'] ?? json['HospitalName'] ?? json['hospitalName']),
       hospitalAddress: parseString(
-          json['HospitalAddress'] ?? json['hospital_address'] ??
-          json['hospitalAddress'] ?? hospital?['address'] ?? ''),
+          json['hospital_address'] ?? json['HospitalAddress'] ?? json['hospitalAddress']),
       hospitalPhone: parseString(
-          json['HospitalPhone'] ?? json['hospital_phone'] ??
-          json['hospitalPhone'] ?? hospital?['phone'] ?? ''),
-      status: parseString(json['Status'] ?? json['status']),
+          json['hospital_phone'] ?? json['HospitalPhone'] ?? json['hospitalPhone']),
+      status: parseString(json['status'] ?? json['Status']),
       createdAt: parseDateTime(
-          json['CreatedAt'] ?? json['created_at'] ?? json['createdAt']),
+          json['created_at'] ?? json['CreatedAt'] ?? json['createdAt']),
+      canFulfill: parseBool(json['can_fulfill'] ?? json['canFulfill']),
       successfulDonations: parseNullableInt(
           json['successful_donations'] ?? json['successfulDonations']),
     );
@@ -92,13 +111,15 @@ class BloodRequest {
       'donor_id': donorId,
       'donor_name': donorName,
       'blood_type': bloodType,
-      'quantity_ml': quantityMl,
+      'component_type': componentType,
+      'units': units,
       'reason': reason,
       'hospital_name': hospitalName,
       'hospital_address': hospitalAddress,
       'hospital_phone': hospitalPhone,
       'status': status,
       'created_at': createdAt.toIso8601String(),
+      'can_fulfill': canFulfill,
       'successful_donations': successfulDonations,
     };
   }
@@ -125,19 +146,38 @@ class BloodRequest {
   Color getStatusColor() {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return const Color(0xFFFFA500); // Orange
+        return const Color(0xFFFFA500);
       case 'APPROVED':
-        return const Color(0xFF4CAF50); // Green
+        return const Color(0xFF4CAF50);
       case 'PARTIALLY APPROVED':
-        return const Color(0xFF2196F3); // Blue
+        return const Color(0xFF2196F3);
       case 'FULFILLED':
-        return const Color(0xFF4CAF50); // Green
+        return const Color(0xFF4CAF50);
       case 'PARTIALLY FULFILLED':
-        return const Color(0xFF2196F3); // Blue
+        return const Color(0xFF2196F3);
       case 'REJECTED':
-        return const Color(0xFFF44336); // Red
+        return const Color(0xFFF44336);
       default:
-        return const Color(0xFF9E9E9E); // Grey
+        return const Color(0xFF9E9E9E);
+    }
+  }
+
+  String getComponentTypeDisplay() {
+    switch (componentType.toUpperCase()) {
+      case 'WHOLE_BLOOD':
+        return 'Whole Blood';
+      case 'PRBC':
+        return 'Packed Red Blood Cells (PRBC)';
+      case 'PLATELETS':
+        return 'Platelets';
+      case 'PLASMA':
+        return 'Plasma';
+      case 'CRYOPRECIPITATE':
+        return 'Cryoprecipitate';
+      case 'CRYO_POOR_PLASMA':
+        return 'Cryo-Poor Plasma';
+      default:
+        return componentType.isNotEmpty ? componentType : 'Not specified';
     }
   }
 }
