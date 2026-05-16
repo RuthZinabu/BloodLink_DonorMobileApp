@@ -113,14 +113,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
             : _profileError != null
                 ? Center(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: responsive.getPadding(20)),
-                      child: Text(
-                        _profileError!,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.body.copyWith(
-                          fontSize: responsive.getFont(16),
-                          color: AppColors.textSecondary,
-                        ),
+                      padding: EdgeInsets.symmetric(horizontal: responsive.getPadding(24)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _profileError!.contains('expired') || _profileError!.contains('401')
+                                ? Icons.lock_clock_outlined
+                                : Icons.error_outline,
+                            color: AppColors.primary,
+                            size: responsive.getIconSize(56),
+                          ),
+                          SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
+                          Text(
+                            _profileError!.contains('expired') || _profileError!.contains('401')
+                                ? 'Session Expired'
+                                : 'Failed to Load Profile',
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.heading.copyWith(
+                              fontSize: responsive.getFont(20),
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          SizedBox(height: responsive.getSpacing(small: 8, medium: 12, large: 16)),
+                          Text(
+                            _profileError!.contains('expired') || _profileError!.contains('401')
+                                ? 'Your session has expired. Please log in again to continue.'
+                                : _profileError!,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: responsive.getFont(15),
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          SizedBox(height: responsive.getSpacing(small: 24, medium: 28, large: 32)),
+                          if (_profileError!.contains('expired') || _profileError!.contains('401'))
+                            ElevatedButton.icon(
+                              onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil('/login', (r) => false),
+                              icon: const Icon(Icons.login),
+                              label: const Text('Log In Again'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.white,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: responsive.getPadding(28),
+                                  vertical: responsive.getPadding(14),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+                                ),
+                              ),
+                            )
+                          else
+                            ElevatedButton.icon(
+                              onPressed: _loadProfile,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Try Again'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: AppColors.white,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: responsive.getPadding(28),
+                                  vertical: responsive.getPadding(14),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   )

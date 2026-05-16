@@ -22,6 +22,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/services/notification_service.dart';
 import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
+import 'package:bloodlink_donor_mobile_app/utils/navigation_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +44,7 @@ class BloodLinkApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return LocalizationProvider(
       child: MaterialApp(
+        navigatorKey: NavigationService.navigatorKey,
         debugShowCheckedModeBanner: false,
         title: 'BloodLink Donor',
         theme: ThemeData(

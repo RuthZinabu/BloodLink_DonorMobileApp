@@ -10,6 +10,7 @@ import 'package:bloodlink_donor_mobile_app/models/badge.dart';
 import 'package:bloodlink_donor_mobile_app/models/leaderboard_entry.dart';
 import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
 import 'package:bloodlink_donor_mobile_app/models/blood_request.dart';
+import 'package:bloodlink_donor_mobile_app/utils/navigation_service.dart';
 
 class ApiService {
   static const String baseUrL = 'https://bloodlink-backend-bpll.onrender.com';
@@ -246,15 +247,23 @@ class ApiService {
     return headers;
   }
 
+  /// Call this whenever an authenticated endpoint returns 401.
+  /// Clears all stored credentials and redirects the user to login.
+  Future<void> _handleUnauthorized() async {
+    await _secureStorage.delete(key: _tokenKey);
+    await _secureStorage.delete(key: _refreshTokenKey);
+    await _secureStorage.delete(key: 'user_email');
+    await _secureStorage.delete(key: 'user_role');
+    NavigationService.redirectToLoginOnSessionExpiry();
+  }
+
   /// Retrieve the current user's profile from the backend.
   Future<Map<String, dynamic>> fetchUserProfile() async {
     try {
       final token = await getAccessToken();
       if (token == null || token.isEmpty) {
-        return {
-          'success': false,
-          'message': 'User is not authenticated.',
-        };
+        await _handleUnauthorized();
+        return {'success': false, 'message': 'Session expired. Please log in again.'};
       }
 
       final response = await http
@@ -273,6 +282,9 @@ class ApiService {
                   ? decoded['data']
                   : decoded,
         };
+      } else if (response.statusCode == 401) {
+        await _handleUnauthorized();
+        return {'success': false, 'message': 'Session expired. Please log in again.'};
       } else {
         return {
           'success': false,
@@ -361,6 +373,8 @@ class ApiService {
               .map((item) => Donation.fromJson(item as Map<String, dynamic>))
               .toList();
         }
+      } else if (response.statusCode == 401) {
+        await _handleUnauthorized();
       }
       return [];
     } catch (e) {
@@ -391,6 +405,8 @@ class ApiService {
                   LeaderboardEntry.fromJson(item as Map<String, dynamic>))
               .toList();
         }
+      } else if (response.statusCode == 401) {
+        await _handleUnauthorized();
       }
       return [];
     } catch (e) {
@@ -420,6 +436,8 @@ class ApiService {
               .map((item) => Badge.fromJson(item as Map<String, dynamic>))
               .toList();
         }
+      } else if (response.statusCode == 401) {
+        await _handleUnauthorized();
       }
       return [];
     } catch (e) {
@@ -442,6 +460,8 @@ class ApiService {
         if (decoded is Map<String, dynamic>) {
           return TestResult.fromJson(decoded);
         }
+      } else if (response.statusCode == 401) {
+        await _handleUnauthorized();
       }
       return null;
     } catch (e) {
@@ -570,6 +590,9 @@ class ApiService {
           'message':
               responseBody['message'] ?? 'Blood request created successfully',
         };
+      } else if (response.statusCode == 401) {
+        await _handleUnauthorized();
+        return {'success': false, 'message': 'Session expired. Please log in again.'};
       } else if (response.statusCode == 403) {
         final errorBody = jsonDecode(response.body);
         return {
@@ -630,6 +653,9 @@ class ApiService {
         } else {
           return [];
         }
+      } else if (response.statusCode == 401) {
+        await _handleUnauthorized();
+        return [];
       } else {
         throw Exception('Failed to load blood requests: ${response.body}');
       }
