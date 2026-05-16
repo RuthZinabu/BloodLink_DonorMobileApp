@@ -22,6 +22,7 @@ import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
 import 'package:bloodlink_donor_mobile_app/services/notification_service.dart';
 import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
+import 'package:bloodlink_donor_mobile_app/services/token_refresh_service.dart';
 import 'package:bloodlink_donor_mobile_app/utils/navigation_service.dart';
 
 void main() async {
@@ -33,6 +34,10 @@ void main() async {
   // Initialize notifications
   final notificationService = NotificationService();
   await notificationService.initialize();
+
+  // Resume proactive token refresh if user was already logged in
+  // (handles app restarts where the user has a stored valid token)
+  TokenRefreshService().scheduleRefresh();
 
   runApp(const BloodLinkApp());
 }

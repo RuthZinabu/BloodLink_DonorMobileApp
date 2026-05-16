@@ -1,11 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'api_service.dart';
+import 'token_refresh_service.dart';
 
 class AuthManager {
   late ApiService _apiService;
   late FlutterSecureStorage _secureStorage;
 
-  // User model to hold current user info
   static String? _currentUserRole;
   static String? _currentUserEmail;
 
@@ -37,7 +37,6 @@ class AuthManager {
       );
 
       if (result['success']) {
-        // Store email for auto-login after registration
         _currentUserEmail = email;
       }
 
@@ -50,7 +49,7 @@ class AuthManager {
     }
   }
 
-  /// Login user
+  /// Login user — starts proactive token refresh after successful login.
   Future<Map<String, dynamic>> login({
     required String email,
     required String password,
@@ -64,9 +63,10 @@ class AuthManager {
       if (result['success']) {
         _currentUserEmail = email;
         _currentUserRole = result['role'];
-        // Store user session info
         await _secureStorage.write(key: 'user_email', value: email);
         await _secureStorage.write(key: 'user_role', value: result['role']);
+        // Start proactive token refresh in the background
+        TokenRefreshService().scheduleRefresh();
       }
 
       return result;
@@ -78,9 +78,12 @@ class AuthManager {
     }
   }
 
-  /// Logout user
+  /// Logout user — cancels any pending refresh timer.
   Future<Map<String, dynamic>> logout() async {
     try {
+      // Cancel refresh before calling logout endpoint
+      TokenRefreshService().cancel();
+
       final result = await _apiService.logout();
 
       if (result['success']) {

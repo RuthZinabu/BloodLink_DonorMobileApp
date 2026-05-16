@@ -11,6 +11,7 @@ import 'package:bloodlink_donor_mobile_app/models/leaderboard_entry.dart';
 import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
 import 'package:bloodlink_donor_mobile_app/models/blood_request.dart';
 import 'package:bloodlink_donor_mobile_app/utils/navigation_service.dart';
+import 'package:bloodlink_donor_mobile_app/services/token_refresh_service.dart';
 
 class ApiService {
   static const String baseUrL = 'https://bloodlink-backend-bpll.onrender.com';
@@ -248,8 +249,15 @@ class ApiService {
   }
 
   /// Call this whenever an authenticated endpoint returns 401.
-  /// Clears all stored credentials and redirects the user to login.
+  /// First attempts a silent token refresh using the stored refresh token.
+  /// If the refresh succeeds the session is silently restored.
+  /// If it fails all credentials are cleared and the user is redirected to login.
   Future<void> _handleUnauthorized() async {
+    final refreshed = await TokenRefreshService().forceRefresh();
+    if (refreshed) {
+      // Session silently restored — the next request will use the new token.
+      return;
+    }
     await _secureStorage.delete(key: _tokenKey);
     await _secureStorage.delete(key: _refreshTokenKey);
     await _secureStorage.delete(key: 'user_email');
