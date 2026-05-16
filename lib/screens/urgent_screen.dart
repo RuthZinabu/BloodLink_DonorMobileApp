@@ -19,15 +19,28 @@ class UrgentScreen extends StatefulWidget {
 
 class _UrgentScreenState extends State<UrgentScreen> {
   final ApiService _apiService = ApiService();
+  final TextEditingController _searchController = TextEditingController();
+
   List<Emergency> _emergencies = [];
   bool _isLoading = true;
   String? _errorMessage;
   _UrgencyFilter _activeFilter = _UrgencyFilter.all;
+  bool _showSearch = false;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _loadEmergencies();
+    _searchController.addListener(() {
+      setState(() => _searchQuery = _searchController.text.trim().toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadEmergencies() async {
@@ -49,11 +62,34 @@ class _UrgentScreenState extends State<UrgentScreen> {
     }
   }
 
+  void _toggleSearch() {
+    setState(() {
+      _showSearch = !_showSearch;
+      if (!_showSearch) {
+        _searchController.clear();
+        _searchQuery = '';
+      }
+    });
+  }
+
   List<Emergency> get _filteredEmergencies {
-    if (_activeFilter == _UrgencyFilter.all) return _emergencies;
-    return _emergencies
-        .where((e) => e.urgencyLevel.toUpperCase() == 'CRITICAL')
-        .toList();
+    List<Emergency> result = _emergencies;
+
+    // Apply urgency filter
+    if (_activeFilter == _UrgencyFilter.critical) {
+      result = result.where((e) => e.urgencyLevel.toUpperCase() == 'CRITICAL').toList();
+    }
+
+    // Apply search query — matches hospital name, location, or blood type
+    if (_searchQuery.isNotEmpty) {
+      result = result.where((e) {
+        return e.hospitalName.toLowerCase().contains(_searchQuery) ||
+            e.location.toLowerCase().contains(_searchQuery) ||
+            e.bloodType.toLowerCase().contains(_searchQuery);
+      }).toList();
+    }
+
+    return result;
   }
 
   @override
@@ -72,6 +108,7 @@ class _UrgentScreenState extends State<UrgentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // ── Header row ───────────────────────────────────────────────
               Row(
                 children: [
                   Expanded(
@@ -80,18 +117,76 @@ class _UrgentScreenState extends State<UrgentScreen> {
                       style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(24)),
                     ),
                   ),
-                  Container(
-                    width: responsive.getWidth(13),
-                    height: responsive.getWidth(13),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+                  GestureDetector(
+                    onTap: _toggleSearch,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width: responsive.getWidth(13),
+                      height: responsive.getWidth(13),
+                      decoration: BoxDecoration(
+                        color: _showSearch
+                            ? AppColors.primary.withOpacity(0.12)
+                            : AppColors.surface,
+                        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+                      ),
+                      child: Icon(
+                        _showSearch ? Icons.close : Icons.search,
+                        color: AppColors.primary,
+                        size: responsive.getIconSize(24),
+                      ),
                     ),
-                    child: Icon(Icons.filter_list, color: AppColors.primary, size: responsive.getIconSize(24)),
                   ),
                 ],
               ),
+
+              // ── Search bar (animated) ─────────────────────────────────────
+              AnimatedCrossFade(
+                duration: const Duration(milliseconds: 250),
+                crossFadeState: _showSearch
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                firstChild: const SizedBox.shrink(),
+                secondChild: Padding(
+                  padding: EdgeInsets.only(top: responsive.getPadding(12)),
+                  child: TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
+                    decoration: InputDecoration(
+                      hintText: 'Search by hospital, location, blood type…',
+                      hintStyle: AppTextStyles.body.copyWith(
+                        color: AppColors.border,
+                        fontSize: responsive.getFont(14),
+                      ),
+                      prefixIcon: Icon(Icons.search, color: AppColors.textSecondary, size: responsive.getIconSize(20)),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: Icon(Icons.clear, color: AppColors.textSecondary, size: responsive.getIconSize(18)),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: AppColors.white,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: responsive.getPadding(14),
+                        horizontal: responsive.getPadding(16),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(responsive.getBorderRadius(16)),
+                      ),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              ),
+
               SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
+
+              // ── Filter pills ──────────────────────────────────────────────
               Row(
                 children: [
                   _Pill(
@@ -110,6 +205,21 @@ class _UrgentScreenState extends State<UrgentScreen> {
                 ],
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
+
+              // ── Results count hint while searching ────────────────────────
+              if (_showSearch && _searchQuery.isNotEmpty && !_isLoading)
+                Padding(
+                  padding: EdgeInsets.only(bottom: responsive.getPadding(10)),
+                  child: Text(
+                    '${displayed.length} result${displayed.length != 1 ? 's' : ''} for "$_searchQuery"',
+                    style: AppTextStyles.body.copyWith(
+                      fontSize: responsive.getFont(13),
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+
+              // ── Content ───────────────────────────────────────────────────
               if (_isLoading)
                 Center(child: CircularProgressIndicator(color: AppColors.primary))
               else if (_errorMessage != null)
@@ -137,24 +247,42 @@ class _UrgentScreenState extends State<UrgentScreen> {
                     child: Column(
                       children: [
                         Icon(
-                          _activeFilter == _UrgencyFilter.critical
-                              ? Icons.health_and_safety_outlined
-                              : Icons.emergency_outlined,
+                          _searchQuery.isNotEmpty
+                              ? Icons.search_off_outlined
+                              : Icons.health_and_safety_outlined,
                           size: responsive.getIconSize(48),
                           color: AppColors.textSecondary,
                         ),
                         SizedBox(height: responsive.getSpacing(small: 12, medium: 16)),
                         Text(
-                          _activeFilter == _UrgencyFilter.critical
-                              ? 'No critical emergencies at the moment.'
-                              : context.tr('urgent_empty'),
+                          _searchQuery.isNotEmpty
+                              ? 'No emergencies matched "$_searchQuery".'
+                              : _activeFilter == _UrgencyFilter.critical
+                                  ? 'No critical emergencies at the moment.'
+                                  : context.tr('urgent_empty'),
                           style: AppTextStyles.body.copyWith(
-                              fontSize: responsive.getFont(16),
-                              color: AppColors.textSecondary),
+                            fontSize: responsive.getFont(16),
+                            color: AppColors.textSecondary,
+                          ),
                           textAlign: TextAlign.center,
                         ),
-                        if (_activeFilter == _UrgencyFilter.critical) ...[
-                          SizedBox(height: responsive.getSpacing(small: 12, medium: 16)),
+                        SizedBox(height: responsive.getSpacing(small: 12, medium: 16)),
+                        if (_searchQuery.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                            child: Text(
+                              'Clear search',
+                              style: TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: responsive.getFont(14),
+                              ),
+                            ),
+                          )
+                        else if (_activeFilter == _UrgencyFilter.critical)
                           GestureDetector(
                             onTap: () => setState(() => _activeFilter = _UrgencyFilter.all),
                             child: Text(
@@ -166,7 +294,6 @@ class _UrgentScreenState extends State<UrgentScreen> {
                               ),
                             ),
                           ),
-                        ],
                       ],
                     ),
                   ),
@@ -177,14 +304,12 @@ class _UrgentScreenState extends State<UrgentScreen> {
                       child: _EmergencyCard(
                         emergency: emergency,
                         responsive: responsive,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => EmergencyDetailScreen(emergency: emergency),
-                            ),
-                          );
-                        },
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EmergencyDetailScreen(emergency: emergency),
+                          ),
+                        ),
                       ),
                     )),
               SizedBox(height: responsive.getHeight(4)),
@@ -259,7 +384,6 @@ class _EmergencyCard extends StatelessWidget {
     if (publishedAt == null) return 'Recently published';
     final now = DateTime.now();
     final difference = now.difference(publishedAt);
-
     if (difference.inDays > 0) {
       return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
     } else if (difference.inHours > 0) {
