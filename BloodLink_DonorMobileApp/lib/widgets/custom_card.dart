@@ -28,6 +28,7 @@ class CustomCard extends StatelessWidget {
     final responsive = context.responsive;
     final responsiveBorderRadius = responsive.getBorderRadius(borderRadius);
     final responsivePadding = padding ?? responsive.getSymmetricPadding(horizontal: 20, vertical: 20);
+    final responsiveElevation = responsive.getElevation(elevation);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(responsiveBorderRadius),
