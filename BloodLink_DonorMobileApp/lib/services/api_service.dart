@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
 import 'package:bloodlink_donor_mobile_app/models/donation.dart';
 import 'package:bloodlink_donor_mobile_app/models/test_result.dart';
@@ -17,6 +18,11 @@ class ApiService {
   static const String baseUrL = 'https://bloodlink-backend-bpll.onrender.com';
   static const String _tokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
+  static const String _cacheProfileKey = 'cache_profile';
+  static const String _cacheDonationsKey = 'cache_donations';
+  static const String _cacheEmergenciesKey = 'cache_emergencies';
+  static const String _cacheCampaignsKey = 'cache_campaigns';
+  static const String _cacheMyRequestsKey = 'cache_my_requests';
 
   final FlutterSecureStorage _secureStorage;
 
@@ -248,6 +254,18 @@ class ApiService {
     return headers;
   }
 
+  Future<void> _writeCache(String key, dynamic data) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, jsonEncode(data));
+  }
+
+  Future<dynamic> _readCache(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(key);
+    if (raw == null || raw.isEmpty) return null;
+    return jsonDecode(raw);
+  }
+
   /// Call this whenever an authenticated endpoint returns 401.
   /// First attempts a silent token refresh using the stored refresh token.
   /// If the refresh succeeds the session is silently restored.
@@ -283,12 +301,14 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
+        final profile =
+            decoded is Map<String, dynamic> && decoded.containsKey('data')
+                ? decoded['data']
+                : decoded;
+        await _writeCache(_cacheProfileKey, profile);
         return {
           'success': true,
-          'profile':
-              decoded is Map<String, dynamic> && decoded.containsKey('data')
-                  ? decoded['data']
-                  : decoded,
+          'profile': profile,
         };
       } else if (response.statusCode == 401) {
         await _handleUnauthorized();
@@ -300,6 +320,15 @@ class ApiService {
         };
       }
     } catch (e) {
+      final cached = await _readCache(_cacheProfileKey);
+      if (cached != null) {
+        return {
+          'success': true,
+          'profile': cached,
+          'message': 'Showing cached profile data due to network interruption.',
+          'isCached': true,
+        };
+      }
       return {
         'success': false,
         'message': 'Network error: ${e.toString()}',
@@ -377,15 +406,29 @@ class ApiService {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded is List) {
-          return decoded
+          final donations = decoded
               .map((item) => Donation.fromJson(item as Map<String, dynamic>))
               .toList();
+          await _writeCache(_cacheDonationsKey, decoded);
+          return donations;
         }
       } else if (response.statusCode == 401) {
         await _handleUnauthorized();
       }
+      final cached = await _readCache(_cacheDonationsKey);
+      if (cached is List) {
+        return cached
+            .map((item) => Donation.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
       return [];
     } catch (e) {
+      final cached = await _readCache(_cacheDonationsKey);
+      if (cached is List) {
+        return cached
+            .map((item) => Donation.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
       return [];
     }
   }
@@ -490,16 +533,30 @@ class ApiService {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded is List) {
-          return decoded
+          final emergencies = decoded
               .map((item) => Emergency.fromJson(item as Map<String, dynamic>))
               .toList();
+          await _writeCache(_cacheEmergenciesKey, decoded);
+          return emergencies;
         } else {
           return [];
         }
       } else {
+        final cached = await _readCache(_cacheEmergenciesKey);
+        if (cached is List) {
+          return cached
+              .map((item) => Emergency.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
         throw Exception('Failed to load emergencies: ${response.body}');
       }
     } catch (e) {
+      final cached = await _readCache(_cacheEmergenciesKey);
+      if (cached is List) {
+        return cached
+            .map((item) => Emergency.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
       throw Exception('Network error: ${e.toString()}');
     }
   }
@@ -552,16 +609,30 @@ class ApiService {
             : decoded;
 
         if (campaignsData is List) {
-          return campaignsData
+          final campaigns = campaignsData
               .map((item) => Campaign.fromJson(item as Map<String, dynamic>))
               .toList();
+          await _writeCache(_cacheCampaignsKey, campaignsData);
+          return campaigns;
         } else {
           return [];
         }
       } else {
+        final cached = await _readCache(_cacheCampaignsKey);
+        if (cached is List) {
+          return cached
+              .map((item) => Campaign.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
         throw Exception('Failed to load campaigns: ${response.statusCode}');
       }
     } catch (e) {
+      final cached = await _readCache(_cacheCampaignsKey);
+      if (cached is List) {
+        return cached
+            .map((item) => Campaign.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
       throw Exception('Network error: ${e.toString()}');
     }
   }
@@ -654,22 +725,50 @@ class ApiService {
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         if (decoded['data'] is List) {
-          return (decoded['data'] as List)
+          final myRequests = (decoded['data'] as List)
               .map(
                   (item) => BloodRequest.fromJson(item as Map<String, dynamic>))
               .toList();
+          await _writeCache(_cacheMyRequestsKey, decoded['data']);
+          return myRequests;
         } else {
           return [];
         }
       } else if (response.statusCode == 401) {
         await _handleUnauthorized();
+        final cached = await _readCache(_cacheMyRequestsKey);
+        if (cached is List) {
+          return cached
+              .map((item) =>
+                  BloodRequest.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
         return [];
       } else {
+        final cached = await _readCache(_cacheMyRequestsKey);
+        if (cached is List) {
+          return cached
+              .map((item) =>
+                  BloodRequest.fromJson(item as Map<String, dynamic>))
+              .toList();
+        }
         throw Exception('Failed to load blood requests: ${response.body}');
       }
     } on TimeoutException catch (e) {
+      final cached = await _readCache(_cacheMyRequestsKey);
+      if (cached is List) {
+        return cached
+            .map((item) => BloodRequest.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
       throw Exception('Network error: ${e.toString()}');
     } on SocketException catch (e) {
+      final cached = await _readCache(_cacheMyRequestsKey);
+      if (cached is List) {
+        return cached
+            .map((item) => BloodRequest.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
       throw Exception('Network error: ${e.toString()}');
     } catch (e) {
       rethrow;

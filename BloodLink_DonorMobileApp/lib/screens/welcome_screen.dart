@@ -251,7 +251,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       );
     } else {
       return Column(
-        children: _campaigns.map((campaign) {
+        children: _campaigns.take(4).map((campaign) {
           return Padding(
             padding: EdgeInsets.only(bottom: responsive.getSpacing(small: 12, medium: 14, large: 16)),
             child: _buildCampaignCard(context, responsive, campaign),

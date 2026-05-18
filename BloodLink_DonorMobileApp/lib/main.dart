@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:bloodlink_donor_mobile_app/screens/splash_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/welcome_screen.dart';
 import 'package:bloodlink_donor_mobile_app/screens/home_screen.dart';
@@ -68,6 +69,30 @@ class BloodLinkApp extends StatelessWidget {
           useMaterial3: true,
           textTheme: AppTextStyles.textTheme,
           iconTheme: const IconThemeData(color: AppColors.iconColor),
+          cardTheme: CardThemeData(
+            color: Colors.white.withOpacity(0.7),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+              side: const BorderSide(color: Color(0x55FFFFFF)),
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.7),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: AppColors.primary.withOpacity(0.35)),
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
           appBarTheme: const AppBarTheme(
             backgroundColor: AppColors.background,
             elevation: 0,
@@ -130,40 +155,60 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: _onItemTapped,
-        height: 70,
-        backgroundColor: AppColors.white,
-        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home),
-            label: context.tr('nav_home'),
+      extendBody: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFF2F5FF), Color(0xFFFDF3F8), Color(0xFFEFF8FF)],
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.campaign_outlined),
-            selectedIcon: const Icon(Icons.campaign),
-            label: context.tr('nav_campaigns'),
+        ),
+        child: _screens[_selectedIndex],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: _onItemTapped,
+              height: 74,
+              backgroundColor: Colors.white.withOpacity(0.72),
+              indicatorColor: AppColors.primary.withOpacity(0.16),
+              labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+              destinations: [
+                NavigationDestination(
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home),
+                  label: context.tr('nav_home'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.campaign_outlined),
+                  selectedIcon: const Icon(Icons.campaign),
+                  label: context.tr('nav_campaigns'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.notifications_active_outlined),
+                  selectedIcon: const Icon(Icons.notifications_active),
+                  label: context.tr('nav_urgent'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.history_outlined),
+                  selectedIcon: const Icon(Icons.history),
+                  label: context.tr('nav_history'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.person_outline),
+                  selectedIcon: const Icon(Icons.person),
+                  label: context.tr('nav_profile'),
+                ),
+              ],
+            ),
           ),
-          NavigationDestination(
-            icon: const Icon(Icons.priority_high_outlined),
-            selectedIcon: const Icon(Icons.priority_high),
-            label: context.tr('nav_urgent'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.history_outlined),
-            selectedIcon: const Icon(Icons.history),
-            label: context.tr('nav_history'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            selectedIcon: const Icon(Icons.person),
-            label: context.tr('nav_profile'),
-          ),
-        ],
+        ),
       ),
     );
   }
