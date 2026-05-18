@@ -708,7 +708,7 @@ class _EligibilityCard extends StatelessWidget {
     if (eligibility.isEligible) {
       return const Color(0xFF1BC47D); // green — eligible now
     }
-    return const Color(0xFFFA4A4A); // red — waiting
+    return const Color(0xFFfb8484); // red — waiting
   }
 
   IconData get _icon {
