@@ -11,6 +11,7 @@ class CustomCard extends StatelessWidget {
   final double blurSigma;
   final Color borderColor;
   final Gradient? gradient;
+  final double elevation;
 
   CustomCard({
     super.key,
@@ -21,6 +22,7 @@ class CustomCard extends StatelessWidget {
     this.blurSigma = 18,
     this.borderColor = const Color(0x66FFFFFF),
     this.gradient,
+    this.elevation = 0,
   });
 
   @override
@@ -29,7 +31,7 @@ class CustomCard extends StatelessWidget {
     final responsiveBorderRadius = responsive.getBorderRadius(borderRadius);
     final responsivePadding = padding ?? responsive.getSymmetricPadding(horizontal: 20, vertical: 20);
     final responsiveElevation = responsive.getElevation(elevation);
-
+    
     return ClipRRect(
       borderRadius: BorderRadius.circular(responsiveBorderRadius),
       child: BackdropFilter(
@@ -43,7 +45,7 @@ class CustomCard extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: AppColors.textPrimary.withOpacity(0.08),
-                blurRadius: 24,
+                blurRadius: 20 + responsiveElevation,
                 offset: const Offset(0, 12),
               ),
             ],
