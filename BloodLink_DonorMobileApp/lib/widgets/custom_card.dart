@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/utils/responsive_utils.dart';
 
@@ -7,6 +8,9 @@ class CustomCard extends StatelessWidget {
   final Color backgroundColor;
   final double borderRadius;
   final EdgeInsetsGeometry? padding;
+  final double blurSigma;
+  final Color borderColor;
+  final Gradient? gradient;
   final double elevation;
 
   CustomCard({
@@ -15,25 +19,42 @@ class CustomCard extends StatelessWidget {
     this.backgroundColor = AppColors.white,
     this.borderRadius = 24,
     this.padding,
-    this.elevation = 4,
+    this.blurSigma = 18,
+    this.borderColor = const Color(0x66FFFFFF),
+    this.gradient,
+    this.elevation = 0,
   });
 
   @override
   Widget build(BuildContext context) {
     final responsive = context.responsive;
     final responsiveBorderRadius = responsive.getBorderRadius(borderRadius);
-    final responsiveElevation = responsive.getElevation(elevation);
     final responsivePadding = padding ?? responsive.getSymmetricPadding(horizontal: 20, vertical: 20);
+    final responsiveElevation = responsive.getElevation(elevation);
 
-    return Card(
-      elevation: 0,
-      color: backgroundColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(responsiveBorderRadius),
-      ),
-      child: Padding(
-        padding: responsivePadding,
-        child: child,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(responsiveBorderRadius),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
+        child: Container(
+          decoration: BoxDecoration(
+            color: backgroundColor.withOpacity(0.72),
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(responsiveBorderRadius),
+            border: Border.all(color: borderColor, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.textPrimary.withOpacity(0.08),
+                blurRadius: 20 + responsiveElevation,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: responsivePadding,
+            child: child,
+          ),
+        ),
       ),
     );
   }

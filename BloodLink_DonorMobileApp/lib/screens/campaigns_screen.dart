@@ -8,7 +8,7 @@ import 'package:bloodlink_donor_mobile_app/models/campaign.dart';
 import 'package:bloodlink_donor_mobile_app/screens/campaign_detail_screen.dart';
 import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
-enum _CampaignFilter { all, thisWeek }
+enum _CampaignFilter { all, open, upcoming }
 
 class CampaignsScreen extends StatefulWidget {
   const CampaignsScreen({super.key});
@@ -75,15 +75,11 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
   List<Campaign> get _filteredCampaigns {
     List<Campaign> result = _campaigns;
 
-    // Apply week filter
-    if (_activeFilter == _CampaignFilter.thisWeek) {
-      final now = DateTime.now();
-      final weekday = now.weekday;
-      final startOfWeek = DateTime(now.year, now.month, now.day - (weekday - 1));
-      final endOfWeek = startOfWeek.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-      result = result
-          .where((c) => c.startDate.isBefore(endOfWeek) && c.endDate.isAfter(startOfWeek))
-          .toList();
+    // Apply status filter
+    if (_activeFilter == _CampaignFilter.open) {
+      result = result.where((c) => c.displayStatus.toUpperCase() == 'OPEN').toList();
+    } else if (_activeFilter == _CampaignFilter.upcoming) {
+      result = result.where((c) => c.displayStatus.toUpperCase() == 'UPCOMING').toList();
     }
 
     // Apply search query
@@ -196,17 +192,24 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
               Row(
                 children: [
                   _Pill(
-                    text: context.tr('campaigns_all'),
+                    text: 'All',
                     isActive: _activeFilter == _CampaignFilter.all,
                     responsive: responsive,
                     onTap: () => setState(() => _activeFilter = _CampaignFilter.all),
                   ),
                   SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                   _Pill(
-                    text: context.tr('campaigns_this_week'),
-                    isActive: _activeFilter == _CampaignFilter.thisWeek,
+                    text: 'Open',
+                    isActive: _activeFilter == _CampaignFilter.open,
                     responsive: responsive,
-                    onTap: () => setState(() => _activeFilter = _CampaignFilter.thisWeek),
+                    onTap: () => setState(() => _activeFilter = _CampaignFilter.open),
+                  ),
+                  SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                  _Pill(
+                    text: 'Upcoming',
+                    isActive: _activeFilter == _CampaignFilter.upcoming,
+                    responsive: responsive,
+                    onTap: () => setState(() => _activeFilter = _CampaignFilter.upcoming),
                   ),
                 ],
               ),
@@ -263,8 +266,8 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
                         Text(
                           _searchQuery.isNotEmpty
                               ? 'No campaigns matched "$_searchQuery".'
-                              : _activeFilter == _CampaignFilter.thisWeek
-                                  ? 'No campaigns scheduled for this week.'
+                              : _activeFilter == _CampaignFilter.upcoming
+                                  ? 'No campaigns found for the selected category.'
                                   : context.tr('campaigns_empty'),
                           style: AppTextStyles.body.copyWith(
                             fontSize: responsive.getFont(16),
@@ -288,7 +291,7 @@ class _CampaignsScreenState extends State<CampaignsScreen> {
                               ),
                             ),
                           )
-                        else if (_activeFilter == _CampaignFilter.thisWeek)
+                        else if (_activeFilter == _CampaignFilter.upcoming)
                           GestureDetector(
                             onTap: () => setState(() => _activeFilter = _CampaignFilter.all),
                             child: Text(
