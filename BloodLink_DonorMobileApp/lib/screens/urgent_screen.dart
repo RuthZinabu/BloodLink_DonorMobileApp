@@ -8,7 +8,7 @@ import 'package:bloodlink_donor_mobile_app/models/emergency.dart';
 import 'package:bloodlink_donor_mobile_app/screens/emergency_detail_screen.dart';
 import 'package:bloodlink_donor_mobile_app/services/localization_service.dart';
 
-enum _UrgencyFilter { all, critical }
+enum _UrgencyFilter { all, urgent, high, emergency }
 
 class UrgentScreen extends StatefulWidget {
   const UrgentScreen({super.key});
@@ -76,8 +76,9 @@ class _UrgentScreenState extends State<UrgentScreen> {
     List<Emergency> result = _emergencies;
 
     // Apply urgency filter
-    if (_activeFilter == _UrgencyFilter.critical) {
-      result = result.where((e) => e.urgencyLevel.toUpperCase() == 'CRITICAL').toList();
+    if (_activeFilter != _UrgencyFilter.all) {
+      final target = _activeFilter.name.toUpperCase();
+      result = result.where((e) => e.urgencyLevel.toUpperCase() == target).toList();
     }
 
     // Apply search query — matches hospital name, location, or blood type
@@ -187,20 +188,33 @@ class _UrgentScreenState extends State<UrgentScreen> {
               SizedBox(height: responsive.getSpacing(small: 14, medium: 18, large: 20)),
 
               // ── Filter pills ──────────────────────────────────────────────
-              Row(
+              Wrap(
+                spacing: responsive.getSpacing(small: 8, medium: 10, large: 12),
+                runSpacing: responsive.getSpacing(small: 8, medium: 10, large: 12),
                 children: [
                   _Pill(
-                    text: context.tr('urgent_all'),
+                    text: 'ALL',
                     isActive: _activeFilter == _UrgencyFilter.all,
                     responsive: responsive,
                     onTap: () => setState(() => _activeFilter = _UrgencyFilter.all),
                   ),
-                  SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
                   _Pill(
-                    text: context.tr('urgent_critical'),
-                    isActive: _activeFilter == _UrgencyFilter.critical,
+                    text: 'URGENT',
+                    isActive: _activeFilter == _UrgencyFilter.urgent,
                     responsive: responsive,
-                    onTap: () => setState(() => _activeFilter = _UrgencyFilter.critical),
+                    onTap: () => setState(() => _activeFilter = _UrgencyFilter.urgent),
+                  ),
+                  _Pill(
+                    text: 'HIGH',
+                    isActive: _activeFilter == _UrgencyFilter.high,
+                    responsive: responsive,
+                    onTap: () => setState(() => _activeFilter = _UrgencyFilter.high),
+                  ),
+                  _Pill(
+                    text: 'EMERGENCY',
+                    isActive: _activeFilter == _UrgencyFilter.emergency,
+                    responsive: responsive,
+                    onTap: () => setState(() => _activeFilter = _UrgencyFilter.emergency),
                   ),
                 ],
               ),
@@ -257,8 +271,8 @@ class _UrgentScreenState extends State<UrgentScreen> {
                         Text(
                           _searchQuery.isNotEmpty
                               ? 'No emergencies matched "$_searchQuery".'
-                              : _activeFilter == _UrgencyFilter.critical
-                                  ? 'No critical emergencies at the moment.'
+                              : _activeFilter != _UrgencyFilter.all
+                                  ? 'No emergencies found for the selected category.'
                                   : context.tr('urgent_empty'),
                           style: AppTextStyles.body.copyWith(
                             fontSize: responsive.getFont(16),
@@ -282,7 +296,7 @@ class _UrgentScreenState extends State<UrgentScreen> {
                               ),
                             ),
                           )
-                        else if (_activeFilter == _UrgencyFilter.critical)
+                        else if (_activeFilter != _UrgencyFilter.all)
                           GestureDetector(
                             onTap: () => setState(() => _activeFilter = _UrgencyFilter.all),
                             child: Text(
