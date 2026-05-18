@@ -11,7 +11,6 @@ class CustomCard extends StatelessWidget {
   final double blurSigma;
   final Color borderColor;
   final Gradient? gradient;
-  final double elevation;
 
   CustomCard({
     super.key,
@@ -22,7 +21,6 @@ class CustomCard extends StatelessWidget {
     this.blurSigma = 18,
     this.borderColor = const Color(0x66FFFFFF),
     this.gradient,
-    this.elevation = 0,
   });
 
   @override
@@ -45,7 +43,7 @@ class CustomCard extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: AppColors.textPrimary.withOpacity(0.08),
-                blurRadius: 20 + responsiveElevation,
+                blurRadius: 24,
                 offset: const Offset(0, 12),
               ),
             ],
