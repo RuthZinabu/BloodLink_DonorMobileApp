@@ -460,16 +460,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       responsive: responsive,
                     ),
                   ),
-                  SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
 
-                  Expanded(
-                    child: _InfoTile(
-                      title: context.tr('home_last_donation'),
-                      value: _lastDonationDate,
-                      status: _lastDonationLocation,
-                      responsive: responsive,
-                    ),
-                  ),
                 ],
               ),
 
@@ -621,7 +612,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 )
               else
                 Column(
-                  children: _nearbyEmergencies.take(3).map((emergency) => Column(
+                  children: _nearbyEmergencies.take(4).map((emergency) => Column(
                     children: [
                       _UrgentItem(
                         bloodType: emergency.bloodType,
