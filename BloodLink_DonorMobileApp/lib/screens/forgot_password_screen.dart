@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_colors.dart';
 import 'package:bloodlink_donor_mobile_app/theme/app_text_styles.dart';
@@ -26,9 +27,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   _ForgotStep _step = _ForgotStep.email;
   bool _isLoading = false;
+  bool _isResending = false;
   String? _errorMessage;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+
+  // Resend OTP countdown
+  static const int _resendCooldown = 60;
+  int _secondsRemaining = 0;
+  Timer? _countdownTimer;
 
   @override
   void dispose() {
@@ -36,7 +43,26 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     _otpController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
+    _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    setState(() => _secondsRemaining = _resendCooldown);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        if (_secondsRemaining > 0) {
+          _secondsRemaining--;
+        } else {
+          timer.cancel();
+        }
+      });
+    });
   }
 
   Future<void> _requestOtp() async {
@@ -57,6 +83,32 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _isLoading = false;
       if (result['success'] == true) {
         _step = _ForgotStep.otp;
+        _startCountdown();
+      } else {
+        _errorMessage = result['message'];
+      }
+    });
+  }
+
+  Future<void> _resendOtp() async {
+    if (_secondsRemaining > 0 || _isResending) return;
+
+    setState(() {
+      _isResending = true;
+      _errorMessage = null;
+    });
+
+    final result = await _apiService.forgotPassword(
+      email: _emailController.text.trim(),
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _isResending = false;
+      if (result['success'] == true) {
+        _startCountdown();
+        _otpController.clear();
       } else {
         _errorMessage = result['message'];
       }
@@ -82,6 +134,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() {
       _isLoading = false;
       if (result['success'] == true) {
+        _countdownTimer?.cancel();
         _step = _ForgotStep.success;
       } else {
         _errorMessage = result['message'];
@@ -100,12 +153,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             if (_step == _ForgotStep.otp) {
+              _countdownTimer?.cancel();
               setState(() {
                 _step = _ForgotStep.email;
                 _errorMessage = null;
                 _otpController.clear();
                 _newPasswordController.clear();
                 _confirmPasswordController.clear();
+                _secondsRemaining = 0;
               });
             } else {
               Navigator.of(context).pop();
@@ -199,33 +254,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               if (value == null || value.trim().isEmpty) {
                 return 'Please enter your email';
               }
-              if (!RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(value.trim())) {
+              if (!RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$')
+                  .hasMatch(value.trim())) {
                 return 'Please enter a valid email address';
               }
               return null;
             },
-            decoration: InputDecoration(
-              labelText: 'Email Address',
-              hintText: 'your.email@example.com',
-              prefixIcon: Icon(
-                Icons.email_outlined,
-                color: AppColors.primary,
-                size: responsive.getIconSize(20),
-              ),
-              filled: true,
-              fillColor: AppColors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-              ),
+            decoration: _inputDecoration(
+              responsive,
+              label: 'Email Address',
+              hint: 'your.email@example.com',
+              icon: Icons.email_outlined,
             ),
           ),
           if (_errorMessage != null) ...[
@@ -245,6 +284,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildOtpStep(ResponsiveUtils responsive) {
+    final canResend = _secondsRemaining == 0 && !_isResending;
+
     return Form(
       key: _resetFormKey,
       child: Column(
@@ -289,11 +330,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const TextSpan(text: '\nEnter it below along with your new password.'),
+                const TextSpan(
+                    text: '\nEnter it below along with your new password.'),
               ],
             ),
           ),
-          SizedBox(height: responsive.getSpacing(small: 32, medium: 40, large: 48)),
+          SizedBox(height: responsive.getSpacing(small: 28, medium: 36, large: 44)),
+
+          // OTP field
           TextFormField(
             controller: _otpController,
             keyboardType: TextInputType.number,
@@ -304,32 +348,65 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               }
               return null;
             },
-            decoration: InputDecoration(
-              labelText: 'OTP Code',
-              hintText: 'Enter the code from your email',
-              counterText: '',
-              prefixIcon: Icon(
-                Icons.pin_outlined,
-                color: AppColors.primary,
-                size: responsive.getIconSize(20),
-              ),
-              filled: true,
-              fillColor: AppColors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.primary, width: 1.5),
-              ),
+            decoration: _inputDecoration(
+              responsive,
+              label: 'OTP Code',
+              hint: 'Enter the code from your email',
+              icon: Icons.pin_outlined,
+              counter: '',
             ),
           ),
-          SizedBox(height: responsive.getSpacing(small: 16, medium: 18, large: 20)),
+
+          // Resend row
+          SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Didn't receive the code? ",
+                style: AppTextStyles.body.copyWith(
+                  fontSize: responsive.getFont(13),
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              if (_isResending)
+                SizedBox(
+                  width: responsive.getIconSize(14),
+                  height: responsive.getIconSize(14),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primary,
+                  ),
+                )
+              else if (_secondsRemaining > 0)
+                Text(
+                  'Resend in ${_secondsRemaining}s',
+                  style: AppTextStyles.body.copyWith(
+                    fontSize: responsive.getFont(13),
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: canResend ? _resendOtp : null,
+                  child: Text(
+                    'Resend OTP',
+                    style: AppTextStyles.body.copyWith(
+                      fontSize: responsive.getFont(13),
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.underline,
+                      decorationColor: AppColors.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+
+          SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
+
+          // New password field
           TextFormField(
             controller: _newPasswordController,
             obscureText: _obscurePassword,
@@ -345,39 +422,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               }
               return null;
             },
-            decoration: InputDecoration(
-              labelText: 'New Password',
-              hintText: 'Enter your new password',
-              prefixIcon: Icon(
-                Icons.lock_outline,
-                color: AppColors.primary,
-                size: responsive.getIconSize(20),
-              ),
+            decoration: _inputDecoration(
+              responsive,
+              label: 'New Password',
+              hint: 'Enter your new password',
+              icon: Icons.lock_outline,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  _obscurePassword
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                   color: AppColors.textSecondary,
                   size: responsive.getIconSize(20),
                 ),
-                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-              ),
-              filled: true,
-              fillColor: AppColors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
               ),
             ),
           ),
           SizedBox(height: responsive.getSpacing(small: 16, medium: 18, large: 20)),
+
+          // Confirm password field
           TextFormField(
             controller: _confirmPasswordController,
             obscureText: _obscureConfirm,
@@ -390,38 +455,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               }
               return null;
             },
-            decoration: InputDecoration(
-              labelText: 'Confirm Password',
-              hintText: 'Re-enter your new password',
-              prefixIcon: Icon(
-                Icons.lock_outline,
-                color: AppColors.primary,
-                size: responsive.getIconSize(20),
-              ),
+            decoration: _inputDecoration(
+              responsive,
+              label: 'Confirm Password',
+              hint: 'Re-enter your new password',
+              icon: Icons.lock_outline,
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  _obscureConfirm
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                   color: AppColors.textSecondary,
                   size: responsive.getIconSize(20),
                 ),
-                onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
-              ),
-              filled: true,
-              fillColor: AppColors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
-                borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+                onPressed: () =>
+                    setState(() => _obscureConfirm = !_obscureConfirm),
               ),
             ),
           ),
+
           if (_errorMessage != null) ...[
             SizedBox(height: responsive.getSpacing(small: 16, medium: 18, large: 20)),
             _buildErrorBanner(responsive, _errorMessage!),
@@ -433,14 +485,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             backgroundColor: AppColors.primary,
             width: double.infinity,
           ),
-          SizedBox(height: responsive.getSpacing(small: 16, medium: 18, large: 20)),
+          SizedBox(height: responsive.getSpacing(small: 14, medium: 16, large: 18)),
           TextButton(
             onPressed: _isLoading
                 ? null
                 : () {
+                    _countdownTimer?.cancel();
                     setState(() {
                       _step = _ForgotStep.email;
                       _errorMessage = null;
+                      _secondsRemaining = 0;
                       _otpController.clear();
                       _newPasswordController.clear();
                       _confirmPasswordController.clear();
@@ -502,6 +556,49 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           width: double.infinity,
         ),
       ],
+    );
+  }
+
+  InputDecoration _inputDecoration(
+    ResponsiveUtils responsive, {
+    required String label,
+    required String hint,
+    required IconData icon,
+    Widget? suffixIcon,
+    String? counter,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      counterText: counter,
+      prefixIcon: Icon(
+        icon,
+        color: AppColors.primary,
+        size: responsive.getIconSize(20),
+      ),
+      suffixIcon: suffixIcon,
+      filled: true,
+      fillColor: AppColors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+        borderSide: BorderSide(color: AppColors.border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+        borderSide: BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+        borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+        borderSide: BorderSide(color: AppColors.warning),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+        borderSide: BorderSide(color: AppColors.warning, width: 1.5),
+      ),
     );
   }
 

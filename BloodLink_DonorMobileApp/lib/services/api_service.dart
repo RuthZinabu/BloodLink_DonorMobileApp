@@ -151,13 +151,16 @@ class ApiService {
         final responseBody = jsonDecode(response.body);
         return {
           'success': true,
-          'message': responseBody['message'] ?? 'Password reset OTP sent to your email',
+          'message': responseBody['message'] ??
+              'Password reset OTP sent to your email',
         };
       } else {
         final errorBody = jsonDecode(response.body);
         return {
           'success': false,
-          'message': errorBody['error'] ?? errorBody['message'] ?? 'Failed to send reset OTP',
+          'message': errorBody['error'] ??
+              errorBody['message'] ??
+              'Failed to send reset OTP',
         };
       }
     } catch (e) {
@@ -197,7 +200,9 @@ class ApiService {
         final errorBody = jsonDecode(response.body);
         return {
           'success': false,
-          'message': errorBody['error'] ?? errorBody['message'] ?? 'Failed to reset password',
+          'message': errorBody['error'] ??
+              errorBody['message'] ??
+              'Failed to reset password',
         };
       }
     } catch (e) {
@@ -327,7 +332,10 @@ class ApiService {
       final token = await getAccessToken();
       if (token == null || token.isEmpty) {
         await _handleUnauthorized();
-        return {'success': false, 'message': 'Session expired. Please log in again.'};
+        return {
+          'success': false,
+          'message': 'Session expired. Please log in again.'
+        };
       }
 
       final response = await http
@@ -350,7 +358,10 @@ class ApiService {
         };
       } else if (response.statusCode == 401) {
         await _handleUnauthorized();
-        return {'success': false, 'message': 'Session expired. Please log in again.'};
+        return {
+          'success': false,
+          'message': 'Session expired. Please log in again.'
+        };
       } else {
         return {
           'success': false,
@@ -629,12 +640,15 @@ class ApiService {
     try {
       final queryParams = <String, String>{};
       if (title != null && title.isNotEmpty) queryParams['title'] = title;
-      if (location != null && location.isNotEmpty) queryParams['location'] = location;
-      if (startDate != null && startDate.isNotEmpty) queryParams['start_date'] = startDate;
-      if (endDate != null && endDate.isNotEmpty) queryParams['end_date'] = endDate;
+      if (location != null && location.isNotEmpty)
+        queryParams['location'] = location;
+      if (startDate != null && startDate.isNotEmpty)
+        queryParams['start_date'] = startDate;
+      if (endDate != null && endDate.isNotEmpty)
+        queryParams['end_date'] = endDate;
 
-      final uri = Uri.parse('$baseUrL/api/campaigns')
-          .replace(queryParameters: queryParams.isNotEmpty ? queryParams : null);
+      final uri = Uri.parse('$baseUrL/api/campaigns/').replace(
+          queryParameters: queryParams.isNotEmpty ? queryParams : null);
 
       final response = await http
           .get(uri, headers: await _getHeaders())
@@ -709,7 +723,10 @@ class ApiService {
         };
       } else if (response.statusCode == 401) {
         await _handleUnauthorized();
-        return {'success': false, 'message': 'Session expired. Please log in again.'};
+        return {
+          'success': false,
+          'message': 'Session expired. Please log in again.'
+        };
       } else if (response.statusCode == 403) {
         final errorBody = jsonDecode(response.body);
         return {
@@ -721,7 +738,8 @@ class ApiService {
         final errorBody = jsonDecode(response.body);
         return {
           'success': false,
-          'message': errorBody['error'] ?? 'Failed to create blood request: ${response.statusCode}',
+          'message': errorBody['error'] ??
+              'Failed to create blood request: ${response.statusCode}',
         };
       }
     } catch (e) {
@@ -777,8 +795,8 @@ class ApiService {
         final cached = await _readCache(_cacheMyRequestsKey);
         if (cached is List) {
           return cached
-              .map((item) =>
-                  BloodRequest.fromJson(item as Map<String, dynamic>))
+              .map(
+                  (item) => BloodRequest.fromJson(item as Map<String, dynamic>))
               .toList();
         }
         return [];
@@ -786,8 +804,8 @@ class ApiService {
         final cached = await _readCache(_cacheMyRequestsKey);
         if (cached is List) {
           return cached
-              .map((item) =>
-                  BloodRequest.fromJson(item as Map<String, dynamic>))
+              .map(
+                  (item) => BloodRequest.fromJson(item as Map<String, dynamic>))
               .toList();
         }
         throw Exception('Failed to load blood requests: ${response.body}');
