@@ -136,13 +136,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                           Column(
                             children: _leaderboard
                                 .sublist(3)
-                                .map((entry) => _RankingTile(
-                                      rank: entry.rank,
-                                      name: entry.fullName.isNotEmpty ? entry.fullName : _donorLabel(entry.donorId),
-                                      subtitle: '${entry.donationCount} donations',
-                                      score: entry.donationCount.toString(),
+                                .asMap()
+                                .entries
+                                .map((mapEntry) => _RankingTile(
+                                      rank: mapEntry.key + 4,
+                                      name: mapEntry.value.fullName.isNotEmpty ? mapEntry.value.fullName : _donorLabel(mapEntry.value.donorId),
+                                      subtitle: '${mapEntry.value.donationCount} donations',
+                                      score: mapEntry.value.donationCount.toString(),
                                       responsive: responsive,
-                                      profilePictureUrl: entry.profilePictureUrl,
+                                      profilePictureUrl: mapEntry.value.profilePictureUrl,
                                     ))
                                 .toList(),
                           )

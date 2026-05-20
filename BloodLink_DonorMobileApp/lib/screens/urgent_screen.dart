@@ -199,23 +199,24 @@ class _UrgentScreenState extends State<UrgentScreen> {
                     onTap: () => setState(() => _activeFilter = _UrgencyFilter.all),
                   ),
                   _Pill(
-                    text: 'URGENT',
+                    text: 'Emergency',
+                    isActive: _activeFilter == _UrgencyFilter.emergency,
+                    responsive: responsive,
+                    onTap: () => setState(() => _activeFilter = _UrgencyFilter.emergency),
+                  ),
+                  _Pill(
+                    text: 'Urgent',
                     isActive: _activeFilter == _UrgencyFilter.urgent,
                     responsive: responsive,
                     onTap: () => setState(() => _activeFilter = _UrgencyFilter.urgent),
                   ),
                   _Pill(
-                    text: 'HIGH',
+                    text: 'High',
                     isActive: _activeFilter == _UrgencyFilter.high,
                     responsive: responsive,
                     onTap: () => setState(() => _activeFilter = _UrgencyFilter.high),
                   ),
-                  _Pill(
-                    text: 'EMERGENCY',
-                    isActive: _activeFilter == _UrgencyFilter.emergency,
-                    responsive: responsive,
-                    onTap: () => setState(() => _activeFilter = _UrgencyFilter.emergency),
-                  ),
+                  
                 ],
               ),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),

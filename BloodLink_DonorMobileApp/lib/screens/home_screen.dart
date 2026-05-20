@@ -703,12 +703,12 @@ class _EligibilityCard extends StatelessWidget {
   /// Determines the card accent color based on eligibility state
   Color get _accentColor {
     if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
-      return const Color(0xFF5F6D7E); // grey — permanently deferred
+      return const Color(0xFF374151); // dark slate — permanently deferred
     }
     if (eligibility.isEligible) {
-      return const Color(0xFF1BC47D); // green — eligible now
+      return const Color(0xFF047857); // deep emerald — eligible now
     }
-    return const Color(0xFFfb8484); // red — waiting
+    return const Color(0xFFB91C1C); // deep red — waiting
   }
 
   IconData get _icon {
