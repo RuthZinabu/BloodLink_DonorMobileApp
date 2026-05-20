@@ -134,7 +134,7 @@ class ApiService {
     }
   }
 
-  /// Forgot password
+  /// Forgot password — sends OTP to the registered email
   Future<Map<String, dynamic>> forgotPassword({
     required String email,
   }) async {
@@ -143,8 +143,46 @@ class ApiService {
           .post(
             Uri.parse('$baseUrL/api/auth/forgot-password'),
             headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'success': true,
+          'message': responseBody['message'] ?? 'Password reset OTP sent to your email',
+        };
+      } else {
+        final errorBody = jsonDecode(response.body);
+        return {
+          'success': false,
+          'message': errorBody['error'] ?? errorBody['message'] ?? 'Failed to send reset OTP',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+      };
+    }
+  }
+
+  /// Reset password — verifies OTP and sets the new password
+  Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+  }) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrL/api/auth/reset-password'),
+            headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'email': email,
+              'otp': otp,
+              'new_password': newPassword,
             }),
           )
           .timeout(const Duration(seconds: 30));
@@ -153,13 +191,13 @@ class ApiService {
         final responseBody = jsonDecode(response.body);
         return {
           'success': true,
-          'message': responseBody['message'] ?? 'Password reset email sent',
+          'message': responseBody['message'] ?? 'Password reset successfully',
         };
       } else {
         final errorBody = jsonDecode(response.body);
         return {
           'success': false,
-          'message': errorBody['message'] ?? 'Failed to send reset email',
+          'message': errorBody['error'] ?? errorBody['message'] ?? 'Failed to reset password',
         };
       }
     } catch (e) {
