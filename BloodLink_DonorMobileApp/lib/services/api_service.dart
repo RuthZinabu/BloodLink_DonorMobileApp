@@ -145,7 +145,7 @@ class ApiService {
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'email': email}),
           )
-          .timeout(const Duration(seconds: 90));
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
@@ -156,25 +156,17 @@ class ApiService {
         };
       } else {
         final errorBody = jsonDecode(response.body);
-        final raw = (errorBody['error'] ?? errorBody['message'] ?? '').toString();
-        final friendly = raw.toLowerCase().contains('not found')
-            ? 'No account found with that email address. Please check and try again.'
-            : raw.isNotEmpty
-                ? raw
-                : 'Failed to send reset OTP. Please try again.';
-        return {'success': false, 'message': friendly};
-      }
-    } on Exception catch (e) {
-      final msg = e.toString().toLowerCase();
-      if (msg.contains('timeout') || msg.contains('timed out')) {
         return {
           'success': false,
-          'message': 'The server is starting up — please wait a moment and try again.',
+          'message': errorBody['error'] ??
+              errorBody['message'] ??
+              'Failed to send reset OTP',
         };
       }
+    } catch (e) {
       return {
         'success': false,
-        'message': 'Could not reach the server. Please check your connection and try again.',
+        'message': 'Network error: ${e.toString()}',
       };
     }
   }
@@ -196,7 +188,7 @@ class ApiService {
               'new_password': newPassword,
             }),
           )
-          .timeout(const Duration(seconds: 90));
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
@@ -206,27 +198,17 @@ class ApiService {
         };
       } else {
         final errorBody = jsonDecode(response.body);
-        final raw = (errorBody['error'] ?? errorBody['message'] ?? '').toString();
-        final friendly = raw.toLowerCase().contains('invalid otp')
-            ? 'The OTP you entered is incorrect. Please check your email and try again.'
-            : raw.toLowerCase().contains('not strong')
-                ? 'Password is too weak. Use at least 6 characters with a mix of letters and numbers.'
-                : raw.isNotEmpty
-                    ? raw
-                    : 'Failed to reset password. Please try again.';
-        return {'success': false, 'message': friendly};
-      }
-    } on Exception catch (e) {
-      final msg = e.toString().toLowerCase();
-      if (msg.contains('timeout') || msg.contains('timed out')) {
         return {
           'success': false,
-          'message': 'The server took too long to respond. Please try again.',
+          'message': errorBody['error'] ??
+              errorBody['message'] ??
+              'Failed to reset password',
         };
       }
+    } catch (e) {
       return {
         'success': false,
-        'message': 'Could not reach the server. Please check your connection and try again.',
+        'message': 'Network error: ${e.toString()}',
       };
     }
   }
