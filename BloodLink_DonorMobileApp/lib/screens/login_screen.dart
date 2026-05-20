@@ -130,10 +130,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: iconBoxSize,
                 decoration: BoxDecoration(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
+                  borderRadius:
+                      BorderRadius.circular(responsive.getBorderRadius(24)),
                 ),
                 child: Icon(
-                  Icons.favorite,
+                  Icons.water_drop,
                   color: AppColors.white,
                   size: iconSize,
                 ),
@@ -141,10 +142,13 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: h28),
               Text(
                 context.tr('login_title'),
-                style: AppTextStyles.heading.copyWith(fontSize: headingFontSize),
+                style:
+                    AppTextStyles.heading.copyWith(fontSize: headingFontSize),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 6, medium: 8, large: 10)),
               Text(
                 context.tr('login_subtitle'),
                 style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
@@ -165,7 +169,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: AppColors.warning,
                         size: errorIconSize,
                       ),
-                      SizedBox(width: responsive.getSpacing(small: 8, medium: 12, large: 16)),
+                      SizedBox(
+                          width: responsive.getSpacing(
+                              small: 8, medium: 12, large: 16)),
                       Expanded(
                         child: Text(
                           _errorMessage!,
@@ -186,9 +192,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     context.tr('login_email'),
-                    style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(14)),
+                    style: AppTextStyles.subtitle
+                        .copyWith(fontSize: responsive.getFont(14)),
                   ),
-                  SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+                  SizedBox(
+                      height: responsive.getSpacing(
+                          small: 6, medium: 8, large: 10)),
                   TextField(
                     controller: _emailController,
                     style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
@@ -206,7 +215,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(textFieldBorderRadius),
+                        borderRadius:
+                            BorderRadius.circular(textFieldBorderRadius),
                       ),
                       isDense: true,
                     ),
@@ -219,9 +229,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     context.tr('login_password'),
-                    style: AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(14)),
+                    style: AppTextStyles.subtitle
+                        .copyWith(fontSize: responsive.getFont(14)),
                   ),
-                  SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+                  SizedBox(
+                      height: responsive.getSpacing(
+                          small: 6, medium: 8, large: 10)),
                   TextField(
                     controller: _passwordController,
                     style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
@@ -245,14 +258,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           });
                         },
                         child: Icon(
-                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           color: AppColors.textSecondary,
                           size: responsive.getIconSize(20),
                         ),
                       ),
                       border: OutlineInputBorder(
                         borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(textFieldBorderRadius),
+                        borderRadius:
+                            BorderRadius.circular(textFieldBorderRadius),
                       ),
                       isDense: true,
                     ),
@@ -282,7 +298,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: h28),
               CustomButton(
-                label: _isLoading ? context.tr('login_loading') : context.tr('login_btn'),
+                label: _isLoading
+                    ? context.tr('login_loading')
+                    : context.tr('login_btn'),
                 onPressed: _isLoading ? () {} : _login,
                 width: double.infinity,
               ),
@@ -296,7 +314,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Text(
                       context.tr('login_or'),
-                      style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
+                      style:
+                          AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                     ),
                   ),
                   const Expanded(child: Divider(color: AppColors.border)),

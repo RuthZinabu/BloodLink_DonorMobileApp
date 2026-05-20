@@ -28,6 +28,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   _ForgotStep _step = _ForgotStep.email;
   bool _isLoading = false;
   bool _isResending = false;
+  bool _showSlowHint = false;
   String? _errorMessage;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
@@ -36,6 +37,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   static const int _resendCooldown = 60;
   int _secondsRemaining = 0;
   Timer? _countdownTimer;
+  Timer? _slowHintTimer;
 
   @override
   void dispose() {
@@ -44,6 +46,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     _countdownTimer?.cancel();
+    _slowHintTimer?.cancel();
     super.dispose();
   }
 
@@ -70,17 +73,28 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() {
       _isLoading = true;
+      _showSlowHint = false;
       _errorMessage = null;
+    });
+
+    // Show a "server is waking up" hint after 6 seconds
+    _slowHintTimer?.cancel();
+    _slowHintTimer = Timer(const Duration(seconds: 6), () {
+      if (mounted && _isLoading) {
+        setState(() => _showSlowHint = true);
+      }
     });
 
     final result = await _apiService.forgotPassword(
       email: _emailController.text.trim(),
     );
 
+    _slowHintTimer?.cancel();
     if (!mounted) return;
 
     setState(() {
       _isLoading = false;
+      _showSlowHint = false;
       if (result['success'] == true) {
         _step = _ForgotStep.otp;
         _startCountdown();
@@ -270,6 +284,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           if (_errorMessage != null) ...[
             SizedBox(height: responsive.getSpacing(small: 16, medium: 18, large: 20)),
             _buildErrorBanner(responsive, _errorMessage!),
+          ],
+          if (_showSlowHint) ...[
+            SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
+            _buildInfoBanner(
+              responsive,
+              'The server is starting up, this may take up to 60 seconds. Please wait…',
+            ),
           ],
           SizedBox(height: responsive.getSpacing(small: 32, medium: 40, large: 48)),
           CustomButton(
@@ -598,6 +619,41 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
         borderSide: BorderSide(color: AppColors.warning, width: 1.5),
+      ),
+    );
+  }
+
+  Widget _buildInfoBanner(ResponsiveUtils responsive, String message) {
+    return Container(
+      padding: EdgeInsets.all(responsive.getPadding(14)),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1D4ED8).withAlpha((0.08 * 255).round()),
+        borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+        border: Border.all(
+          color: const Color(0xFF1D4ED8).withAlpha((0.25 * 255).round()),
+        ),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: responsive.getIconSize(18),
+            height: responsive.getIconSize(18),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: const Color(0xFF1D4ED8),
+            ),
+          ),
+          SizedBox(width: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: const Color(0xFF1D4ED8),
+                fontSize: responsive.getFont(13),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
