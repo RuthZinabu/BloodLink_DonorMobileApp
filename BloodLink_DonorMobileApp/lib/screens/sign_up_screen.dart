@@ -28,58 +28,306 @@ class _Country {
 }
 
 const List<_Country> _kCountries = [
-  _Country(name: 'Ghana',            flag: '🇬🇭', dialCode: '+233', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Nigeria',          flag: '🇳🇬', dialCode: '+234', minDigits: 10, maxDigits: 10),
-  _Country(name: 'Kenya',            flag: '🇰🇪', dialCode: '+254', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'South Africa',     flag: '🇿🇦', dialCode: '+27',  minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Uganda',           flag: '🇺🇬', dialCode: '+256', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Tanzania',         flag: '🇹🇿', dialCode: '+255', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Ethiopia',         flag: '🇪🇹', dialCode: '+251', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Rwanda',           flag: '🇷🇼', dialCode: '+250', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Cameroon',         flag: '🇨🇲', dialCode: '+237', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Senegal',          flag: '🇸🇳', dialCode: '+221', minDigits: 9,  maxDigits: 9),
-  _Country(name: "Côte d'Ivoire",    flag: '🇨🇮', dialCode: '+225', minDigits: 10, maxDigits: 10),
-  _Country(name: 'Egypt',            flag: '🇪🇬', dialCode: '+20',  minDigits: 10, maxDigits: 10),
-  _Country(name: 'Morocco',          flag: '🇲🇦', dialCode: '+212', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Zambia',           flag: '🇿🇲', dialCode: '+260', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Zimbabwe',         flag: '🇿🇼', dialCode: '+263', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Malawi',           flag: '🇲🇼', dialCode: '+265', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Mozambique',       flag: '🇲🇿', dialCode: '+258', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Angola',           flag: '🇦🇴', dialCode: '+244', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Botswana',         flag: '🇧🇼', dialCode: '+267', minDigits: 8,  maxDigits: 8),
-  _Country(name: 'Namibia',          flag: '🇳🇦', dialCode: '+264', minDigits: 9,  maxDigits: 10),
-  _Country(name: 'Liberia',          flag: '🇱🇷', dialCode: '+231', minDigits: 8,  maxDigits: 8),
-  _Country(name: 'Sierra Leone',     flag: '🇸🇱', dialCode: '+232', minDigits: 8,  maxDigits: 8),
-  _Country(name: 'Gambia',           flag: '🇬🇲', dialCode: '+220', minDigits: 7,  maxDigits: 7),
-  _Country(name: 'Guinea',           flag: '🇬🇳', dialCode: '+224', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Togo',             flag: '🇹🇬', dialCode: '+228', minDigits: 8,  maxDigits: 8),
-  _Country(name: 'Benin',            flag: '🇧🇯', dialCode: '+229', minDigits: 8,  maxDigits: 8),
-  _Country(name: 'United States',    flag: '🇺🇸', dialCode: '+1',   minDigits: 10, maxDigits: 10),
-  _Country(name: 'Canada',           flag: '🇨🇦', dialCode: '+1',   minDigits: 10, maxDigits: 10),
-  _Country(name: 'United Kingdom',   flag: '🇬🇧', dialCode: '+44',  minDigits: 10, maxDigits: 10),
-  _Country(name: 'France',           flag: '🇫🇷', dialCode: '+33',  minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Germany',          flag: '🇩🇪', dialCode: '+49',  minDigits: 10, maxDigits: 11),
-  _Country(name: 'Italy',            flag: '🇮🇹', dialCode: '+39',  minDigits: 9,  maxDigits: 10),
-  _Country(name: 'Spain',            flag: '🇪🇸', dialCode: '+34',  minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Netherlands',      flag: '🇳🇱', dialCode: '+31',  minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Portugal',         flag: '🇵🇹', dialCode: '+351', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'India',            flag: '🇮🇳', dialCode: '+91',  minDigits: 10, maxDigits: 10),
-  _Country(name: 'China',            flag: '🇨🇳', dialCode: '+86',  minDigits: 11, maxDigits: 11),
-  _Country(name: 'Japan',            flag: '🇯🇵', dialCode: '+81',  minDigits: 10, maxDigits: 11),
-  _Country(name: 'Australia',        flag: '🇦🇺', dialCode: '+61',  minDigits: 9,  maxDigits: 9),
-  _Country(name: 'New Zealand',      flag: '🇳🇿', dialCode: '+64',  minDigits: 8,  maxDigits: 9),
-  _Country(name: 'Brazil',           flag: '🇧🇷', dialCode: '+55',  minDigits: 10, maxDigits: 11),
-  _Country(name: 'Saudi Arabia',     flag: '🇸🇦', dialCode: '+966', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'UAE',              flag: '🇦🇪', dialCode: '+971', minDigits: 9,  maxDigits: 9),
-  _Country(name: 'Qatar',            flag: '🇶🇦', dialCode: '+974', minDigits: 8,  maxDigits: 8),
-  _Country(name: 'Kuwait',           flag: '🇰🇼', dialCode: '+965', minDigits: 8,  maxDigits: 8),
-  _Country(name: 'Turkey',           flag: '🇹🇷', dialCode: '+90',  minDigits: 10, maxDigits: 10),
-  _Country(name: 'Pakistan',         flag: '🇵🇰', dialCode: '+92',  minDigits: 10, maxDigits: 10),
-  _Country(name: 'Bangladesh',       flag: '🇧🇩', dialCode: '+880', minDigits: 10, maxDigits: 10),
-  _Country(name: 'Malaysia',         flag: '🇲🇾', dialCode: '+60',  minDigits: 9,  maxDigits: 10),
-  _Country(name: 'Singapore',        flag: '🇸🇬', dialCode: '+65',  minDigits: 8,  maxDigits: 8),
-  _Country(name: 'Philippines',      flag: '🇵🇭', dialCode: '+63',  minDigits: 10, maxDigits: 10),
-  _Country(name: 'South Korea',      flag: '🇰🇷', dialCode: '+82',  minDigits: 10, maxDigits: 11),
+  _Country(
+      name: 'Ghana',
+      flag: '🇬🇭',
+      dialCode: '+233',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Nigeria',
+      flag: '🇳🇬',
+      dialCode: '+234',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'Kenya',
+      flag: '🇰🇪',
+      dialCode: '+254',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'South Africa',
+      flag: '🇿🇦',
+      dialCode: '+27',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Uganda',
+      flag: '🇺🇬',
+      dialCode: '+256',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Tanzania',
+      flag: '🇹🇿',
+      dialCode: '+255',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Ethiopia',
+      flag: '🇪🇹',
+      dialCode: '+251',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Rwanda',
+      flag: '🇷🇼',
+      dialCode: '+250',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Cameroon',
+      flag: '🇨🇲',
+      dialCode: '+237',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Senegal',
+      flag: '🇸🇳',
+      dialCode: '+221',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: "Côte d'Ivoire",
+      flag: '🇨🇮',
+      dialCode: '+225',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'Egypt',
+      flag: '🇪🇬',
+      dialCode: '+20',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'Morocco',
+      flag: '🇲🇦',
+      dialCode: '+212',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Zambia',
+      flag: '🇿🇲',
+      dialCode: '+260',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Zimbabwe',
+      flag: '🇿🇼',
+      dialCode: '+263',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Malawi',
+      flag: '🇲🇼',
+      dialCode: '+265',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Mozambique',
+      flag: '🇲🇿',
+      dialCode: '+258',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Angola',
+      flag: '🇦🇴',
+      dialCode: '+244',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Botswana',
+      flag: '🇧🇼',
+      dialCode: '+267',
+      minDigits: 8,
+      maxDigits: 8),
+  _Country(
+      name: 'Namibia',
+      flag: '🇳🇦',
+      dialCode: '+264',
+      minDigits: 9,
+      maxDigits: 10),
+  _Country(
+      name: 'Liberia',
+      flag: '🇱🇷',
+      dialCode: '+231',
+      minDigits: 8,
+      maxDigits: 8),
+  _Country(
+      name: 'Sierra Leone',
+      flag: '🇸🇱',
+      dialCode: '+232',
+      minDigits: 8,
+      maxDigits: 8),
+  _Country(
+      name: 'Gambia',
+      flag: '🇬🇲',
+      dialCode: '+220',
+      minDigits: 7,
+      maxDigits: 7),
+  _Country(
+      name: 'Guinea',
+      flag: '🇬🇳',
+      dialCode: '+224',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Togo', flag: '🇹🇬', dialCode: '+228', minDigits: 8, maxDigits: 8),
+  _Country(
+      name: 'Benin',
+      flag: '🇧🇯',
+      dialCode: '+229',
+      minDigits: 8,
+      maxDigits: 8),
+  _Country(
+      name: 'United States',
+      flag: '🇺🇸',
+      dialCode: '+1',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'Canada',
+      flag: '🇨🇦',
+      dialCode: '+1',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'United Kingdom',
+      flag: '🇬🇧',
+      dialCode: '+44',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'France',
+      flag: '🇫🇷',
+      dialCode: '+33',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Germany',
+      flag: '🇩🇪',
+      dialCode: '+49',
+      minDigits: 10,
+      maxDigits: 11),
+  _Country(
+      name: 'Italy',
+      flag: '🇮🇹',
+      dialCode: '+39',
+      minDigits: 9,
+      maxDigits: 10),
+  _Country(
+      name: 'Spain', flag: '🇪🇸', dialCode: '+34', minDigits: 9, maxDigits: 9),
+  _Country(
+      name: 'Netherlands',
+      flag: '🇳🇱',
+      dialCode: '+31',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'Portugal',
+      flag: '🇵🇹',
+      dialCode: '+351',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'India',
+      flag: '🇮🇳',
+      dialCode: '+91',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'China',
+      flag: '🇨🇳',
+      dialCode: '+86',
+      minDigits: 11,
+      maxDigits: 11),
+  _Country(
+      name: 'Japan',
+      flag: '🇯🇵',
+      dialCode: '+81',
+      minDigits: 10,
+      maxDigits: 11),
+  _Country(
+      name: 'Australia',
+      flag: '🇦🇺',
+      dialCode: '+61',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'New Zealand',
+      flag: '🇳🇿',
+      dialCode: '+64',
+      minDigits: 8,
+      maxDigits: 9),
+  _Country(
+      name: 'Brazil',
+      flag: '🇧🇷',
+      dialCode: '+55',
+      minDigits: 10,
+      maxDigits: 11),
+  _Country(
+      name: 'Saudi Arabia',
+      flag: '🇸🇦',
+      dialCode: '+966',
+      minDigits: 9,
+      maxDigits: 9),
+  _Country(
+      name: 'UAE', flag: '🇦🇪', dialCode: '+971', minDigits: 9, maxDigits: 9),
+  _Country(
+      name: 'Qatar',
+      flag: '🇶🇦',
+      dialCode: '+974',
+      minDigits: 8,
+      maxDigits: 8),
+  _Country(
+      name: 'Kuwait',
+      flag: '🇰🇼',
+      dialCode: '+965',
+      minDigits: 8,
+      maxDigits: 8),
+  _Country(
+      name: 'Turkey',
+      flag: '🇹🇷',
+      dialCode: '+90',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'Pakistan',
+      flag: '🇵🇰',
+      dialCode: '+92',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'Bangladesh',
+      flag: '🇧🇩',
+      dialCode: '+880',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'Malaysia',
+      flag: '🇲🇾',
+      dialCode: '+60',
+      minDigits: 9,
+      maxDigits: 10),
+  _Country(
+      name: 'Singapore',
+      flag: '🇸🇬',
+      dialCode: '+65',
+      minDigits: 8,
+      maxDigits: 8),
+  _Country(
+      name: 'Philippines',
+      flag: '🇵🇭',
+      dialCode: '+63',
+      minDigits: 10,
+      maxDigits: 10),
+  _Country(
+      name: 'South Korea',
+      flag: '🇰🇷',
+      dialCode: '+82',
+      minDigits: 10,
+      maxDigits: 11),
 ];
 
 // ---------------------------------------------------------------------------
@@ -93,19 +341,19 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _nameController            = TextEditingController();
-  final _emailController           = TextEditingController();
-  final _phoneLocalController      = TextEditingController();
-  final _passwordController        = TextEditingController();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneLocalController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _addressController         = TextEditingController();
+  final _addressController = TextEditingController();
 
   DateTime? _selectedBirthDate;
-  String?   _errorMessage;
-  bool      _isLoading            = false;
-  bool      _showPassword         = false;
-  bool      _showConfirmPassword  = false;
-  _Country  _selectedCountry      = _kCountries.first; // default: Ghana
+  String? _errorMessage;
+  bool _isLoading = false;
+  bool _showPassword = false;
+  bool _showConfirmPassword = false;
+  _Country _selectedCountry = _kCountries.first; // default: Ghana
 
   late AuthManager _authManager;
 
@@ -113,7 +361,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void initState() {
     super.initState();
     _authManager = AuthManager();
-    _selectedBirthDate = DateTime.now().subtract(const Duration(days: 365 * 18));
+    _selectedBirthDate =
+        DateTime.now().subtract(const Duration(days: 365 * 18));
   }
 
   @override
@@ -211,18 +460,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => _isLoading = true);
 
     // Combine country code + local digits (strip any leading zero from local)
-    final localDigits = _phoneLocalController.text.replaceAll(RegExp(r'\D'), '');
+    final localDigits =
+        _phoneLocalController.text.replaceAll(RegExp(r'\D'), '');
     final strippedLocal =
         localDigits.startsWith('0') ? localDigits.substring(1) : localDigits;
     final fullPhone = '${_selectedCountry.dialCode}$strippedLocal';
 
     try {
       final result = await _authManager.registerDonor(
-        fullName:  _nameController.text.trim(),
-        email:     _emailController.text.trim(),
-        phone:     fullPhone,
-        password:  _passwordController.text,
-        address:   _addressController.text.trim(),
+        fullName: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: fullPhone,
+        password: _passwordController.text,
+        address: _addressController.text.trim(),
         birthDate: _selectedBirthDate!,
       );
 
@@ -264,29 +514,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
           style:
               AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(14)),
         ),
-        SizedBox(
-            height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+        SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
         TextField(
-          controller:   controller,
-          style:        AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
+          controller: controller,
+          style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
           keyboardType: keyboardType,
-          obscureText:  obscureText,
+          obscureText: obscureText,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: AppTextStyles.body.copyWith(
-              color:    AppColors.border,
+              color: AppColors.border,
               fontSize: responsive.getFont(14),
             ),
             suffixIcon: suffixIcon,
-            filled:      true,
-            fillColor:   AppColors.white,
+            filled: true,
+            fillColor: AppColors.white,
             contentPadding: EdgeInsets.symmetric(
-              vertical:   responsive.getPadding(18),
+              vertical: responsive.getPadding(18),
               horizontal: responsive.getPadding(16),
             ),
             border: OutlineInputBorder(
-              borderSide:   BorderSide.none,
-              borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+              borderSide: BorderSide.none,
+              borderRadius:
+                  BorderRadius.circular(responsive.getBorderRadius(18)),
             ),
             isDense: true,
           ),
@@ -303,15 +553,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     required ResponsiveUtils responsive,
   }) {
     return _buildTextField(
-      label:      label,
-      hintText:   '••••••••',
+      label: label,
+      hintText: '••••••••',
       controller: controller,
       obscureText: !showPassword,
       suffixIcon: IconButton(
         icon: Icon(
-          showPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+          showPassword
+              ? Icons.visibility_outlined
+              : Icons.visibility_off_outlined,
           color: AppColors.textSecondary,
-          size:  responsive.getIconSize(20),
+          size: responsive.getIconSize(20),
         ),
         onPressed: onToggle,
         splashRadius: 20,
@@ -332,8 +584,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           style:
               AppTextStyles.subtitle.copyWith(fontSize: responsive.getFont(14)),
         ),
-        SizedBox(
-            height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+        SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
         Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -346,28 +597,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   horizontal: responsive.getPadding(12),
                 ),
                 decoration: BoxDecoration(
-                  color:        AppColors.white,
-                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+                  color: AppColors.white,
+                  borderRadius:
+                      BorderRadius.circular(responsive.getBorderRadius(18)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(c.flag,
                         style: TextStyle(fontSize: responsive.getFont(20))),
-                    SizedBox(
-                        width: responsive.getSpacing(small: 4, medium: 6)),
+                    SizedBox(width: responsive.getSpacing(small: 4, medium: 6)),
                     Text(
                       c.dialCode,
                       style: AppTextStyles.body.copyWith(
-                        fontSize:   responsive.getFont(14),
+                        fontSize: responsive.getFont(14),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(
-                        width: responsive.getSpacing(small: 2, medium: 4)),
+                    SizedBox(width: responsive.getSpacing(small: 2, medium: 4)),
                     Icon(Icons.arrow_drop_down,
                         color: AppColors.textSecondary,
-                        size:  responsive.getIconSize(20)),
+                        size: responsive.getIconSize(20)),
                   ],
                 ),
               ),
@@ -378,25 +628,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: SizedBox(
                 height: responsive.getPadding(54),
                 child: TextField(
-                  controller:    _phoneLocalController,
-                  keyboardType:  TextInputType.number,
+                  controller: _phoneLocalController,
+                  keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   style: AppTextStyles.body
                       .copyWith(fontSize: responsive.getFont(14)),
                   decoration: InputDecoration(
                     hintText: hint,
                     hintStyle: AppTextStyles.body.copyWith(
-                      color:    AppColors.border,
+                      color: AppColors.border,
                       fontSize: responsive.getFont(14),
                     ),
-                    filled:    true,
+                    filled: true,
                     fillColor: AppColors.white,
                     contentPadding: EdgeInsets.symmetric(
-                      vertical:   responsive.getPadding(18),
+                      vertical: responsive.getPadding(18),
                       horizontal: responsive.getPadding(16),
                     ),
                     border: OutlineInputBorder(
-                      borderSide:   BorderSide.none,
+                      borderSide: BorderSide.none,
                       borderRadius:
                           BorderRadius.circular(responsive.getBorderRadius(18)),
                     ),
@@ -413,7 +663,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Text(
             '${c.minDigits}${c.minDigits != c.maxDigits ? '–${c.maxDigits}' : ''} digit local number for ${c.name}',
             style: AppTextStyles.body.copyWith(
-              color:    AppColors.textSecondary,
+              color: AppColors.textSecondary,
               fontSize: responsive.getFont(11),
             ),
           ),
@@ -425,11 +675,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // ── Main build ─────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    final responsive        = context.responsive;
-    final iconBoxSize       = responsive.isSmallScreen ? 60.0 : responsive.isMediumScreen ? 80.0 : 100.0;
-    final iconSize          = responsive.getFont(44);
-    final headingFontSize   = responsive.getFont(26);
-    final bodyFontSize      = responsive.getFont(14);
+    final responsive = context.responsive;
+    final iconBoxSize = responsive.isSmallScreen
+        ? 60.0
+        : responsive.isMediumScreen
+            ? 80.0
+            : 100.0;
+    final iconSize = responsive.getFont(44);
+    final headingFontSize = responsive.getFont(26);
+    final bodyFontSize = responsive.getFont(14);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -437,94 +691,114 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: SingleChildScrollView(
           padding: EdgeInsets.symmetric(
             horizontal: responsive.getPadding(20),
-            vertical:   responsive.getPadding(32),
+            vertical: responsive.getPadding(32),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // ── Logo ────────────────────────────────────────────────────
               Container(
-                width:  iconBoxSize,
+                width: iconBoxSize,
                 height: iconBoxSize,
                 decoration: BoxDecoration(
-                  color:        AppColors.primary,
-                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
+                  color: AppColors.primary,
+                  borderRadius:
+                      BorderRadius.circular(responsive.getBorderRadius(24)),
                 ),
-                child: Icon(Icons.favorite, color: AppColors.white, size: iconSize),
+                child: Icon(Icons.water_drop,
+                    color: AppColors.white, size: iconSize),
               ),
-              SizedBox(height: responsive.getSpacing(small: 16, medium: 24, large: 32)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 16, medium: 24, large: 32)),
               Text(
                 context.tr('signup_title'),
-                style:     AppTextStyles.heading.copyWith(fontSize: headingFontSize),
+                style:
+                    AppTextStyles.heading.copyWith(fontSize: headingFontSize),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 6, medium: 8, large: 10)),
               Text(
                 context.tr('signup_subtitle'),
-                style:     AppTextStyles.body.copyWith(fontSize: bodyFontSize),
+                style: AppTextStyles.body.copyWith(fontSize: bodyFontSize),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 28)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 16, medium: 20, large: 28)),
 
               // ── Error banner ─────────────────────────────────────────────
               if (_errorMessage != null) ...[
                 Container(
                   padding: EdgeInsets.all(responsive.getFont(14)),
                   decoration: BoxDecoration(
-                    color:        AppColors.warning.withAlpha((0.12 * 255).toInt()),
-                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+                    color: AppColors.warning.withAlpha((0.12 * 255).toInt()),
+                    borderRadius:
+                        BorderRadius.circular(responsive.getBorderRadius(12)),
                   ),
                   child: Row(
                     children: [
                       Icon(Icons.error_outline,
                           color: AppColors.warning,
-                          size:  responsive.getFont(20)),
+                          size: responsive.getFont(20)),
                       SizedBox(
                           width: responsive.getSpacing(small: 8, medium: 12)),
                       Expanded(
                         child: Text(
                           _errorMessage!,
                           style: TextStyle(
-                            color:      AppColors.warning,
+                            color: AppColors.warning,
                             fontWeight: FontWeight.w600,
-                            fontSize:   bodyFontSize,
+                            fontSize: bodyFontSize,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
+                SizedBox(
+                    height: responsive.getSpacing(
+                        small: 12, medium: 16, large: 20)),
               ],
 
               // ── Form fields ──────────────────────────────────────────────
               _buildTextField(
-                label:      context.tr('signup_full_name'),
-                hintText:   context.tr('signup_name_hint'),
+                label: context.tr('signup_full_name'),
+                hintText: context.tr('signup_name_hint'),
                 controller: _nameController,
                 responsive: responsive,
               ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 12, medium: 16, large: 20)),
               _buildTextField(
-                label:        context.tr('signup_email'),
-                hintText:     context.tr('signup_email_hint'),
-                controller:   _emailController,
+                label: context.tr('signup_email'),
+                hintText: context.tr('signup_email_hint'),
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                responsive:   responsive,
+                responsive: responsive,
               ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 12, medium: 16, large: 20)),
 
               // ── Phone with country picker ────────────────────────────────
               _buildPhoneField(responsive),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 12, medium: 16, large: 20)),
 
               _buildTextField(
-                label:      context.tr('signup_address'),
-                hintText:   context.tr('signup_address_hint'),
+                label: context.tr('signup_address'),
+                hintText: context.tr('signup_address_hint'),
                 controller: _addressController,
                 responsive: responsive,
               ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 12, medium: 16, large: 20)),
 
               // ── Birth date ───────────────────────────────────────────────
               Column(
@@ -536,17 +810,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         .copyWith(fontSize: responsive.getFont(14)),
                   ),
                   SizedBox(
-                      height: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+                      height: responsive.getSpacing(
+                          small: 6, medium: 8, large: 10)),
                   GestureDetector(
                     onTap: _selectBirthDate,
                     child: Container(
                       padding: EdgeInsets.symmetric(
-                        vertical:   responsive.getPadding(18),
+                        vertical: responsive.getPadding(18),
                         horizontal: responsive.getPadding(16),
                       ),
                       decoration: BoxDecoration(
-                        color:        AppColors.white,
-                        borderRadius: BorderRadius.circular(responsive.getBorderRadius(18)),
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(
+                            responsive.getBorderRadius(18)),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -557,40 +833,46 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 : '${_selectedBirthDate!.year}-${_selectedBirthDate!.month.toString().padLeft(2, '0')}-${_selectedBirthDate!.day.toString().padLeft(2, '0')}',
                             style: AppTextStyles.body.copyWith(
                               fontSize: responsive.getFont(14),
-                              color:    _selectedBirthDate == null
+                              color: _selectedBirthDate == null
                                   ? AppColors.border
                                   : AppColors.textPrimary,
                             ),
                           ),
                           Icon(Icons.calendar_today,
                               color: AppColors.primary,
-                              size:  responsive.getIconSize(20)),
+                              size: responsive.getIconSize(20)),
                         ],
                       ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 12, medium: 16, large: 20)),
 
               // ── Password fields ──────────────────────────────────────────
               responsive.isSmallScreen
                   ? Column(
                       children: [
                         _buildPasswordField(
-                          label:       context.tr('signup_password'),
-                          controller:  _passwordController,
+                          label: context.tr('signup_password'),
+                          controller: _passwordController,
                           showPassword: _showPassword,
-                          onToggle:    () => setState(() => _showPassword = !_showPassword),
-                          responsive:  responsive,
+                          onToggle: () =>
+                              setState(() => _showPassword = !_showPassword),
+                          responsive: responsive,
                         ),
-                        SizedBox(height: responsive.getSpacing(small: 12, medium: 16, large: 20)),
+                        SizedBox(
+                            height: responsive.getSpacing(
+                                small: 12, medium: 16, large: 20)),
                         _buildPasswordField(
-                          label:       context.tr('signup_confirm_password'),
-                          controller:  _confirmPasswordController,
+                          label: context.tr('signup_confirm_password'),
+                          controller: _confirmPasswordController,
                           showPassword: _showConfirmPassword,
-                          onToggle:    () => setState(() => _showConfirmPassword = !_showConfirmPassword),
-                          responsive:  responsive,
+                          onToggle: () => setState(() =>
+                              _showConfirmPassword = !_showConfirmPassword),
+                          responsive: responsive,
                         ),
                       ],
                     )
@@ -598,36 +880,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       children: [
                         Expanded(
                           child: _buildPasswordField(
-                            label:       context.tr('signup_password'),
-                            controller:  _passwordController,
+                            label: context.tr('signup_password'),
+                            controller: _passwordController,
                             showPassword: _showPassword,
-                            onToggle:    () => setState(() => _showPassword = !_showPassword),
-                            responsive:  responsive,
+                            onToggle: () =>
+                                setState(() => _showPassword = !_showPassword),
+                            responsive: responsive,
                           ),
                         ),
-                        SizedBox(width: responsive.getSpacing(small: 12, medium: 16)),
+                        SizedBox(
+                            width:
+                                responsive.getSpacing(small: 12, medium: 16)),
                         Expanded(
                           child: _buildPasswordField(
-                            label:       context.tr('signup_confirm_password'),
-                            controller:  _confirmPasswordController,
+                            label: context.tr('signup_confirm_password'),
+                            controller: _confirmPasswordController,
                             showPassword: _showConfirmPassword,
-                            onToggle:    () => setState(() => _showConfirmPassword = !_showConfirmPassword),
-                            responsive:  responsive,
+                            onToggle: () => setState(() =>
+                                _showConfirmPassword = !_showConfirmPassword),
+                            responsive: responsive,
                           ),
                         ),
                       ],
                     ),
 
-              SizedBox(height: responsive.getSpacing(small: 16, medium: 24, large: 32)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 16, medium: 24, large: 32)),
 
               CustomButton(
-                label:     _isLoading
+                label: _isLoading
                     ? context.tr('signup_creating')
                     : context.tr('signup_create_account'),
                 onPressed: _isLoading ? () {} : _signUp,
-                width:     double.infinity,
+                width: double.infinity,
               ),
-              SizedBox(height: responsive.getSpacing(small: 12, medium: 18, large: 24)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 12, medium: 18, large: 24)),
 
               Wrap(
                 alignment: WrapAlignment.center,
@@ -643,9 +933,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     child: Text(
                       context.tr('signup_sign_in'),
                       style: TextStyle(
-                        color:      AppColors.primary,
+                        color: AppColors.primary,
                         fontWeight: FontWeight.w700,
-                        fontSize:   bodyFontSize,
+                        fontSize: bodyFontSize,
                       ),
                     ),
                   ),
@@ -686,8 +976,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
             ? _kCountries
             : _kCountries
                 .where((c) =>
-                    c.name.toLowerCase().contains(q) ||
-                    c.dialCode.contains(q))
+                    c.name.toLowerCase().contains(q) || c.dialCode.contains(q))
                 .toList();
       });
     });
@@ -702,20 +991,20 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      expand:          false,
+      expand: false,
       initialChildSize: 0.65,
-      maxChildSize:    0.90,
-      minChildSize:    0.40,
+      maxChildSize: 0.90,
+      minChildSize: 0.40,
       builder: (_, scrollController) => Column(
         children: [
           // Handle
           const SizedBox(height: 12),
           Center(
             child: Container(
-              width:  40,
+              width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color:        AppColors.border,
+                color: AppColors.border,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -735,16 +1024,16 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText:  'Search country or code…',
+                hintText: 'Search country or code…',
                 hintStyle: AppTextStyles.body.copyWith(color: AppColors.border),
                 prefixIcon: Icon(Icons.search,
                     color: AppColors.textSecondary, size: 20),
-                filled:    true,
+                filled: true,
                 fillColor: AppColors.white,
                 contentPadding:
                     const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
                 border: OutlineInputBorder(
-                  borderSide:   BorderSide.none,
+                  borderSide: BorderSide.none,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 isDense: true,
@@ -755,15 +1044,14 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
           // List
           Expanded(
             child: ListView.builder(
-              controller:  scrollController,
-              itemCount:   _filtered.length,
+              controller: scrollController,
+              itemCount: _filtered.length,
               itemBuilder: (_, i) {
                 final c = _filtered[i];
                 final isSelected = c.dialCode == widget.selected.dialCode &&
                     c.name == widget.selected.name;
                 return ListTile(
-                  leading: Text(c.flag,
-                      style: const TextStyle(fontSize: 24)),
+                  leading: Text(c.flag, style: const TextStyle(fontSize: 24)),
                   title: Text(c.name,
                       style: AppTextStyles.body
                           .copyWith(fontWeight: FontWeight.w500)),
@@ -772,7 +1060,7 @@ class _CountryPickerSheetState extends State<_CountryPickerSheet> {
                     children: [
                       Text(c.dialCode,
                           style: AppTextStyles.body.copyWith(
-                              color:      AppColors.textSecondary,
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w600)),
                       if (isSelected) ...[
                         const SizedBox(width: 8),

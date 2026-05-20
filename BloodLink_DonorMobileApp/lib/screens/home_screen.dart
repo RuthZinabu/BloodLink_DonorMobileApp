@@ -700,15 +700,26 @@ class _EligibilityCard extends StatelessWidget {
     required this.responsive,
   });
 
-  /// Determines the card accent color based on eligibility state
+  /// Pastel card background color based on eligibility state
   Color get _accentColor {
     if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
-      return const Color(0xFF374151); // dark slate — permanently deferred
+      return const Color(0xFFF3F4F6); // soft light gray — permanently deferred
     }
     if (eligibility.isEligible) {
-      return const Color(0xFF047857); // deep emerald — eligible now
+      return const Color(0xFFD1FAE5); // soft light green — eligible now
     }
-    return const Color(0xFFE53535); // vibrant red — waiting
+    return const Color(0xFFFEE2E2); // soft light red — waiting
+  }
+
+  /// Dark ink color for text and icons — WCAG-friendly contrast on pastel bg
+  Color get _inkColor {
+    if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
+      return const Color(0xFF374151); // dark slate
+    }
+    if (eligibility.isEligible) {
+      return const Color(0xFF065F46); // deep emerald
+    }
+    return const Color(0xFF991B1B); // deep red
   }
 
   IconData get _icon {
@@ -729,9 +740,10 @@ class _EligibilityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = _accentColor;
+    final bg = _accentColor;
+    final ink = _inkColor;
     return CustomCard(
-      backgroundColor: accent.withAlpha((0.10 * 255).round()),
+      backgroundColor: bg,
       borderRadius: responsive.getBorderRadius(28),
       padding: EdgeInsets.all(responsive.getPadding(22)),
       elevation: 0,
@@ -746,6 +758,8 @@ class _EligibilityCard extends StatelessWidget {
                 context.tr('home_next_eligible'),
                 style: AppTextStyles.subtitle.copyWith(
                   fontSize: responsive.getFont(16),
+                  color: const Color(0xFF111827),
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               Container(
@@ -754,14 +768,14 @@ class _EligibilityCard extends StatelessWidget {
                   vertical: responsive.getPadding(4),
                 ),
                 decoration: BoxDecoration(
-                  color: accent.withAlpha((0.18 * 255).round()),
+                  color: ink.withAlpha((0.14 * 255).round()),
                   borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
                 ),
                 child: Text(
                   _statusBadge,
                   style: AppTextStyles.label.copyWith(
-                    color: accent,
-                    fontWeight: FontWeight.bold,
+                    color: ink,
+                    fontWeight: FontWeight.w700,
                     fontSize: responsive.getFont(12),
                   ),
                 ),
@@ -780,16 +794,17 @@ class _EligibilityCard extends StatelessWidget {
                     ? SizedBox(
                         height: responsive.getFont(38),
                         child: LinearProgressIndicator(
-                          color: accent,
-                          backgroundColor: accent.withAlpha((0.15 * 255).round()),
+                          color: ink,
+                          backgroundColor: ink.withAlpha((0.15 * 255).round()),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       )
                     : Text(
                         nextEligibleDays,
                         style: AppTextStyles.heading.copyWith(
-                          color: accent,
+                          color: ink,
                           fontSize: responsive.getFont(36),
+                          fontWeight: FontWeight.w700,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -798,12 +813,12 @@ class _EligibilityCard extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(responsive.getPadding(12)),
                 decoration: BoxDecoration(
-                  color: accent.withAlpha((0.20 * 255).round()),
+                  color: ink.withAlpha((0.14 * 255).round()),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   _icon,
-                  color: accent,
+                  color: ink,
                   size: responsive.getIconSize(24),
                 ),
               ),
@@ -817,7 +832,8 @@ class _EligibilityCard extends StatelessWidget {
             isLoading ? context.tr('home_loading_eligibility') : nextEligibleMessage,
             style: AppTextStyles.body.copyWith(
               fontSize: responsive.getFont(14),
-              color: AppColors.textSecondary,
+              color: const Color(0xFF1F2937),
+              fontWeight: FontWeight.w600,
             ),
           ),
 
@@ -833,15 +849,16 @@ class _EligibilityCard extends StatelessWidget {
                 Text(
                   '${90 - eligibility.countdownDays} / 90 days completed',
                   style: AppTextStyles.label.copyWith(
-                    color: AppColors.textSecondary,
+                    color: const Color(0xFF1F2937),
+                    fontWeight: FontWeight.w600,
                     fontSize: responsive.getFont(11),
                   ),
                 ),
                 Text(
                   '${((90 - eligibility.countdownDays) / 90 * 100).toStringAsFixed(0)}%',
                   style: AppTextStyles.label.copyWith(
-                    color: accent,
-                    fontWeight: FontWeight.bold,
+                    color: ink,
+                    fontWeight: FontWeight.w700,
                     fontSize: responsive.getFont(11),
                   ),
                 ),
@@ -853,8 +870,8 @@ class _EligibilityCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: (90 - eligibility.countdownDays).clamp(0, 90) / 90,
                 minHeight: 6,
-                color: accent,
-                backgroundColor: accent.withAlpha((0.15 * 255).round()),
+                color: ink,
+                backgroundColor: ink.withAlpha((0.15 * 255).round()),
               ),
             ),
           ],
