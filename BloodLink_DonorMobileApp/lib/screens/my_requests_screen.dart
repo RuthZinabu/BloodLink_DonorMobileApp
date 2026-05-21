@@ -18,6 +18,7 @@ class MyRequestsScreen extends StatefulWidget {
 class _MyRequestsScreenState extends State<MyRequestsScreen> {
   final ApiService _apiService = ApiService();
   List<BloodRequest> _requests = [];
+  Map<String, int> _analytics = {};
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -47,14 +48,15 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
     });
 
     try {
-      final requests = await _apiService.fetchMyBloodRequests(
+      final result = await _apiService.fetchMyBloodRequests(
         status: _selectedStatus,
         startDate: _startDate?.toIso8601String().split('T').first,
         endDate: _endDate?.toIso8601String().split('T').first,
       );
 
       setState(() {
-        _requests = requests;
+        _requests = (result['requests'] as List<dynamic>).cast<BloodRequest>();
+        _analytics = Map<String, int>.from(result['analytics'] as Map? ?? {});
         _isLoading = false;
       });
     } catch (e) {
@@ -199,6 +201,44 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                 ],
               ),
             ),
+            if (_analytics.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: responsive.getPadding(16),
+                  vertical: responsive.getPadding(4),
+                ),
+                child: Row(
+                  children: [
+                    _AnalyticChip(
+                      label: 'Total',
+                      value: _analytics['total_requests'] ?? 0,
+                      color: const Color(0xFF5F6D7E),
+                      responsive: responsive,
+                    ),
+                    SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 10)),
+                    _AnalyticChip(
+                      label: 'Pending',
+                      value: _analytics['total_pending'] ?? 0,
+                      color: const Color(0xFFFFA500),
+                      responsive: responsive,
+                    ),
+                    SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 10)),
+                    _AnalyticChip(
+                      label: 'Fulfilled',
+                      value: _analytics['total_fulfilled'] ?? 0,
+                      color: const Color(0xFF4CAF50),
+                      responsive: responsive,
+                    ),
+                    SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 10)),
+                    _AnalyticChip(
+                      label: 'Cancelled',
+                      value: _analytics['total_cancelled'] ?? 0,
+                      color: const Color(0xFFF44336),
+                      responsive: responsive,
+                    ),
+                  ],
+                ),
+              ),
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: responsive.getPadding(20),
@@ -550,6 +590,61 @@ class _RequestCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Analytics summary chip ──────────────────────────────────────────────────
+
+class _AnalyticChip extends StatelessWidget {
+  final String label;
+  final int value;
+  final Color color;
+  final ResponsiveUtils responsive;
+
+  const _AnalyticChip({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.responsive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: responsive.getPadding(10),
+          horizontal: responsive.getPadding(8),
+        ),
+        decoration: BoxDecoration(
+          color: color.withAlpha((0.10 * 255).round()),
+          borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+          border: Border.all(color: color.withAlpha((0.25 * 255).round())),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '$value',
+              style: TextStyle(
+                color: color,
+                fontSize: responsive.getFont(18),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: responsive.getSpacing(small: 2, medium: 2, large: 2)),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: responsive.getFont(10),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

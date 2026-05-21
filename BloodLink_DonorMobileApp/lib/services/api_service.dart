@@ -751,79 +751,86 @@ class ApiService {
   }
 
   /// Fetch the logged-in donor's blood requests.
-  Future<List<BloodRequest>> fetchMyBloodRequests({
+  /// Returns `{'requests': List<BloodRequest>, 'analytics': Map<String,int>}`
+  Future<Map<String, dynamic>> fetchMyBloodRequests({
     String? status,
     String? startDate,
     String? endDate,
   }) async {
+    Map<String, int> _parseAnalytics(dynamic raw) {
+      if (raw is Map) {
+        int g(String k) {
+          final v = raw[k];
+          if (v is int) return v;
+          return int.tryParse(v?.toString() ?? '') ?? 0;
+        }
+        return {
+          'total_requests': g('total_requests'),
+          'total_fulfilled': g('total_fulfilled'),
+          'total_pending': g('total_pending'),
+          'total_cancelled': g('total_cancelled'),
+        };
+      }
+      return {};
+    }
+
+    List<BloodRequest> _parseList(List<dynamic> raw) =>
+        raw.map((item) => BloodRequest.fromJson(item as Map<String, dynamic>)).toList();
+
     try {
       final queryParams = <String, String>{};
-      if (status != null && status.isNotEmpty) {
-        queryParams['status'] = status;
-      }
-      if (startDate != null && startDate.isNotEmpty) {
-        queryParams['start_date'] = startDate;
-      }
-      if (endDate != null && endDate.isNotEmpty) {
-        queryParams['end_date'] = endDate;
-      }
+      if (status != null && status.isNotEmpty) queryParams['status'] = status;
+      if (startDate != null && startDate.isNotEmpty) queryParams['start_date'] = startDate;
+      if (endDate != null && endDate.isNotEmpty) queryParams['end_date'] = endDate;
 
       final uri = Uri.parse('$baseUrL/api/donor/my-requests')
           .replace(queryParameters: queryParams);
 
       final response = await http
-          .get(
-            uri,
-            headers: await _getHeaders(authenticated: true),
-          )
+          .get(uri, headers: await _getHeaders(authenticated: true))
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        if (decoded['data'] is List) {
-          final myRequests = (decoded['data'] as List)
-              .map(
-                  (item) => BloodRequest.fromJson(item as Map<String, dynamic>))
-              .toList();
-          await _writeCache(_cacheMyRequestsKey, decoded['data']);
-          return myRequests;
-        } else {
-          return [];
+        // Backend: {"data":{"requests":[...],"analytics":{...}},"message":"..."}
+        // Also handle legacy flat: {"data":[...]}
+        List<dynamic>? rawList;
+        Map<String, int> analytics = {};
+
+        if (decoded['data'] is Map) {
+          rawList = decoded['data']['requests'] as List?;
+          analytics = _parseAnalytics(decoded['data']['analytics']);
+        } else if (decoded['data'] is List) {
+          rawList = decoded['data'] as List;
         }
+
+        final requests = _parseList(rawList ?? []);
+        await _writeCache(_cacheMyRequestsKey, rawList ?? []);
+        return {'requests': requests, 'analytics': analytics};
       } else if (response.statusCode == 401) {
         await _handleUnauthorized();
         final cached = await _readCache(_cacheMyRequestsKey);
-        if (cached is List) {
-          return cached
-              .map(
-                  (item) => BloodRequest.fromJson(item as Map<String, dynamic>))
-              .toList();
-        }
-        return [];
+        return {
+          'requests': cached is List ? _parseList(cached) : <BloodRequest>[],
+          'analytics': <String, int>{},
+        };
       } else {
         final cached = await _readCache(_cacheMyRequestsKey);
         if (cached is List) {
-          return cached
-              .map(
-                  (item) => BloodRequest.fromJson(item as Map<String, dynamic>))
-              .toList();
+          return {'requests': _parseList(cached), 'analytics': <String, int>{}};
         }
         throw Exception('Failed to load blood requests: ${response.body}');
       }
     } on TimeoutException catch (e) {
       final cached = await _readCache(_cacheMyRequestsKey);
       if (cached is List) {
-        return cached
-            .map((item) => BloodRequest.fromJson(item as Map<String, dynamic>))
-            .toList();
+        return {'requests': _parseList(cached), 'analytics': <String, int>{}};
       }
       throw Exception('Network error: ${e.toString()}');
     } on SocketException catch (e) {
       final cached = await _readCache(_cacheMyRequestsKey);
       if (cached is List) {
-        return cached
-            .map((item) => BloodRequest.fromJson(item as Map<String, dynamic>))
-            .toList();
+        return {'requests': _parseList(cached), 'analytics': <String, int>{}};
       }
       throw Exception('Network error: ${e.toString()}');
     } catch (e) {
