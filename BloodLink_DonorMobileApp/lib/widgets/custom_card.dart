@@ -12,6 +12,7 @@ class CustomCard extends StatelessWidget {
   final Color borderColor;
   final Gradient? gradient;
   final double elevation;
+  final double backgroundOpacity;
 
   CustomCard({
     super.key,
@@ -23,6 +24,7 @@ class CustomCard extends StatelessWidget {
     this.borderColor = const Color(0x66FFFFFF),
     this.gradient,
     this.elevation = 0,
+    this.backgroundOpacity = 0.72,
   });
 
   @override
@@ -38,7 +40,7 @@ class CustomCard extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
         child: Container(
           decoration: BoxDecoration(
-            color: backgroundColor.withOpacity(0.72),
+            color: backgroundColor.withOpacity(backgroundOpacity),
             gradient: gradient,
             borderRadius: BorderRadius.circular(responsiveBorderRadius),
             border: Border.all(color: borderColor, width: 1),

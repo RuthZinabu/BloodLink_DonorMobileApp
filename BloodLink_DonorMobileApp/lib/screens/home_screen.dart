@@ -700,27 +700,23 @@ class _EligibilityCard extends StatelessWidget {
     required this.responsive,
   });
 
-  /// Pastel card background color based on eligibility state
+  /// Card background color based on eligibility state
   Color get _accentColor {
     if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
-      return const Color(0xFFF3F4F6); // soft light gray — permanently deferred
+      return const Color(0xFF4B5563); // medium slate — works with white text
     }
     if (eligibility.isEligible) {
-      return const Color(0xFFD1FAE5); // soft light green — eligible now
+      return const Color(0xFF047857); // deep emerald — works with white text
     }
-    return const Color(0xFFFEE2E2); // soft light red — waiting
+    // Waiting: #FFB9B9 base + 20% #E51616 overlay
+    return Color.alphaBlend(
+      const Color(0x33E51616), // 0x33 = 51 ≈ 20%
+      const Color(0xFFFFB9B9),
+    );
   }
 
-  /// Dark ink color for text and icons — WCAG-friendly contrast on pastel bg
-  Color get _inkColor {
-    if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
-      return const Color(0xFF374151); // dark slate
-    }
-    if (eligibility.isEligible) {
-      return const Color(0xFF065F46); // deep emerald
-    }
-    return const Color(0xFF991B1B); // deep red
-  }
+  /// All text and icons inside the card are white
+  Color get _inkColor => Colors.white;
 
   IconData get _icon {
     if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
@@ -744,6 +740,7 @@ class _EligibilityCard extends StatelessWidget {
     final ink = _inkColor;
     return CustomCard(
       backgroundColor: bg,
+      backgroundOpacity: 1.0,
       borderRadius: responsive.getBorderRadius(28),
       padding: EdgeInsets.all(responsive.getPadding(22)),
       elevation: 0,
@@ -758,7 +755,7 @@ class _EligibilityCard extends StatelessWidget {
                 context.tr('home_next_eligible'),
                 style: AppTextStyles.subtitle.copyWith(
                   fontSize: responsive.getFont(16),
-                  color: const Color(0xFF111827),
+                  color: ink,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -832,7 +829,7 @@ class _EligibilityCard extends StatelessWidget {
             isLoading ? context.tr('home_loading_eligibility') : nextEligibleMessage,
             style: AppTextStyles.body.copyWith(
               fontSize: responsive.getFont(14),
-              color: const Color(0xFF1F2937),
+              color: ink,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -849,7 +846,7 @@ class _EligibilityCard extends StatelessWidget {
                 Text(
                   '${90 - eligibility.countdownDays} / 90 days completed',
                   style: AppTextStyles.label.copyWith(
-                    color: const Color(0xFF1F2937),
+                    color: ink,
                     fontWeight: FontWeight.w600,
                     fontSize: responsive.getFont(11),
                   ),
