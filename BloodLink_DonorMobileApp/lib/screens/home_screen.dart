@@ -793,7 +793,7 @@ class _EligibilityCard extends StatelessWidget {
   }
 
   /// All text and icons inside the card are white
-  Color get _inkColor => Colors.black;
+  Color get _inkColor => Colors.grey;
 
   IconData get _icon {
     if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {

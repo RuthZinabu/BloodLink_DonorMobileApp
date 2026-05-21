@@ -27,7 +27,6 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
   String _selectedComponentType = 'PRBC';
   bool _isLoading = false;
   String? _errorMessage;
-  String? _successMessage;
 
   static const List<Map<String, String>> _componentTypes = [
     {'value': 'WHOLE_BLOOD', 'label': 'Whole Blood'},
@@ -48,13 +47,87 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
     super.dispose();
   }
 
+  void _showSuccessDialog(String message) {
+    final responsive = ResponsiveUtils.of(context);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(responsive.getBorderRadius(20)),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(responsive.getPadding(28)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: responsive.getPadding(72),
+                height: responsive.getPadding(72),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4CAF50).withAlpha((0.12 * 255).round()),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  color: const Color(0xFF4CAF50),
+                  size: responsive.getIconSize(42),
+                ),
+              ),
+              SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
+              Text(
+                'Request Submitted!',
+                style: AppTextStyles.heading.copyWith(
+                  fontSize: responsive.getFont(20),
+                  color: const Color(0xFF1B5E20),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+              Text(
+                message,
+                style: AppTextStyles.body.copyWith(
+                  fontSize: responsive.getFont(14),
+                  color: const Color(0xFF388E3C),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: responsive.getSpacing(small: 24, medium: 28, large: 32)),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: const Color(0xFF4CAF50),
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: responsive.getPadding(14)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    'Done',
+                    style: AppTextStyles.body.copyWith(
+                      fontSize: responsive.getFont(16),
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _submitRequest() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
       _errorMessage = null;
-      _successMessage = null;
     });
 
     try {
@@ -68,10 +141,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
       );
 
       if (result['success'] == true) {
-        setState(() {
-          _successMessage = result['message'];
-          _isLoading = false;
-        });
+        setState(() => _isLoading = false);
         _formKey.currentState!.reset();
         _unitsController.text = '1';
         _reasonController.clear();
@@ -79,6 +149,7 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
         _hospitalAddressController.clear();
         _hospitalPhoneController.clear();
         setState(() => _selectedComponentType = 'PRBC');
+        if (mounted) _showSuccessDialog(result['message'] ?? 'Blood requested successfully!');
       } else {
         setState(() {
           _errorMessage = result['message'];
@@ -146,32 +217,6 @@ class _BloodRequestScreenState extends State<BloodRequestScreen> {
                 ),
               ),
               SizedBox(height: responsive.getSpacing(small: 20, medium: 24, large: 28)),
-              if (_successMessage != null)
-                Container(
-                  margin: EdgeInsets.only(bottom: responsive.getSpacing(small: 20, medium: 24, large: 28)),
-                  padding: EdgeInsets.all(responsive.getPadding(16)),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withAlpha((0.12 * 255).round()),
-                    borderRadius: BorderRadius.circular(responsive.getBorderRadius(12)),
-                    border: Border.all(color: AppColors.primary.withAlpha((0.3 * 255).round())),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle, color: AppColors.primary, size: responsive.getIconSize(20)),
-                      SizedBox(width: responsive.getSpacing(small: 8, medium: 10, large: 12)),
-                      Expanded(
-                        child: Text(
-                          _successMessage!,
-                          style: AppTextStyles.body.copyWith(
-                            fontSize: responsive.getFont(14),
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               if (_errorMessage != null)
                 Container(
                   margin: EdgeInsets.only(bottom: responsive.getSpacing(small: 20, medium: 24, large: 28)),

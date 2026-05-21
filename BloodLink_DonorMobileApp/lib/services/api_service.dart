@@ -792,16 +792,40 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
-        // Backend: {"data":{"requests":[...],"analytics":{...}},"message":"..."}
-        // Also handle legacy flat: {"data":[...]}
+        // Scan every likely shape the backend might return:
+        //   {data:{requests:[...],analytics:{...}}}
+        //   {data:{data:[...],analytics:{...}}}
+        //   {data:[...]}
+        //   {requests:[...],analytics:{...}}
+        //   [{...}]  (bare list at root)
         List<dynamic>? rawList;
         Map<String, int> analytics = {};
 
-        if (decoded['data'] is Map) {
-          rawList = decoded['data']['requests'] as List?;
-          analytics = _parseAnalytics(decoded['data']['analytics']);
+        if (decoded is List) {
+          rawList = decoded;
+        } else if (decoded['data'] is Map) {
+          final d = decoded['data'] as Map;
+          if (d['requests'] is List) {
+            rawList = d['requests'] as List;
+          } else if (d['data'] is List) {
+            rawList = d['data'] as List;
+          } else {
+            // last resort: first List value inside data
+            for (final v in d.values) {
+              if (v is List) { rawList = v; break; }
+            }
+          }
+          analytics = _parseAnalytics(d['analytics']);
         } else if (decoded['data'] is List) {
           rawList = decoded['data'] as List;
+        } else if (decoded['requests'] is List) {
+          rawList = decoded['requests'] as List;
+          analytics = _parseAnalytics(decoded['analytics']);
+        } else {
+          // last resort: first List at top level
+          for (final v in (decoded as Map).values) {
+            if (v is List) { rawList = v; break; }
+          }
         }
 
         final requests = _parseList(rawList ?? []);
