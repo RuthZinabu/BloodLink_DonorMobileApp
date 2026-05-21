@@ -83,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     // Stream: refresh whenever the user moves ≥ 500 m
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.balanced,
+        accuracy: LocationAccuracy.medium,
         distanceFilter: 500, // metres
       ),
     ).listen(

@@ -3,8 +3,10 @@ class TestResult {
   final String donationId;
   final String? donorId;
   final String? testerName;
+  final String? campaignAddress;
   final String? hivResult;
-  final String? hepatitisResult;
+  final String? hepatitisBResult;
+  final String? hepatitisCResult;
   final String? syphilisResult;
   final String? malariaResult;
   final String? bloodType;
@@ -16,8 +18,10 @@ class TestResult {
     required this.donationId,
     this.donorId,
     this.testerName,
+    this.campaignAddress,
     this.hivResult,
-    this.hepatitisResult,
+    this.hepatitisBResult,
+    this.hepatitisCResult,
     this.syphilisResult,
     this.malariaResult,
     this.bloodType,
@@ -37,8 +41,10 @@ class TestResult {
       donationId: json['donation_id']?.toString() ?? '',
       donorId: json['donor_id']?.toString(),
       testerName: json['tester_name']?.toString(),
+      campaignAddress: json['campaign_address']?.toString(),
       hivResult: json['hiv_result']?.toString(),
-      hepatitisResult: json['hepatitis_result']?.toString(),
+      hepatitisBResult: json['hepatitis_b_result']?.toString(),
+      hepatitisCResult: json['hepatitis_c_result']?.toString(),
       syphilisResult: json['syphilis_result']?.toString(),
       malariaResult: json['malaria_result']?.toString(),
       bloodType: json['blood_type']?.toString(),
