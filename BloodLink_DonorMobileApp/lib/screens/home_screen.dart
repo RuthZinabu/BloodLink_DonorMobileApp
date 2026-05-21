@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -41,6 +42,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _loadingNearby = true;
   int _unreadNotifications = 0;
 
+  // Auto-refresh location
+  StreamSubscription<Position>? _positionStream;
+  Timer? _locationRefreshTimer;
+  static const Duration _locationRefreshInterval = Duration(minutes: 5);
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _stopLocationAutoRefresh();
     super.dispose();
   }
 
@@ -60,7 +67,74 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _checkLocationAndFetchNearby();
+    } else if (state == AppLifecycleState.paused) {
+      // Pause the periodic timer when app goes to background (stream pauses itself)
+      _locationRefreshTimer?.cancel();
+      _locationRefreshTimer = null;
     }
+  }
+
+  /// Starts position-change stream (fires every 500 m of movement) and
+  /// a 5-minute periodic timer as a fallback.
+  void _startLocationAutoRefresh() {
+    // Avoid duplicate subscriptions
+    _stopLocationAutoRefresh();
+
+    // Stream: refresh whenever the user moves ≥ 500 m
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.balanced,
+        distanceFilter: 500, // metres
+      ),
+    ).listen(
+      (Position position) async {
+        if (!mounted) return;
+        await _apiService.updateDonorLocation(
+            position.latitude, position.longitude);
+        await _refreshNearbyFromPosition(position);
+      },
+      onError: (_) {}, // silently ignore stream errors
+    );
+
+    // Timer: refresh every 5 minutes regardless of movement
+    _locationRefreshTimer = Timer.periodic(
+      _locationRefreshInterval,
+      (_) {
+        if (mounted) _checkLocationAndFetchNearby();
+      },
+    );
+  }
+
+  void _stopLocationAutoRefresh() {
+    _positionStream?.cancel();
+    _positionStream = null;
+    _locationRefreshTimer?.cancel();
+    _locationRefreshTimer = null;
+  }
+
+  /// Lightweight refresh that reuses an already-obtained [position]
+  /// (avoids a second `getCurrentPosition` call).
+  Future<void> _refreshNearbyFromPosition(Position position) async {
+    try {
+      final emergencies = await _apiService.fetchEmergencies();
+      final nearby = emergencies
+          .map((e) {
+            final dist = (e.latitude != null && e.longitude != null)
+                ? _calculateDistanceKm(position.latitude, position.longitude,
+                    e.latitude!, e.longitude!)
+                : e.distance;
+            return e.copyWith(distance: dist);
+          })
+          .where((e) => e.distance != null && e.distance! <= 20)
+          .toList();
+
+      if (!mounted) return;
+      setState(() {
+        _nearbyEmergencies = nearby;
+        _locationEnabled = true;
+        _loadingNearby = false;
+      });
+    } catch (_) {}
   }
 
   Future<void> _loadUserProfile() async {
@@ -226,6 +300,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _locationEnabled = true;
         _loadingNearby = false;
       });
+
+      // Start auto-refresh now that we have confirmed permissions + position
+      _startLocationAutoRefresh();
     } catch (e) {
       setState(() {
         _locationEnabled = false;
@@ -716,7 +793,7 @@ class _EligibilityCard extends StatelessWidget {
   }
 
   /// All text and icons inside the card are white
-  Color get _inkColor => Colors.white;
+  Color get _inkColor => Colors.black;
 
   IconData get _icon {
     if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {
