@@ -176,10 +176,40 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _donorInfo = donorInfo;
         _isLoading = false;
       });
+      // Also try to refresh donations count from the leaderboard API
+      if (donorInfo.donorId.isNotEmpty) {
+        _refreshDonationCountFromLeaderboard(donorInfo.donorId);
+      }
     } else {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  /// Use the leaderboard API to find the current donor's donation count
+  /// and update the home UI. This prefers the leaderboard source when
+  /// available (it includes canonical counts for leaderboard-driven metrics).
+  Future<void> _refreshDonationCountFromLeaderboard(String donorId) async {
+    try {
+      final entries = await _apiService.fetchLeaderboard(limit: 1000);
+      if (!mounted) return;
+
+      for (final e in entries) {
+        if (e.donorId == donorId) {
+          setState(() {
+            _donationsCount = e.donationCount.toString();
+            _donationsStatus = e.donationCount > 0
+                ? '${e.donationCount} successful donations'
+                : 'No donations yet';
+          });
+          return;
+        }
+      }
+
+      // If not found in leaderboard, keep existing donorInfo total (already set)
+    } catch (_) {
+      // Ignore errors; fallback to donorInfo value already populated
     }
   }
 
@@ -783,7 +813,7 @@ class _EligibilityCard extends StatelessWidget {
       return const Color(0xFF4B5563); // medium slate — works with white text
     }
     if (eligibility.isEligible) {
-      return const Color(0xFF047857); // deep emerald — works with white text
+      return const Color.fromARGB(255, 6, 179, 130); // deep emerald — works with white text
     }
     // Waiting: #FFB9B9 base + 20% #E51616 overlay
     return Color.alphaBlend(
@@ -793,7 +823,7 @@ class _EligibilityCard extends StatelessWidget {
   }
 
   /// All text and icons inside the card are white
-  Color get _inkColor => Colors.grey;
+  Color get _inkColor => Colors.white;
 
   IconData get _icon {
     if (donorInfo.overallStatus == 'PERMANENTLY_DEFERRED') {

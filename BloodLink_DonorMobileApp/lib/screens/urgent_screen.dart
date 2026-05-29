@@ -389,7 +389,12 @@ class _EmergencyCard extends StatelessWidget {
       case 'URGENT':
         return const Color.fromARGB(255, 250, 159, 74);
       case 'HIGH':
-        return const Color.fromARGB(255, 250, 159, 74);
+        // return const Color.fromARGB(255, 250, 159, 74);
+         // Waiting: #FFB9B9 base + 20% #E51616 overlay
+    return Color.alphaBlend(
+      const Color(0x33E51616), // 0x33 = 51 ≈ 20%
+      const Color(0xFFFFB9B9),
+    );
       default:
         return AppColors.primary;
     }

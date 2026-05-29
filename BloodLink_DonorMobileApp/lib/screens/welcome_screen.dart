@@ -522,15 +522,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               SizedBox(height: responsive.getSpacing(small: 12, medium: 14, large: 16)),
               _buildCampaignsSection(context, responsive),
               SizedBox(height: responsive.getSpacing(small: 16, medium: 20, large: 24)),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _StatTile(value: '25k+', label: context.tr('welcome_stat_donors'), responsive: responsive),
-                  _StatTile(value: '8.5k+', label: context.tr('welcome_stat_lives'), responsive: responsive),
-                  _StatTile(value: '1.2k', label: context.tr('welcome_stat_campaigns'), responsive: responsive),
-                ],
-              ),
-              SizedBox(height: responsive.getSpacing(small: 24, medium: 28, large: 32)),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children: [
+              //     _StatTile(value: '25k+', label: context.tr('welcome_stat_donors'), responsive: responsive),
+              //     _StatTile(value: '8.5k+', label: context.tr('welcome_stat_lives'), responsive: responsive),
+              //     _StatTile(value: '1.2k', label: context.tr('welcome_stat_campaigns'), responsive: responsive),
+              //   ],
+              // ),
+              // SizedBox(height: responsive.getSpacing(small: 24, medium: 28, large: 32)),
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(responsive.getPadding(24)),
