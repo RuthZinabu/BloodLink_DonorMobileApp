@@ -129,14 +129,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 width: iconBoxSize,
                 height: iconBoxSize,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                   color: const Color.fromARGB(255, 255, 255, 255),
                   borderRadius:
                       BorderRadius.circular(responsive.getBorderRadius(24)),
                 ),
-                child: Icon(
-                  Icons.water_drop,
-                  color: AppColors.white,
-                  size: iconSize,
+                child: ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(responsive.getBorderRadius(24)),
+                  child: Padding(
+                    padding: EdgeInsets.all(
+                      responsive.getSpacing(small: 10, medium: 12, large: 14),
+                    ),
+                    child: Image.asset(
+                      'assets/image/app_logo.png',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
               ),
               SizedBox(height: h28),
