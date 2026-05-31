@@ -16,8 +16,9 @@ class CampaignDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-        'Campaign',
-          style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(18)),
+          'Campaign',
+          style:
+              AppTextStyles.heading.copyWith(fontSize: responsive.getFont(18)),
         ),
         backgroundColor: AppColors.background,
         elevation: 0,
@@ -37,7 +38,8 @@ class CampaignDetailScreen extends StatelessWidget {
                 padding: EdgeInsets.all(responsive.getPadding(18)),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(responsive.getBorderRadius(24)),
+                  borderRadius:
+                      BorderRadius.circular(responsive.getBorderRadius(24)),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.textPrimary.withOpacity(0.08),
@@ -50,10 +52,13 @@ class CampaignDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-          campaign.title,
-          style: AppTextStyles.heading.copyWith(fontSize: responsive.getFont(18)),
-        ),
-        SizedBox(height: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+                      campaign.title,
+                      style: AppTextStyles.heading
+                          .copyWith(fontSize: responsive.getFont(18)),
+                    ),
+                    SizedBox(
+                        height: responsive.getSpacing(
+                            small: 10, medium: 12, large: 14)),
                     Text(
                       campaign.displayStatus,
                       style: AppTextStyles.subtitle.copyWith(
@@ -61,12 +66,17 @@ class CampaignDetailScreen extends StatelessWidget {
                         fontSize: responsive.getFont(14),
                       ),
                     ),
-                    SizedBox(height: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+                    SizedBox(
+                        height: responsive.getSpacing(
+                            small: 10, medium: 12, large: 14)),
                     Text(
                       campaign.formattedDate,
-                      style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
+                      style: AppTextStyles.body
+                          .copyWith(fontSize: responsive.getFont(14)),
                     ),
-                    SizedBox(height: responsive.getSpacing(small: 8, medium: 10, large: 12)),
+                    SizedBox(
+                        height: responsive.getSpacing(
+                            small: 8, medium: 10, large: 12)),
                     Row(
                       children: [
                         Icon(
@@ -74,11 +84,14 @@ class CampaignDetailScreen extends StatelessWidget {
                           color: AppColors.primary,
                           size: responsive.getIconSize(18),
                         ),
-                        SizedBox(width: responsive.getSpacing(small: 6, medium: 8, large: 10)),
+                        SizedBox(
+                            width: responsive.getSpacing(
+                                small: 6, medium: 8, large: 10)),
                         Expanded(
                           child: Text(
                             campaign.displayLocation,
-                            style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
+                            style: AppTextStyles.body
+                                .copyWith(fontSize: responsive.getFont(14)),
                           ),
                         ),
                       ],
@@ -86,27 +99,33 @@ class CampaignDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: responsive.getSpacing(small: 20, medium: 22, large: 24)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 20, medium: 22, large: 24)),
               Text(
                 'About this campaign',
-                style: AppTextStyles.title.copyWith(fontSize: responsive.getFont(18)),
+                style: AppTextStyles.title
+                    .copyWith(fontSize: responsive.getFont(18)),
               ),
-              SizedBox(height: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 10, medium: 12, large: 14)),
               Text(
                 campaign.content,
-                style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(15)),
+                style: AppTextStyles.body
+                    .copyWith(fontSize: responsive.getFont(15)),
               ),
-              SizedBox(height: responsive.getSpacing(small: 20, medium: 22, large: 24)),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 20, medium: 22, large: 24)),
               Text(
                 'Campaign Details',
-                style: AppTextStyles.title.copyWith(fontSize: responsive.getFont(18)),
+                style: AppTextStyles.title
+                    .copyWith(fontSize: responsive.getFont(18)),
               ),
-              SizedBox(height: responsive.getSpacing(small: 10, medium: 12, large: 14)),
-              _DetailRow(
-                label: 'Campaign ID',
-                value: campaign.id,
-                responsive: responsive,
-              ),
+              SizedBox(
+                  height:
+                      responsive.getSpacing(small: 10, medium: 12, large: 14)),
               _DetailRow(
                 label: 'Status',
                 value: campaign.displayStatus,
@@ -115,6 +134,11 @@ class CampaignDetailScreen extends StatelessWidget {
               _DetailRow(
                 label: 'Venue',
                 value: campaign.displayLocation,
+                responsive: responsive,
+              ),
+              _DetailRow(
+                label: 'End Date',
+                value: campaign.formattedEndDate,
                 responsive: responsive,
               ),
             ],
@@ -139,7 +163,8 @@ class _DetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: responsive.getSpacing(small: 10, medium: 12, large: 14)),
+      padding: EdgeInsets.only(
+          bottom: responsive.getSpacing(small: 10, medium: 12, large: 14)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -157,7 +182,8 @@ class _DetailRow extends StatelessWidget {
             flex: 3,
             child: Text(
               value,
-              style: AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
+              style:
+                  AppTextStyles.body.copyWith(fontSize: responsive.getFont(14)),
             ),
           ),
         ],

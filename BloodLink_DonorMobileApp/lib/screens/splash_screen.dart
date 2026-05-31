@@ -106,8 +106,8 @@ class _SplashScreenState extends State<SplashScreen>
                           child: Image.asset(
                             'assets/image/app_logo.png',
                             fit: BoxFit.contain,
-                            cacheWidth: logoSize.toInt() * 2, // Higher resolution for crisp display
-                            cacheHeight: logoSize.toInt() * 2,
+                            cacheWidth: logoSize.toInt() * 3, // Higher resolution for crisp display
+                            cacheHeight: logoSize.toInt() * 3,
                           ),
                         ),
                       ),

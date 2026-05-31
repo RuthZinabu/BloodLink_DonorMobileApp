@@ -681,7 +681,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         : responsive.isMediumScreen
             ? 80.0
             : 100.0;
-    final iconSize = responsive.getFont(44);
+    final iconSize = responsive.getFont(48);
     final headingFontSize = responsive.getFont(26);
     final bodyFontSize = responsive.getFont(14);
 

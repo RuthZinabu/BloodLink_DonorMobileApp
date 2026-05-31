@@ -30,14 +30,18 @@ class Campaign {
     return Campaign(
       id: json['campaign_id']?.toString() ??
           json['CampaignID']?.toString() ??
-          json['id']?.toString() ?? '',
+          json['id']?.toString() ??
+          '',
       title: json['title']?.toString() ?? json['Title']?.toString() ?? '',
       content: json['content']?.toString() ?? json['Content']?.toString() ?? '',
-      location: json['location']?.toString() ?? json['Location']?.toString() ?? '',
+      location:
+          json['location']?.toString() ?? json['Location']?.toString() ?? '',
       startDate: safeParse(json['start_date'] ?? json['StartDate']),
       endDate: safeParse(json['end_date'] ?? json['EndDate']),
       createdAt: safeParse(json['created_at'] ?? json['CreatedAt']),
-      distance: json['distance'] != null ? double.tryParse(json['distance'].toString()) : null,
+      distance: json['distance'] != null
+          ? double.tryParse(json['distance'].toString())
+          : null,
     );
   }
 
@@ -46,7 +50,8 @@ class Campaign {
     if (words.isEmpty || words.first.isEmpty) {
       return 'CM';
     }
-    final initials = words.take(2).map((word) => word.substring(0, 1).toUpperCase()).join();
+    final initials =
+        words.take(2).map((word) => word.substring(0, 1).toUpperCase()).join();
     return initials;
   }
 
@@ -57,13 +62,29 @@ class Campaign {
     return '$date · $start – $end';
   }
 
+  String get formattedEndDate => _formatDate(endDate);
+
   String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   String _formatTime(DateTime date) {
-    final hour = date.hour > 12 ? date.hour - 12 : (date.hour == 0 ? 12 : date.hour);
+    final hour =
+        date.hour > 12 ? date.hour - 12 : (date.hour == 0 ? 12 : date.hour);
     final period = date.hour >= 12 ? 'PM' : 'AM';
     final minute = date.minute.toString().padLeft(2, '0');
     return '$hour:$minute $period';

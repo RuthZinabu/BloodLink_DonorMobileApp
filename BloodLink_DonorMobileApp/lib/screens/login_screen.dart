@@ -100,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
         : responsive.isMediumScreen
             ? 80.0
             : 100.0;
-    final iconSize = responsive.getFont(44);
+    final iconSize = responsive.getFont(48);
     final h20 = responsive.getSpacing(small: 12, medium: 20, large: 28);
     final h28 = responsive.getSpacing(small: 20, medium: 28, large: 36);
     final h32 = responsive.getSpacing(small: 24, medium: 32, large: 40);
